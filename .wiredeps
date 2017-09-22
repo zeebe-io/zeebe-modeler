@@ -1,0 +1,288 @@
+{
+  "name": "camunda-modeler",
+  "version": "1.6.0",
+  "dependencies": {
+    "bpmn-js": {
+      "version": "bpmn-io/bpmn-js",
+      "dependencies": {
+        "bpmn-moddle": {
+          "version": "bpmn-io/bpmn-moddle",
+          "dependencies": {
+            "moddle": {
+              "version": "1.0.0"
+            },
+            "moddle-xml": {
+              "version": "1.0.0",
+              "dependencies": {
+                "sax": {
+                  "version": "0.6.1"
+                },
+                "tiny-stack": {
+                  "version": "0.1.0"
+                }
+              }
+            }
+          }
+        },
+        "diagram-js": {
+          "version": "bpmn-io/diagram-js",
+          "dependencies": {
+            "didi": {
+              "version": "0.1.1"
+            },
+            "hammerjs": {
+              "version": "2.0.8"
+            },
+            "object-refs": {
+              "version": "0.1.1"
+            },
+            "tiny-svg": {
+              "version": "0.1.1"
+            }
+          }
+        },
+        "diagram-js-direct-editing": {
+          "version": "0.17.1"
+        },
+        "object-refs": {
+          "version": "0.1.1"
+        },
+        "tiny-svg": {
+          "version": "0.1.1"
+        }
+      }
+    },
+    "bpmn-js-properties-panel": {
+      "version": "bpmn-io/bpmn-js-properties-panel",
+      "dependencies": {
+        "selection-update": {
+          "version": "0.1.2"
+        }
+      }
+    },
+    "camunda-bpmn-moddle": {
+      "version": "camunda/camunda-bpmn-moddle"
+    },
+    "camunda-cmmn-moddle": {
+      "version": "0.2.0"
+    },
+    "cmmn-js": {
+      "version": "0.7.4",
+      "dependencies": {
+        "cmmn-moddle": {
+          "version": "0.3.4",
+          "dependencies": {
+            "moddle": {
+              "version": "0.8.0"
+            },
+            "moddle-xml": {
+              "version": "0.12.0",
+              "dependencies": {
+                "sax": {
+                  "version": "0.6.1"
+                },
+                "tiny-stack": {
+                  "version": "0.1.0"
+                }
+              }
+            }
+          }
+        },
+        "diagram-js": {
+          "version": "0.18.4",
+          "dependencies": {
+            "didi": {
+              "version": "0.1.1"
+            },
+            "hammerjs": {
+              "version": "2.0.8"
+            },
+            "object-refs": {
+              "version": "0.1.1"
+            },
+            "tiny-svg": {
+              "version": "0.1.1"
+            }
+          }
+        },
+        "diagram-js-direct-editing": {
+          "version": "0.17.1"
+        },
+        "object-refs": {
+          "version": "0.1.1"
+        },
+        "tiny-svg": {
+          "version": "0.1.1"
+        }
+      }
+    },
+    "cmmn-js-properties-panel": {
+      "version": "0.2.3",
+      "dependencies": {
+        "selection-update": {
+          "version": "0.1.2"
+        }
+      }
+    },
+    "diagram-js": {
+      "version": "0.18.4",
+      "dependencies": {
+        "didi": {
+          "version": "0.1.1"
+        },
+        "hammerjs": {
+          "version": "2.0.8"
+        },
+        "object-refs": {
+          "version": "0.1.1"
+        },
+        "tiny-svg": {
+          "version": "0.1.1"
+        }
+      }
+    },
+    "diagram-js-origin": {
+      "version": "0.15.1",
+      "dependencies": {
+        "tiny-svg": {
+          "version": "0.1.1"
+        }
+      }
+    },
+    "diagram-js-minimap": {
+      "version": "0.5.1"
+    },
+    "dmn-js": {
+      "version": "0.9.0",
+      "dependencies": {
+        "diagram-js": {
+          "version": "0.18.4",
+          "dependencies": {
+            "didi": {
+              "version": "0.1.1"
+            },
+            "hammerjs": {
+              "version": "2.0.8"
+            },
+            "object-refs": {
+              "version": "0.1.1"
+            },
+            "tiny-svg": {
+              "version": "0.1.1"
+            }
+          }
+        },
+        "diagram-js-direct-editing": {
+          "version": "0.17.1"
+        },
+        "dmn-moddle": {
+          "version": "0.6.0",
+          "dependencies": {
+            "moddle": {
+              "version": "1.0.0"
+            },
+            "moddle-xml": {
+              "version": "1.0.0",
+              "dependencies": {
+                "sax": {
+                  "version": "0.6.1"
+                },
+                "tiny-stack": {
+                  "version": "0.1.0"
+                }
+              }
+            }
+          }
+        },
+        "object-refs": {
+          "version": "0.1.1"
+        },
+        "selection-update": {
+          "version": "0.1.2"
+        },
+        "table-js": {
+          "version": "0.6.3",
+          "dependencies": {
+            "diagram-js": {
+              "version": "0.16.3",
+              "dependencies": {
+                "eve": {
+                  "version": "0.4.2"
+                },
+                "hammerjs": {
+                  "version": "2.0.8"
+                },
+                "snapsvg": {
+                  "version": "0.3.0"
+                }
+              }
+            },
+            "didi": {
+              "version": "0.1.1"
+            }
+          }
+        },
+        "tiny-svg": {
+          "version": "0.1.1"
+        }
+      }
+    },
+    "glob": {
+      "version": "7.1.1",
+      "dependencies": {
+        "fs.realpath": {
+          "version": "1.0.0"
+        },
+        "inflight": {
+          "version": "1.0.6",
+          "dependencies": {
+            "wrappy": {
+              "version": "1.0.2"
+            }
+          }
+        },
+        "minimatch": {
+          "version": "3.0.3",
+          "dependencies": {
+            "brace-expansion": {
+              "version": "1.1.6",
+              "dependencies": {
+                "balanced-match": {
+                  "version": "0.4.2"
+                },
+                "concat-map": {
+                  "version": "0.0.1"
+                }
+              }
+            }
+          }
+        },
+        "once": {
+          "version": "1.4.0",
+          "dependencies": {
+            "wrappy": {
+              "version": "1.0.2"
+            }
+          }
+        },
+        "path-is-absolute": {
+          "version": "1.0.1"
+        }
+      }
+    },
+    "inherits": {
+      "version": "2.0.3"
+    },
+    "lodash": {
+      "version": "3.10.1"
+    },
+    "parents": {
+      "version": "1.0.1",
+      "dependencies": {
+        "path-platform": {
+          "version": "0.11.15"
+        }
+      }
+    }
+  }
+}
