@@ -1,7 +1,7 @@
 {
-  "name": "camunda-modeler",
+  "name": "zeebe-modeler",
   "version": "1.8.2",
-  "description": "Camunda Modeler for BPMN, DMN and CMMN, based on bpmn.io",
+  "description": "Zeebe Modeler for BPMN based on bpmn.io",
   "main": "app/lib/index.js",
   "scripts": {
     "test": "grunt test",

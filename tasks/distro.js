@@ -65,16 +65,16 @@ module.exports = function(grunt) {
     };
 
     if (platform === 'darwin') {
-      options.name = 'Camunda Modeler';
+      options.name = 'Zeebe Modeler';
     }
 
     if (platform === 'win32') {
       options['win32metadata'] = {
         CompanyName: 'camunda Services GmbH',
-        FileDescription: 'Camunda Modeler',
-        OriginalFilename: 'camunda-modeler.exe',
-        ProductName: 'Camunda Modeler',
-        InternalName: 'camunda-modeler'
+        FileDescription: 'Zeebe Modeler',
+        OriginalFilename: 'zebee-modeler.exe',
+        ProductName: 'Zeebe Modeler',
+        InternalName: 'zeebe-modeler'
       };
 
       // make sure wine is available on linux systems
@@ -151,7 +151,7 @@ function createArchive(platform, path, done) {
     dest += '.zip';
   } else {
     if (platform === 'darwin') {
-      dest = dest.replace(/Camunda Modeler/, 'camunda-modeler');
+      dest = dest.replace(/Zeebe Modeler/, 'zeebe-modeler');
     }
 
     dest += '.tar.gz';
@@ -164,7 +164,7 @@ function createArchive(platform, path, done) {
   archive.on('end', done);
   archive.on('error', done);
 
-  archive.directory(path, 'camunda-modeler').finalize();
+  archive.directory(path, 'zeebe-modeler').finalize();
 }
 
 

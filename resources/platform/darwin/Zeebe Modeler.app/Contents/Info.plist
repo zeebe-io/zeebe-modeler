@@ -5,17 +5,17 @@
     <key>BuildMachineOSBuild</key>
     <string>14D136</string>
     <key>CFBundleDisplayName</key>
-    <string>Camunda Modeler</string>
+    <string>Zeebe Modeler</string>
     <key>CFBundleExecutable</key>
-    <string>Camunda Modeler</string>
+    <string>Zeebe Modeler</string>
     <key>CFBundleIconFile</key>
     <string>electron.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>com.electron.camunda-modeler</string>
+    <string>com.electron.zeebe-modeler</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>Camunda Modeler</string>
+    <string>Zeebe Modeler</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleDocumentTypes</key>

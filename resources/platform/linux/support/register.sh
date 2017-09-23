@@ -23,21 +23,21 @@ cd ".."
 CAMUNDA_MODELER_BIN=`pwd`
 cd "${oldpwd}"
 
-ICON_NAME=camunda-modeler
+ICON_NAME=zeebe-modeler
 TMP_DIR=`mktemp --directory`
-DESKTOP_FILE=$TMP_DIR/camunda-modeler.desktop
+DESKTOP_FILE=$TMP_DIR/zeebe-modeler.desktop
 cat << EOF > $DESKTOP_FILE
 [Desktop Entry]
 Version=1.0
 Encoding=UTF-8
-Name=Camunda Modeler
-Keywords=bpmn;cmmn;dmn;modeler;camunda
+Name=Zeebe Modeler
+Keywords=bpmn;cmmn;dmn;modeler;zeebe
 GenericName=Process Modeling Tool
 Type=Application
 Categories=Development
 Terminal=false
 StartupNotify=true
-Exec="$CAMUNDA_MODELER_BIN/camunda-modeler" %f
+Exec="$CAMUNDA_MODELER_BIN/zeebe-modeler" %f
 MimeType=application/bpmn;application/cmmn;application/dmn
 Icon=$ICON_NAME.png
 X-Ayatana-Desktop-Shortcuts=NewWindow;RepositoryBrowser
