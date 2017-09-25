@@ -9,6 +9,7 @@ function CustomReplaceMenuProvider(popupMenu, modeling, moddle, bpmnReplace, rul
 
 inherits(CustomReplaceMenuProvider, ReplaceMenuProvider);
 
+//For future element support!!  
 CustomReplaceMenuProvider.prototype._createEntries = function(element, replaceOptions) {
   var options = ReplaceMenuProvider.prototype._createEntries.call(this, element, replaceOptions);
 

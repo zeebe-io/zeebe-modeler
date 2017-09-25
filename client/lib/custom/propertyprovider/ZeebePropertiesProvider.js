@@ -1,21 +1,19 @@
 'use strict';
 
 
-var inherits = require('inherits');
+var inherits = require('inherits'),
+     is = require('bpmn-js/lib/util/ModelUtil').is;
 
 var PropertiesActivator = require('bpmn-js-properties-panel/lib/PropertiesActivator');
+
 var idProps = require('bpmn-js-properties-panel/lib/provider/bpmn/parts/IdProps'),
-nameProps = require('bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps'),
-executableProps = require('bpmn-js-properties-panel/lib/provider/bpmn/parts/ExecutableProps');
-
-var is = require('bpmn-js/lib/util/ModelUtil').is;
-
-var inputOutput = require('./parts/InputOutputProps'),
-inputOutputParameter = require('./parts/InputOutputParameterProps');
-
-var headers = require('./parts/HeadersProps');
-
-var taskDefinition = require('./parts/TaskDefinitionProps');
+    nameProps = require('bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps'),
+    executableProps = require('bpmn-js-properties-panel/lib/provider/bpmn/parts/ExecutableProps'),
+    inputOutput = require('./parts/InputOutputProps'),
+    inputOutputParameter = require('./parts/InputOutputParameterProps'),
+    headers = require('./parts/HeadersProps'),
+    taskDefinition = require('./parts/TaskDefinitionProps'),
+    sequenceFlowProps = require('./parts/SequenceFlowProps');
 
 
 var getInputOutputParameterLabel = function(param) {
@@ -42,6 +40,7 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, translate
   nameProps(generalGroup, element, translate);
   executableProps(generalGroup, element,translate);
   taskDefinition(generalGroup, element, bpmnFactory);
+  sequenceFlowProps(generalGroup, element, bpmnFactory, translate);
 
   return[
   generalGroup

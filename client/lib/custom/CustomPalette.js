@@ -121,6 +121,9 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
     ),
     'create.service-task': createAction(
       'bpmn:ServiceTask', 'activity', 'bpmn-icon-service-task'
+    ),
+    'create.exclusive-gateway': createAction(
+      'bpmn:ExclusiveGateway', 'gateway', 'bpmn-icon-gateway-xor'
     )
   });
 

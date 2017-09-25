@@ -9,6 +9,7 @@ module.exports.AVAILABLE_REPLACE_ELEMENTS = [
 
 module.exports.AVAILABLE_CONTEXTPAD_ENTRIES = [
 	'append.end-event',
+	'append.gateway',
 	'delete',
 	'connect'
 

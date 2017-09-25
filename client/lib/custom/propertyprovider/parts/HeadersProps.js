@@ -1,9 +1,13 @@
 var properties = require('./implementation/Headers'),
     elementHelper = require('bpmn-js-properties-panel/lib/helper/ElementHelper'),
-    cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper');
-
+    cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper'),
+    is = require('bpmn-js/lib/util/ModelUtil').is;
 
 module.exports = function(group, element, bpmnFactory) {
+
+  if(!is(element, 'bpmn:ServiceTask')){
+    return;
+  }
 
   var propertiesEntry = properties(element, bpmnFactory, {
     id: 'headers',

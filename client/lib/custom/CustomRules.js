@@ -41,6 +41,11 @@ CustomRules.prototype.init = function() {
    * Can shape be created on target container?
    */
   function canCreate(source) {
+
+    if(is(source, 'bpmn:ExclusiveGateway')){
+      return true;
+    }
+
     return !hasOutgoings(source);
   }
 
@@ -49,8 +54,11 @@ CustomRules.prototype.init = function() {
    */
   function canConnect(source, target) {
 
+     if(is(source, 'bpmn:ExclusiveGateway')){
+      return true;
+    }
 
-    return !hasOutgoings(source) && !hasIncomings(target);
+    return !hasOutgoings(source);
     
   }
 
