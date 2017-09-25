@@ -1,11 +1,19 @@
-> Looking for the legacy [Camunda Eclipse plug-in](https://github.com/camunda/camunda-eclipse-plugin)?
-
 
 # Zeebe Modeler
 
-First night-hack version.
+##Install:
 
-Try it in Dev-Mode: npm run dev
+npm install
+
+###Dev-Mode
+npm run dev
+
+###Distro
+npm run distro
+run this command for creating install files
+
+
+Tests are currently not working.
 
 Refectoring is coming soon....
 
@@ -14,4 +22,4 @@ Refectoring is coming soon....
 
 MIT
 
-Contains parts ([bpmn-js](https://github.com/bpmn-io/bpmn-js), [dmn-js](https://github.com/bpmn-io/dmn-js), [cmmn-js](https://github.com/bpmn-io/cmmn-js)) released under the [bpmn.io license](http://bpmn.io/license).
+Contains parts ([bpmn-js](https://github.com/bpmn-io/bpmn-js)) released under the [bpmn.io license](http://bpmn.io/license).
