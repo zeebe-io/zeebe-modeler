@@ -1,24 +1,13 @@
 'use strict';
 
-var reduce = require('lodash/collection/reduce'),
-    inherits = require('inherits');
-
-var is = require('bpmn-js/lib/util/ModelUtil').is;
+var inherits = require('inherits'),
+    is = require('bpmn-js/lib/util/ModelUtil').is;
 
 var RuleProvider = require('diagram-js/lib/features/rules/RuleProvider');
 
 var HIGH_PRIORITY = 1500;
 
-
-function isCustom(element) {
-  return element && /^custom\:/.test(element.type);
-}
-
-function hasIncomings(element){
-  return element.incoming && element.incoming.length > 0;
-}
-
-function hasOutgoings(element){
+function hasOutgoings(element) {
   return element.outgoing && element.outgoing.length > 0;
 }
 /**
@@ -42,7 +31,7 @@ CustomRules.prototype.init = function() {
    */
   function canCreate(source) {
 
-    if(is(source, 'bpmn:ExclusiveGateway')){
+    if (is(source, 'bpmn:ExclusiveGateway')) {
       return true;
     }
 
@@ -54,7 +43,7 @@ CustomRules.prototype.init = function() {
    */
   function canConnect(source, target) {
 
-     if(is(source, 'bpmn:ExclusiveGateway')){
+    if (is(source, 'bpmn:ExclusiveGateway')) {
       return true;
     }
 
@@ -75,13 +64,4 @@ CustomRules.prototype.init = function() {
 
     return canConnect(source, target);
   });
-/*
-  this.addRule('shape.replace', HIGH_PRIORITY, function(element) {
-    var businessObject = element.element.businessObject;
-    if (is(businessObject, 'bpmn:ExclusiveGateway')) {
-      //return false; //here you could completely disable morph for gateways
-      return true;
-    }
-  });
-*/
 };

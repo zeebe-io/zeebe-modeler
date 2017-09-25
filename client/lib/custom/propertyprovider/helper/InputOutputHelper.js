@@ -28,9 +28,8 @@ function getParameters(element, prop) {
  * @return {ModdleElement} the inputOutput object
  */
 InputOutputHelper.getInputOutput = function(element) {
-    var bo = getBusinessObject(element);
-    return (getElements(bo, 'zeebe:IoMapping') || [])[0];
-
+  var bo = getBusinessObject(element);
+  return (getElements(bo, 'zeebe:IoMapping') || [])[0];
 };
 
 

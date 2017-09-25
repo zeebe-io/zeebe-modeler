@@ -5,7 +5,7 @@ var properties = require('./implementation/Headers'),
 
 module.exports = function(group, element, bpmnFactory) {
 
-  if(!is(element, 'bpmn:ServiceTask')){
+  if (!is(element, 'bpmn:ServiceTask')) {
     return;
   }
 

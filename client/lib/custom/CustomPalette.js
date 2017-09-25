@@ -7,7 +7,7 @@ var assign = require('lodash/object/assign');
  */
 function PaletteProvider(palette, create, elementFactory, spaceTool, lassoTool, handTool, globalConnect, translate) {
 
-   this._palette = palette;
+  this._palette = palette;
   this._create = create;
   this._elementFactory = elementFactory;
   this._spaceTool = spaceTool;
@@ -28,7 +28,7 @@ PaletteProvider.$inject = [ 'palette', 'create', 'elementFactory', 'spaceTool', 
 
 PaletteProvider.prototype.getPaletteEntries = function(element) {
 
-   var actions  = {},
+  var actions  = {},
       create = this._create,
       elementFactory = this._elementFactory,
       spaceTool = this._spaceTool,
@@ -62,10 +62,6 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
         click: createListener
       }
     };
-  }
-
-  function createParticipant(event, collapsed) {
-    create.start(event, elementFactory.createParticipantShape(collapsed));
   }
 
   assign(actions, {

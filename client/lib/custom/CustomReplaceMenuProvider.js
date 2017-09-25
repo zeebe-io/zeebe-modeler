@@ -5,7 +5,7 @@ var ReplaceMenuProvider = require('bpmn-js/lib/features/popup-menu/ReplaceMenuPr
 var availableElements = require('./modeler-options/Options').AVAILABLE_REPLACE_ELEMENTS;
 function CustomReplaceMenuProvider(popupMenu, modeling, moddle, bpmnReplace, rules, translate) {
   ReplaceMenuProvider.call(this, popupMenu, modeling, moddle, bpmnReplace, rules, translate);
-};
+}
 
 inherits(CustomReplaceMenuProvider, ReplaceMenuProvider);
 

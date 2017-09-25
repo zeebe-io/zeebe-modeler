@@ -93,14 +93,14 @@ module.exports = function(element, bpmnFactory, options) {
           outputParameters: []
         });
 
-          commands.push(cmdHelper.addAndRemoveElementsFromList(
-            element,
-            extensionElements,
-            'values',
-            'extensionElements',
-            [ inputOutput ],
-            []
-          ));
+        commands.push(cmdHelper.addAndRemoveElementsFromList(
+          element,
+          extensionElements,
+          'values',
+          'extensionElements',
+          [ inputOutput ],
+          []
+        ));
       }
 
       var newElem = createParameter(type, inputOutput, bpmnFactory, { source: 'sourceValue', target: 'targetValaue' });
@@ -123,8 +123,7 @@ module.exports = function(element, bpmnFactory, options) {
 
       if (!firstLength && !secondLength) {
 
-          commands.push(extensionElementsHelper.removeEntry(getBusinessObject(element), element, inputOutput));
-
+        commands.push(extensionElementsHelper.removeEntry(getBusinessObject(element), element, inputOutput));
       }
 
       return commands;
@@ -135,7 +134,7 @@ module.exports = function(element, bpmnFactory, options) {
     return function(element, node, option, property, value, idx) {
       var parameter = getter(element, idx);
 
-      option.text = value + " : "+ parameter['target'];
+      option.text = value +' : '+ parameter['target'];
     };
   };
 

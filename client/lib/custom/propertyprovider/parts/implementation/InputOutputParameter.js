@@ -1,19 +1,10 @@
 'use strict';
 
-var is = require('bpmn-js/lib/util/ModelUtil').is;
-
-var elementHelper = require('bpmn-js-properties-panel/lib/helper/ElementHelper'),
-    inputOutputHelper = require('../../helper/InputOutputHelper'),
+var inputOutputHelper = require('../../helper/InputOutputHelper'),
     cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper'),
     utils = require('bpmn-js-properties-panel/lib/Utils');
 
-var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory'),
-    script = require('bpmn-js-properties-panel/lib/provider/camunda/parts/implementation/Script')('scriptFormat', 'value', true);
-
-
-function createElement(type, parent, factory, properties) {
-  return elementHelper.createElement(type, properties, parent, factory);
-}
+var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory');
 
 function ensureInputOutputSupported(element) {
   return inputOutputHelper.isInputOutputSupported(element);

@@ -16,9 +16,7 @@ var diagramOriginModule = require('diagram-js-origin'),
     minimapModule = require('diagram-js-minimap'),
     propertiesPanelModule = require('bpmn-js-properties-panel'),
     propertiesProviderModule = require('../../custom/propertyprovider'),
-    camundaModdlePackage = require('camunda-bpmn-moddle/resources/camunda'),
-    zebeeModdleExtension = require('../../custom/zeebe-bpmn-moddle/zeebe'),
-    camundaModdleExtension = require('camunda-bpmn-moddle/lib');
+    zebeeModdleExtension = require('../../custom/zeebe-bpmn-moddle/zeebe');
 
 var WarningsOverlay = require('base/components/warnings-overlay');
 
@@ -364,7 +362,7 @@ BpmnEditor.prototype.createModeler = function($el, $propertiesEl) {
       zebeeModdleExtension,
       require('../../custom')
     ].concat(pluginModules),
-    moddleExtensions: { camunda: camundaModdlePackage , zeebe: zebeeModdleExtension},
+    moddleExtensions: { zeebe: zebeeModdleExtension },
     minimap: {
       open: minimapLayout.open
     }

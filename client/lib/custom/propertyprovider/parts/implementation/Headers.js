@@ -95,7 +95,7 @@ module.exports = function(element, bpmnFactory, options) {
 
   var bo = getBusinessObject(element);
 
-  if(!is(element, 'bpmn:ServiceTask')){
+  if (!is(element, 'bpmn:ServiceTask')) {
     return;
   }
 

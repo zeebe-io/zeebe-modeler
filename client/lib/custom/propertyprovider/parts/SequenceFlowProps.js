@@ -46,8 +46,8 @@ module.exports = function(group, element, bpmnFactory, translate) {
           conditionType = '';
 
       if (conditionExpression) {
-          conditionType = 'expression';
-          values.condition = conditionExpression.get('body');
+        conditionType = 'expression';
+        values.condition = conditionExpression.get('body');
       }
 
       values.conditionType = conditionType;
@@ -64,8 +64,8 @@ module.exports = function(group, element, bpmnFactory, translate) {
         body: undefined
       };
 
-        var condition = values.condition;
-        conditionProps.body = condition;
+      var condition = values.condition;
+      conditionProps.body = condition;
 
       var update = {
         'conditionExpression': undefined

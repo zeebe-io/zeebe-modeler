@@ -1,8 +1,7 @@
 'use strict';
 
-
 var inherits = require('inherits'),
-     is = require('bpmn-js/lib/util/ModelUtil').is;
+    is = require('bpmn-js/lib/util/ModelUtil').is;
 
 var PropertiesActivator = require('bpmn-js-properties-panel/lib/PropertiesActivator');
 
@@ -42,8 +41,8 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, translate
   taskDefinition(generalGroup, element, bpmnFactory);
   sequenceFlowProps(generalGroup, element, bpmnFactory, translate);
 
-  return[
-  generalGroup
+  return [
+    generalGroup
   ];
 }
 
@@ -61,7 +60,7 @@ function createHeadersGroups(element, bpmnFactory, elementRegistry) {
   headers(headersGroup, element, bpmnFactory);
 
   return [
-  headersGroup
+    headersGroup
   ];
 }
 
@@ -92,8 +91,8 @@ function createInputOutputTabGroups(element, bpmnFactory, elementRegistry) {
   inputOutputParameter(inputOutputParameterGroup, element, bpmnFactory, options);
 
   return [
-  inputOutputGroup,
-  inputOutputParameterGroup
+    inputOutputGroup,
+    inputOutputParameterGroup
   ];
 }
 
@@ -120,9 +119,9 @@ function ZeebePropertiesProvider(eventBus, bpmnFactory, elementRegistry, transla
     };
 
     return [
-    generalTab,
-    inputOutputTab,
-    headersTab
+      generalTab,
+      inputOutputTab,
+      headersTab
     ];
   };
 }
