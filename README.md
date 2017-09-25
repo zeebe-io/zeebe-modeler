@@ -1,14 +1,14 @@
 
 # Zeebe Modeler
 
-##Install:
+## Install:
 
 npm install
 
-###Dev-Mode
+### Dev-Mode
 npm run dev
 
-###Distro
+### Distro
 npm run distro
 run this command for creating install files
 
