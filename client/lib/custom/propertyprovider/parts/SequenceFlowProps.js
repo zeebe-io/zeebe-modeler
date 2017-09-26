@@ -25,10 +25,10 @@ module.exports = function(group, element, bpmnFactory, translate) {
 
   group.entries.push({
     id: 'condition',
-    label: translate('Condition'),
+    label: translate('Condition expression'),
     html:  // expression
             '<div class="bpp-row">' +
-              '<label for="zeebe-condition">'+translate('Expression')+'</label>' +
+              '<label for="zeebe-condition">'+translate('Condition expression')+'</label>' +
               '<div class="bpp-field-wrapper">' +
                 '<input id="zeebe-condition" type="text" name="condition" />' +
                 '<button class="clear" data-action="clear" data-show="canClear">' +

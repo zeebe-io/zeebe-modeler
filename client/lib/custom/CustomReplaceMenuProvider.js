@@ -16,7 +16,7 @@ CustomReplaceMenuProvider.prototype._createEntries = function(element, replaceOp
   options = options.filter(function(option) {
 
     if (availableElements.indexOf(option.id) != -1) {
-        //hier eigenen Filter aufsetzen
+      //hier eigenen Filter aufsetzen
       return true;
     }
   });

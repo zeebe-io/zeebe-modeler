@@ -3,14 +3,18 @@
 var AVAILABLE_REPLACE_ELEMENTS = [
   'replace-with-service-task',
   'replace-with-none-start',
-  'replace-with-none-end'
+  'replace-with-none-end',
+  'replace-with-conditional-flow',
+  'replace-with-default-flow',
+  'replace-with-sequence-flow'
 ];
 
 var AVAILABLE_CONTEXTPAD_ENTRIES = [
   'append.end-event',
   'append.gateway',
   'delete',
-  'connect'
+  'connect',
+  'replace'
 ];
 
 module.exports.AVAILABLE_REPLACE_ELEMENTS = AVAILABLE_REPLACE_ELEMENTS;

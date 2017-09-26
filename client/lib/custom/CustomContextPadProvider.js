@@ -49,9 +49,13 @@ function CustomContextPadProvider(eventBus, contextPad, modeling, elementFactory
     if (!is(businessObject, 'bpmn:EndEvent')) {
       assign(filteredActions, { 'append.append-task': appendAction('bpmn:ServiceTask', 'bpmn-icon-service-task') });
     }
+
     for (var i = 0; i < availableActions.length; i++) {
       var availableAction = availableActions[i];
       if (actions[availableAction]) {
+        if (availableAction == 'replace' && !is(businessObject, 'bpmn:SequenceFlow')) {
+          continue;
+        }
         filteredActions[availableAction] = actions[availableAction];
       }
     }
