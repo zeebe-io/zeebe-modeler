@@ -19,6 +19,12 @@ Tests are currently not working.
 
 Refectoring is coming soon....
 
+## Code of Conduct
+
+This project adheres to the Contributor Covenant [Code of
+Conduct](/CODE_OF_CONDUCT.md). By participating, you are expected to uphold
+this code. Please report unacceptable behavior to
+code-of-conduct@zeebe.io.
 
 ## License
 
