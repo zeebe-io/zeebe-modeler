@@ -83,6 +83,51 @@ module.exports = function(group, element, bpmnFactory) {
     }
   }));
 
+  group.entries.push(entryFactory.validationAwareTextField({
+    id: 'taskDefinitionRetries',
+    label: 'Retries',
+    modelProperty: 'retries',
+
+    getProperty: function(element, node) {
+      return (getTaskDefinition(element, node) || {}).retries;
+    },
+
+    setProperty: function(element, values, node) {
+      var bo = getBusinessObject(element);
+      var commands = [];
+
+      //CREATE extensionElemente
+      var extensionElements = bo.get('extensionElements');
+      if (!extensionElements) {
+        extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
+        commands.push(cmdHelper.updateProperties(element, { extensionElements: extensionElements }));
+      }
+        //create taskDefinition
+      var taskDefinition = getTaskDefinition(element);
+
+      if (!taskDefinition) {
+        taskDefinition = elementHelper.createElement('zeebe:TaskDefinition', { }, extensionElements, bpmnFactory);
+        commands.push(cmdHelper.addAndRemoveElementsFromList(
+          element,
+          extensionElements,
+          'values',
+          'extensionElements',
+          [ taskDefinition ],
+          []
+        ));
+      }
+
+      commands.push(cmdHelper.updateBusinessObject(element, taskDefinition, values));
+      return commands;
+    },
+
+    validate: function(element, values, node) {
+      
+      return true;
+    }
+     
+  }));
+
 };
 
 

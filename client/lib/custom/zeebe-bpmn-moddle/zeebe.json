@@ -113,6 +113,11 @@
           "name": "type",
           "type": "string",
           "isAttr": true
+        },
+        {
+          "name": "retries",
+          "type": "string",
+          "isAttr": true
         }
       ]
     }
