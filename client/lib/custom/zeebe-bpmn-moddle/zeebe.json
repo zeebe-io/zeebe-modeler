@@ -29,6 +29,11 @@
           "type": "IoMapping"
         },
         {
+          "name": "outputBehavior",
+          "type": "String",
+          "isAttr": true
+        },
+        {
           "name": "connectorId",
           "type": "String"
         },
