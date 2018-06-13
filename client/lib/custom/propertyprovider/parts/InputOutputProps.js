@@ -35,12 +35,13 @@ module.exports = function (group, element, bpmnFactory) {
       id: 'io-mapping-outputBehavior',
       label: 'Output Behavior',
       selectOptions: [
+        { name: '', value: '' },
         { name: 'MERGE', value: 'merge' },
         { name: 'OVERWRITE', value: 'overwrite' },
         { name: 'NONE', value: 'none' }
       ],
       modelProperty: 'outputBehavior',
-      emptyParameter: true,
+      emptyParameter: false,
 
       get: function (element, node) {
         return (getIoMapping(element, node) || {});
