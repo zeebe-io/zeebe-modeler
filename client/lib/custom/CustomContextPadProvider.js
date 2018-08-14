@@ -47,7 +47,10 @@ function CustomContextPadProvider(eventBus, contextPad, modeling, elementFactory
     var filteredActions = {};
 
     if (!is(businessObject, 'bpmn:EndEvent')) {
-      assign(filteredActions, { 'append.append-task': appendAction('bpmn:ServiceTask', 'bpmn-icon-service-task') });
+      assign(filteredActions, { 'append.append-service-task': appendAction('bpmn:ServiceTask', 'bpmn-icon-service-task') });
+      assign(filteredActions, { 'append.append-receive-task': appendAction('bpmn:ReceiveTask', 'bpmn-icon-receive-task') });
+      assign(filteredActions, { 'append.append-event': appendAction('bpmn:IntermediateCatchEvent', 'bpmn-icon-intermediate-event-catch-message','Message Event',{ eventDefinitionType: 'bpmn:MessageEventDefinition'}) });
+   
     }
 
     for (var i = 0; i < availableActions.length; i++) {

@@ -65,6 +65,19 @@
       ]
     },
     {
+      "name": "Subscription",
+      "superClass": [
+        "Element"
+      ],
+      "properties": [
+        {
+          "name": "correlationKey",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
       "name": "Input",
       "superClass": [ "InputOutputParameter" ]
     },

@@ -118,6 +118,13 @@ PaletteProvider.prototype.getPaletteEntries = function(element) {
     'create.service-task': createAction(
       'bpmn:ServiceTask', 'activity', 'bpmn-icon-service-task'
     ),
+    'create.receive-task': createAction(
+      'bpmn:ReceiveTask', 'activity', 'bpmn-icon-receive-task'
+    ),
+ 
+    'create.intermediate-event': createAction(
+      'bpmn:IntermediateCatchEvent', 'event', 'bpmn-icon-intermediate-event-catch-message', 'Message Event', { eventDefinitionType: 'bpmn:MessageEventDefinition'}
+    ),
     'create.exclusive-gateway': createAction(
       'bpmn:ExclusiveGateway', 'gateway', 'bpmn-icon-gateway-xor'
     )

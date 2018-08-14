@@ -12,7 +12,8 @@ var idProps = require('bpmn-js-properties-panel/lib/provider/bpmn/parts/IdProps'
     inputOutputParameter = require('./parts/InputOutputParameterProps'),
     headers = require('./parts/HeadersProps'),
     taskDefinition = require('./parts/TaskDefinitionProps'),
-    sequenceFlowProps = require('./parts/SequenceFlowProps');
+    sequenceFlowProps = require('./parts/SequenceFlowProps'),
+    messageProps = require('./parts/MessageProps');
 
 
 var getInputOutputParameterLabel = function(param) {
@@ -40,6 +41,7 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, translate
   executableProps(generalGroup, element,translate);
   taskDefinition(generalGroup, element, bpmnFactory);
   sequenceFlowProps(generalGroup, element, bpmnFactory, translate);
+  messageProps(generalGroup, element, bpmnFactory, translate);
 
   return [
     generalGroup
