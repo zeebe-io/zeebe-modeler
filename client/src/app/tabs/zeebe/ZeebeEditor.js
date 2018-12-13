@@ -31,6 +31,8 @@ import css from './ZeebeEditor.less';
 
 import generateImage from '../../util/generateImage';
 
+const EXPORT_AS = [ 'svg', 'png' ];
+
 const COLORS = [{
   title: 'White',
   fill: 'white',
@@ -116,8 +118,12 @@ export class ZeebeEditor extends CachedComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (!this.state.importing) {
+    if (!isImporting(this.state) && isXMLChange(prevProps.xml, this.props.xml)) {
       this.checkImport();
+    }
+
+    if (isChachedStateChange(prevProps, this.props)) {
+      this.handleChanged();
     }
 
     if (prevProps.layout.propertiesPanel !== this.props.layout.propertiesPanel) {
@@ -222,10 +228,17 @@ export class ZeebeEditor extends CachedComponent {
       modeler
     } = this.getCached();
 
+    const commandStack = modeler.get('commandStack');
+
+    const stackIdx = commandStack._stackIdx;
+
     onImport(error, warnings);
 
     if (!error) {
-      modeler.lastXML = xml;
+      this.setCached({
+        lastXML: xml,
+        stackIdx
+      });
 
       this.setState({
         importing: false
@@ -233,15 +246,14 @@ export class ZeebeEditor extends CachedComponent {
     }
   }
 
-
-  handleChanged = (event = {}) => {
-    const {
-      modeler
-    } = this.getCached();
+  handleChanged = () => {
+    const modeler = this.getModeler();
 
     const {
       onChanged
     } = this.props;
+
+    const dirty = this.isDirty();
 
     const commandStack = modeler.get('commandStack');
     const selection = modeler.get('selection');
@@ -256,9 +268,10 @@ export class ZeebeEditor extends CachedComponent {
       copy: !!selectionLength,
       cut: false,
       defaultCopyCutPaste: inputActive,
+      dirty,
       distribute: selectionLength > 2,
       editLabel: !inputActive && !!selectionLength,
-      exportAs: [ 'svg', 'png' ],
+      exportAs: EXPORT_AS,
       find: !inputActive,
       globalConnectTool: !inputActive,
       handTool: !inputActive,
@@ -297,16 +310,27 @@ export class ZeebeEditor extends CachedComponent {
     this.setState(newState);
   }
 
-  async checkImport() {
+  isDirty() {
     const {
-      modeler
+      modeler,
+      stackIdx
     } = this.getCached();
 
-    let {
-      xml
-    } = this.props;
+    const commandStack = modeler.get('commandStack');
 
-    if (xml !== modeler.lastXML) {
+    return commandStack._stackIdx !== stackIdx;
+  }
+
+  async checkImport() {
+    const {
+      lastXML
+    } = this.getCached();
+
+    let { xml } = this.props;
+
+    const modeler = this.getModeler();
+
+    if (isXMLChange(lastXML, xml)) {
       this.setState({
         importing: true
       });
@@ -316,17 +340,37 @@ export class ZeebeEditor extends CachedComponent {
     }
   }
 
-  getXML() {
+  getModeler() {
     const {
       modeler
     } = this.getCached();
 
+
+    return modeler;
+  }
+
+  getXML() {
+    const {
+      lastXML,
+      modeler
+    } = this.getCached();
+
+    const commandStack = modeler.get('commandStack');
+
+    const stackIdx = commandStack._stackIdx;
+
     return new Promise((resolve, reject) => {
 
-      // TODO(nikku): set current modeler version and name to the diagram
+      if (!this.isDirty()) {
+        return resolve(lastXML || this.props.xml);
+      }
 
+      // TODO(nikku): set current modeler version and name to the diagram
       modeler.saveXML({ format: true }, (err, xml) => {
-        modeler.lastXML = xml;
+        this.setCached({
+          lastXML: xml,
+          stackIdx
+        });
 
         if (err) {
           this.handleError({
@@ -560,11 +604,19 @@ export class ZeebeEditor extends CachedComponent {
       position: 'absolute'
     });
 
+    const commandStack = modeler.get('commandStack');
+
+    const stackIdx = commandStack._stackIdx;
+
     return {
-      modeler,
       __destroy: () => {
         modeler.destroy();
-      }
+      },
+      lastXML: null,
+      modeler,
+      namespaceDialogShown: false,
+      stackIdx,
+      templatesLoaded: false
     };
   }
 
@@ -595,4 +647,18 @@ class Color extends Component {
         { ...rest }></div>
     );
   }
+}
+
+// helpers //////////
+
+function isImporting(state) {
+  return state.importing;
+}
+
+function isXMLChange(prevXML, xml) {
+  return prevXML !== xml;
+}
+
+function isChachedStateChange(prevProps, props) {
+  return prevProps.cachedState !== props.cachedState;
 }
