@@ -13,7 +13,7 @@ import {
   ZeebeEditor
 } from '../ZeebeEditor';
 
-import BpmnModeler from 'test/mocks/bpmn-js/Modeler';
+import ZeebeModeler from 'test/mocks/bpmn-js/Modeler';
 
 import { SlotFillRoot } from 'src/app/slot-fill';
 
@@ -70,7 +70,7 @@ describe('<ZeebeEditor>', function() {
 
       cache.add('editor', {
         cached: {
-          modeler: new BpmnModeler()
+          modeler: new ZeebeModeler()
         },
         __destroy: () => {}
       });
@@ -88,24 +88,28 @@ describe('<ZeebeEditor>', function() {
   });
 
 
-  it('#getXML', async function() {
+  it('#getModeler', async function() {
 
     // given
-    let instance;
+    const { instance } = await renderEditor(diagramXML);
 
-    async function onImport() {
+    // when
+    const modeler = instance.getModeler();
 
-      // when
-      const xml = await instance.getXML();
+    // then
+    expect(modeler).to.exist;
+  });
 
-      // then
-      expect(xml).to.exist;
-      expect(xml).to.eql(diagramXML);
-    }
 
-    instance = renderEditor(diagramXML, {
-      onImport
-    }).instance;
+  it('#getXML', async function() {
+    const {
+      instance
+    } = renderEditor(diagramXML);
+
+    const xml = await instance.getXML();
+
+    expect(xml).to.exist;
+    expect(xml).to.eql(diagramXML);
   });
 
 
@@ -157,20 +161,15 @@ describe('<ZeebeEditor>', function() {
 
         // then
         expect(state).to.include({
-          align: false,
-          copy: false,
-          distribute: false,
+          dirty: true,
           editLabel: false,
           find: true,
           globalConnectTool: true,
           handTool: true,
           lassoTool: true,
           moveCanvas: true,
-          moveToOrigin: true,
-          paste: false,
           redo: true,
           removeSelected: false,
-          setColor: false,
           spaceTool: true,
           undo: true
         });
@@ -180,18 +179,18 @@ describe('<ZeebeEditor>', function() {
 
       cache.add('editor', {
         cached: {
-          modeler: new BpmnModeler({
-            clipboard: {
-              isEmpty: () => true
-            },
+          lastXML: diagramXML,
+          modeler: new ZeebeModeler({
             commandStack: {
               canRedo: () => true,
-              canUndo: () => true
+              canUndo: () => true,
+              _stackIdx: 1
             },
             selection: {
               get: () => []
             }
-          })
+          }),
+          stackIdx: 2
         },
         __destroy: () => {}
       });
@@ -288,67 +287,60 @@ describe('<ZeebeEditor>', function() {
 
   describe('errors', function() {
 
-    // TODO
-    it('should handle template error');
-
-
     it('should handle XML export error', async function() {
 
       // given
-      let instance;
-
       const errorSpy = spy();
 
-      async function onImport() {
+      const {
+        instance
+      } = renderEditor('export-error', {
+        onError: errorSpy
+      });
 
-        // when
-        let err;
+      // make sure editor is dirty
+      const commandStack = instance.getModeler().get('commandStack');
 
-        try {
-          await instance.getXML();
-        } catch (e) {
-          err = e;
-        }
+      commandStack.execute(1);
 
-        // then
-        expect(err).to.exist;
-        expect(errorSpy).to.have.been.calledOnce;
+      let err;
+
+      // when
+      try {
+        await instance.getXML();
+      } catch (e) {
+        err = e;
       }
 
-      instance = renderEditor('export-error', {
-        onError: errorSpy,
-        onImport
-      }).instance;
+      // then
+      expect(err).to.exist;
+      expect(errorSpy).to.have.been.calledOnce;
     });
 
 
     it('should handle image export error', async function() {
 
       // given
-      let instance;
-
       const errorSpy = spy();
 
-      async function onImport() {
+      const {
+        instance
+      } = renderEditor('export-as-error', {
+        onError: errorSpy
+      });
 
-        // when
-        let err;
+      let err;
 
-        try {
-          await instance.exportAs('svg');
-        } catch (e) {
-          err = e;
-        }
-
-        // then
-        expect(err).to.exist;
-        expect(errorSpy).to.have.been.calledOnce;
+      // when
+      try {
+        await instance.exportAs('svg');
+      } catch (e) {
+        err = e;
       }
 
-      instance = renderEditor('export-as-error', {
-        onError: errorSpy,
-        onImport
-      }).instance;
+      // then
+      expect(err).to.exist;
+      expect(errorSpy).to.have.been.calledOnce;
     });
 
   });
@@ -359,80 +351,146 @@ describe('<ZeebeEditor>', function() {
     it('should import without errors and warnings', function() {
 
       // given
-      let instance;
-
-      function onImport(err, warnings) {
-
-        // then
-        const {
-          modeler
-        } = instance.getCached();
-
-        expect(modeler.lastXML).to.equal(diagramXML);
-
-        expect(err).to.not.exist;
-
-        expect(warnings).to.have.length(0);
-      }
+      const importSpy = spy();
 
       // when
-      instance = renderEditor(diagramXML, {
-        onImport
-      }).instance;
+      const { instance } = renderEditor(diagramXML, {
+        onImport: importSpy
+      });
+
+      // then
+      const {
+        lastXML
+      } = instance.getCached();
+
+      expect(importSpy).to.have.been.calledWith(null, []);
+
+      expect(lastXML).to.equal(diagramXML);
     });
 
 
     it('should import with warnings', function() {
 
       // given
-      let instance;
-
-      function onImport(error, warnings) {
+      const importSpy = (error, warnings) => {
 
         // then
-        const {
-          modeler
-        } = instance.getCached();
-
-        expect(modeler.lastXML).to.equal('import-warnings');
-
         expect(error).not.to.exist;
 
+        expect(warnings).to.exist;
         expect(warnings).to.have.length(1);
         expect(warnings[0]).to.equal('warning');
-      }
+      };
 
       // when
-      instance = renderEditor('import-warnings', {
-        onImport
-      }).instance;
+      const { instance } = renderEditor('import-warnings', {
+        onImport: importSpy
+      });
+
+      // then
+      const {
+        lastXML
+      } = instance.getCached();
+
+      expect(lastXML).to.equal('import-warnings');
     });
 
 
     it('should import with error', function() {
 
       // given
-      let instance;
-
-      function onImport(error, warnings) {
+      const importSpy = (error, warnings) => {
 
         // then
-        const {
-          modeler
-        } = instance.getCached();
-
-        expect(modeler.lastXML).not.to.exist;
-
         expect(error).to.exist;
         expect(error.message).to.equal('error');
 
+        expect(warnings).to.exist;
         expect(warnings).to.have.length(0);
-      }
+      };
 
       // when
-      instance = renderEditor('import-error', {
-        onImport
-      }).instance;
+      const { instance } = renderEditor('import-error', {
+        onImport: importSpy
+      });
+
+      // then
+      const {
+        lastXML
+      } = instance.getCached();
+
+      expect(lastXML).not.to.exist;
+    });
+
+  });
+
+
+  describe('dirty state', function() {
+
+    let instance;
+
+    beforeEach(function() {
+      instance = renderEditor(diagramXML).instance;
+    });
+
+
+    it('should NOT be dirty initially', function() {
+
+      // then
+      const dirty = instance.isDirty();
+
+      expect(dirty).to.be.false;
+    });
+
+
+    it('should be dirty after modeling', function() {
+
+      // given
+      const { modeler } = instance.getCached();
+
+      // when
+      // execute 1 command
+      modeler.get('commandStack').execute(1);
+
+      // then
+      const dirty = instance.isDirty();
+
+      expect(dirty).to.be.true;
+    });
+
+
+    it('should NOT be dirty after modeling -> undo', function() {
+
+      // given
+      const { modeler } = instance.getCached();
+
+      modeler.get('commandStack').execute(1);
+
+      // when
+      modeler.get('commandStack').undo();
+
+      // then
+      const dirty = instance.isDirty();
+
+      expect(dirty).to.be.false;
+    });
+
+
+    it('should NOT be dirty after save', async function() {
+
+      // given
+      const { modeler } = instance.getCached();
+
+      // execute 1 command
+      modeler.get('commandStack').execute(1);
+
+      // when
+      await instance.getXML();
+
+      // then
+      const dirty = instance.isDirty();
+
+      expect(dirty).to.be.false;
     });
 
   });
@@ -453,7 +511,7 @@ describe('<ZeebeEditor>', function() {
 
       cache.add('editor', {
         cached: {
-          modeler: new CmmnModeler({
+          modeler: new ZeebeModeler({
             eventBus: eventBusStub,
             canvas: canvasStub
           })
@@ -500,29 +558,23 @@ const TestEditor = WithCachedState(ZeebeEditor);
 
 function renderEditor(xml, options = {}) {
   const {
-    id,
     layout,
-    onAction,
     onChanged,
-    onContentUpdated,
     onError,
     onImport,
-    onLayoutChanged,
-    onModal
+    onLayoutChanged
   } = options;
 
   const slotFillRoot = mount(
     <SlotFillRoot>
       <TestEditor
-        id={ id || 'editor' }
+        id={ options.id || 'editor' }
         xml={ xml }
-        onAction={ onAction || noop }
+        activeSheet={ options.activeSheet || { id: 'bpmn' } }
         onChanged={ onChanged || noop }
         onError={ onError || noop }
         onImport={ onImport || noop }
         onLayoutChanged={ onLayoutChanged || noop }
-        onContentUpdated={ onContentUpdated || noop }
-        onModal={ onModal || noop }
         cache={ options.cache || new Cache() }
         layout={ layout || {
           minimap: {
