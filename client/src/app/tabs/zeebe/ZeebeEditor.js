@@ -115,9 +115,13 @@ export class ZeebeEditor extends CachedComponent {
     propertiesPanel.detach();
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     if (!this.state.importing) {
       this.checkImport();
+    }
+
+    if (prevProps.layout.propertiesPanel !== this.props.layout.propertiesPanel) {
+      this.triggerAction('resize');
     }
   }
 
@@ -428,8 +432,10 @@ export class ZeebeEditor extends CachedComponent {
     } = this.getCached();
 
     const canvas = modeler.get('canvas');
+    const eventBus = modeler.get('eventBus');
 
     canvas.resized();
+    eventBus.fire('propertiesPanel.resized');
   }
 
   render() {
