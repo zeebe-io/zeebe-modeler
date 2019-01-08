@@ -1159,18 +1159,6 @@ export class App extends Component {
       return this.createDiagram('bpmn');
     }
 
-    if (action === 'create-dmn-diagram') {
-      return this.createDiagram('dmn');
-    }
-
-    if (action === 'create-dmn-table') {
-      return this.createDiagram('dmn', { table: true });
-    }
-
-    if (action === 'create-cmmn-diagram') {
-      return this.createDiagram('cmmn');
-    }
-
     if (action === 'open-diagram') {
       return this.showOpenFilesDialog();
     }
@@ -1323,18 +1311,6 @@ export class App extends Component {
                 {
                   text: 'Create new BPMN diagram',
                   onClick: this.composeAction('create-bpmn-diagram')
-                },
-                {
-                  text: 'Create new DMN table',
-                  onClick: this.composeAction('create-dmn-table')
-                },
-                {
-                  text: 'Create new DMN diagram (DRD)',
-                  onClick: this.composeAction('create-dmn-diagram')
-                },
-                {
-                  text: 'Create new CMMN diagram',
-                  onClick: this.composeAction('create-cmmn-diagram')
                 }
               ] }
             >

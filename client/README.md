@@ -1,1 +1,1 @@
-# camunda-modeler-client
+# zeebe-modeler-client

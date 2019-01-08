@@ -7,10 +7,10 @@ npm install
 
 MacOSX users: `brew cask install zeebe-modeler` (requires [homebrew](https://brew.sh/index_de.html) and [cask](https://caskroom.github.io))
 
-### Dev-Mode
+## Dev-Mode
 npm run dev
 
-### Distro
+## Distro
 npm run distro
 run this command for creating install files
 

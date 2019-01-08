@@ -8,7 +8,7 @@
  * const editor = ...;
  *
  * addExporter(editor, {
- *   exporter: 'Camunda Modeler',
+ *   exporter: 'Zeebe Modeler',
  *   exporterVersion: '1.0.0-beta.6'
  * });
  */

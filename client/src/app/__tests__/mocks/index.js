@@ -112,26 +112,6 @@ export class TabsProvider {
           svg: EXPORT_SVG
         },
         extensions: [ 'bpmn', 'xml' ]
-      },
-      cmmn: {
-        name: 'CMMN',
-        encoding: ENCODING_UTF8,
-        exports: {
-          jpg: EXPORT_JPG,
-          png: EXPORT_PNG,
-          svg: EXPORT_SVG
-        },
-        extensions: [ 'cmmn', 'xml' ]
-      },
-      dmn: {
-        name: 'DMN',
-        encoding: ENCODING_UTF8,
-        exports: {
-          jpg: EXPORT_JPG,
-          png: EXPORT_PNG,
-          svg: EXPORT_SVG
-        },
-        extensions: [ 'dmn', 'xml' ]
       }
     };
   }

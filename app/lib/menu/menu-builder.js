@@ -415,11 +415,11 @@ class MenuBuilder {
     const topPart = [
       {
         label: 'Documentation',
-        click: () => browserOpen('https://docs.camunda.org/manual/latest/modeler/camunda-modeler')
+        click: () => browserOpen('https://docs.zeebe.io/bpmn-modeler/README.html')
       },
       {
         label: 'User Forum',
-        click: () => browserOpen('https://forum.camunda.org/c/modeler')
+        click: () => browserOpen('https://forum.zeebe.io/')
       },
       {
         label: 'Keyboard Shortcuts',

@@ -1,13 +1,13 @@
 {
-  "name": "camunda-modeler",
-  "version": "2.2.3",
-  "description": "Camunda Modeler for BPMN, DMN and CMMN, based on bpmn.io",
+  "name": "zeebe-modeler",
+  "version": "0.5.0",
+  "description": "Zeebe Modeler for BPMN based on bpmn.io",
   "private": true,
   "main": "lib/index.js",
   "author": {
     "name": "Camunda Services GmbH",
     "email": "info@camunda.com",
-    "url": "https://zeebe.io"
+    "url": "https://camunda.com"
   },
   "devDependencies": {
     "electron-devtools-installer": "^2.2.4",

@@ -1,6 +1,6 @@
 # Docs
 
-Developer documentation for the Camunda Modeler.
+Developer documentation for the Zeebe Modeler.
 
 
 ### [Element Templates](./element-templates)

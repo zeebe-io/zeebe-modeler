@@ -17,15 +17,13 @@ describe('TabsProvider', function() {
   });
 
 
-  it('should provide BPMN, CMMN, DMN and empty tab', function() {
+  it('should provide BPMN and empty tab', function() {
 
     // given
     const tabsProvider = new TabsProvider();
 
     // then
-    expect(tabsProvider.getProvider('cmmn')).to.exist;
     expect(tabsProvider.getProvider('bpmn')).to.exist;
-    expect(tabsProvider.getProvider('dmn')).to.exist;
 
     expect(tabsProvider.getProvider('empty')).to.exist;
   });
@@ -38,9 +36,7 @@ describe('TabsProvider', function() {
 
     // then
     expect(tabsProvider.getInitialFileContents('bpmn')).to.exist;
-    expect(tabsProvider.getInitialFileContents('cmmn')).to.exist;
-    expect(tabsProvider.getInitialFileContents('dmn', { table: true })).to.exist;
-    expect(tabsProvider.getInitialFileContents('dmn')).to.exist;
+
   });
 
 
@@ -51,9 +47,7 @@ describe('TabsProvider', function() {
 
     // then
     expect(tabsProvider.createTab('bpmn')).to.exist;
-    expect(tabsProvider.createTab('cmmn')).to.exist;
-    expect(tabsProvider.createTab('dmn', { table: true })).to.exist;
-    expect(tabsProvider.createTab('dmn')).to.exist;
+
   });
 
 
@@ -66,9 +60,6 @@ describe('TabsProvider', function() {
 
       // then
       expect(await tabsProvider.getTabComponent('bpmn')).to.exist;
-      expect(await tabsProvider.getTabComponent('cmmn')).to.exist;
-      expect(await tabsProvider.getTabComponent('dmn', { table: true })).to.exist;
-      expect(await tabsProvider.getTabComponent('dmn')).to.exist;
 
       expect(await tabsProvider.getTabComponent('empty')).to.exist;
     }
@@ -125,7 +116,7 @@ describe('TabsProvider', function() {
       const file = {
         name: 'foo.xml',
         path: '/a/foo.xml',
-        contents: require('./TabsProviderSpec.dmn.xml')
+        contents: require('./TabsProviderSpec.bpmn.xml')
       };
 
       // when
@@ -134,7 +125,7 @@ describe('TabsProvider', function() {
       // then
       expect(tab.name).to.eql(file.name);
       expect(tab.title).to.eql(file.path);
-      expect(tab.type).to.eql('dmn');
+      expect(tab.type).to.eql('bpmn');
     });
 
 
@@ -168,8 +159,6 @@ describe('TabsProvider', function() {
 
     // then
     expect(providers['bpmn']).to.exist;
-    expect(providers['cmmn']).to.exist;
-    expect(providers['dmn']).to.exist;
     expect(providers['empty']).to.exist;
   });
 
@@ -183,7 +172,7 @@ describe('TabsProvider', function() {
     const providerNames = tabsProvider.getProviderNames();
 
     // then
-    expect(providerNames).to.eql([ 'BPMN', 'CMMN', 'DMN' ]);
+    expect(providerNames).to.eql([ 'BPMN' ]);
   });
 
 

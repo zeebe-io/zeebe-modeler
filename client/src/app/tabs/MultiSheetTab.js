@@ -117,7 +117,7 @@ export class MultiSheetTab extends CachedComponent {
 
     if (answer === 'ask-in-forum') {
       onAction('open-external-url', {
-        url: 'https://forum.camunda.org/c/modeler'
+        url: 'https://forum.zeebe.io/'
       });
     }
   }
