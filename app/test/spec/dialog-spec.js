@@ -1,22 +1,22 @@
 'use strict';
 
-var path = require('path');
+const path = require('path');
 
-var Dialog = require('../../lib/dialog');
+const Dialog = require('../../lib/dialog');
 
-var ElectronDialog = require('../helper/mock/electron-dialog'),
-    Config = require('../helper/mock/config');
+const ElectronDialog = require('../helper/mock/electron-dialog'),
+      Config = require('../helper/mock/config');
 
-var USER_PATH = '/users/bpmn.io/',
-    USER_DESKTOP_PATH = path.join(USER_PATH, 'desktop');
+const { assign } = require('min-dash');
 
+const USER_PATH = '/users/bpmn.io/',
+      USER_DESKTOP_PATH = path.join(USER_PATH, 'desktop');
 
-function getDialogArgs(method) {
-  return method.args[0][1];
-}
 
 describe('Dialog', function() {
-  var dialog, electronDialog, config;
+  let dialog,
+      electronDialog,
+      config;
 
   beforeEach(function() {
     config = new Config(USER_PATH);
@@ -30,183 +30,350 @@ describe('Dialog', function() {
   });
 
 
-  it('should show open dialog', function(done) {
-    // given
-    var newBasePath = path.join(USER_PATH, 'bpmn'),
-        newPath = path.join(newBasePath, 'diagram_1.bpmn'),
-        openDialogArg;
+  describe('#showDialog', function() {
 
-    electronDialog.setResponse([ newPath ]);
+    it('should show error dialog', async function() {
 
-    // when
-    dialog.showDialog('open', {}, function(err, openResult) {
+      // given
+      electronDialog.setResponse(0);
 
-      openDialogArg = getDialogArgs(electronDialog.showOpenDialog);
+      var options = {
+        buttons: [{
+          id: 'foo',
+          label: 'Foo'
+        }, {
+          id: 'bar',
+          label: 'Bar'
+        }],
+        title: 'error',
+        type: 'error'
+      };
 
-      // then
-      expect(openResult).to.contain(newPath);
-
-      expect(electronDialog.showOpenDialog).to.have.been.called;
-
-      expect(openDialogArg.title).to.equal('Open diagram');
-      expect(openDialogArg.defaultPath).to.equal(USER_DESKTOP_PATH);
-
-      done();
-    });
-
-  });
-
-
-  it('should show save dialog', function(done) {
-    // given
-    var newBasePath = path.join(USER_PATH, 'dmn'),
-        newPath = path.join(newBasePath, 'diagram_1.dmn'),
-        saveDialogArg;
-
-    electronDialog.setResponse(newPath);
-
-    // when
-    dialog.showDialog('save', {
-      name: 'diagram_1.dmn',
-      fileType: 'dmn'
-    }, function(err, saveResult) {
-      saveDialogArg = getDialogArgs(electronDialog.showSaveDialog);
+      // when
+      const result = await dialog.showDialog(options);
 
       // then
-      expect(saveResult).to.equal(newPath);
-
-      expect(electronDialog.showSaveDialog).to.have.been.called;
-
-      expect(saveDialogArg.title).to.equal('Save diagram_1.dmn as...');
-      expect(path.join(saveDialogArg.defaultPath)).to.equal(path.join(USER_DESKTOP_PATH, 'diagram_1.dmn'));
-
-      done();
-    });
-
-  });
-
-
-  it('should show empty file dialog', function(done) {
-
-    // given
-    electronDialog.setResponse(1); // 'Create' button
-
-    // when
-    dialog.showDialog('emptyFile', {
-      fileType: 'bpmn',
-      name: 'foo.bpmn'
-    }, function(err, result) {
       var dialogArgs = getDialogArgs(electronDialog.showMessageBox);
 
-      expect(result).to.equal('create');
-
+      // then
       expect(electronDialog.showMessageBox).to.have.been.called;
 
-      expect(dialogArgs.title).to.equal('Empty BPMN file');
-      expect(dialogArgs.message).to.equal([
-        'The file "foo.bpmn" is empty.',
-        'Would you like to create a new BPMN diagram?'
-      ].join('\n'));
+      expect(dialogArgs.title).to.equal('error');
+      expect(dialogArgs.buttons).to.have.length(2);
 
-      done();
+      expect(result).to.equal('foo');
     });
-  });
 
 
-  it('should show message dialog -> close', function(done) {
+    it('should show warning dialog', async function() {
 
-    // given
-    var messageBoxArg;
+      // given
+      electronDialog.setResponse(0);
 
-    electronDialog.setResponse(1);
+      var options = {
+        buttons: [{
+          id: 'foo',
+          label: 'Foo'
+        }, {
+          id: 'bar',
+          label: 'Bar'
+        }],
+        title: 'warning',
+        type: 'warning'
+      };
 
-    // when
-    dialog.showDialog('close', {
-      name: 'diagram_1.bpmn'
-    }, function(err, closeResult) {
-      messageBoxArg = getDialogArgs(electronDialog.showMessageBox);
+      // when
+      const result = await dialog.showDialog(options);
 
       // then
-      expect(closeResult).to.equal('save');
+      var dialogArgs = getDialogArgs(electronDialog.showMessageBox);
 
+      // then
       expect(electronDialog.showMessageBox).to.have.been.called;
 
-      expect(messageBoxArg.title).to.equal('Close diagram');
-      expect(messageBoxArg.buttons).to.eql([ 'Cancel', 'Save', 'Don\'t Save' ]);
+      expect(dialogArgs.title).to.equal('warning');
+      expect(dialogArgs.buttons).to.have.length(2);
 
-      done();
+      expect(result).to.equal('foo');
+    });
+
+
+    it('should show info dialog', async function() {
+
+      // given
+      electronDialog.setResponse(0);
+
+      var options = {
+        buttons: [{
+          id: 'foo',
+          label: 'Foo'
+        }, {
+          id: 'bar',
+          label: 'Bar'
+        }],
+        title: 'info',
+        type: 'info'
+      };
+
+      // when
+      const result = await dialog.showDialog(options);
+
+      // then
+      var dialogArgs = getDialogArgs(electronDialog.showMessageBox);
+
+      // then
+      expect(electronDialog.showMessageBox).to.have.been.called;
+
+      expect(dialogArgs.title).to.equal('info');
+      expect(dialogArgs.buttons).to.have.length(2);
+
+      expect(result).to.equal('foo');
+    });
+
+
+    it('should show question dialog', async function() {
+
+      // given
+      electronDialog.setResponse(0);
+
+      var options = {
+        buttons: [{
+          id: 'foo',
+          label: 'Foo'
+        }, {
+          id: 'bar',
+          label: 'Bar'
+        }],
+        title: 'question',
+        type: 'question'
+      };
+
+      // when
+      const result = await dialog.showDialog(options);
+
+      // then
+      var dialogArgs = getDialogArgs(electronDialog.showMessageBox);
+
+      // then
+      expect(electronDialog.showMessageBox).to.have.been.called;
+
+      expect(dialogArgs.title).to.equal('question');
+      expect(dialogArgs.buttons).to.have.length(2);
+
+      expect(result).to.equal('foo');
     });
 
   });
 
 
-  it('should show general error dialog', function() {
-    var title = 'Error',
-        message = 'There was an internal error.' + '\n' + 'Please try again.';
+  describe('#showOpenDialog', function() {
 
-    // when
-    dialog.showGeneralErrorDialog();
+    const options = {
+      filters: {
+        name: 'foo',
+        extensions: [ 'foo' ]
+      },
+      title: 'foo'
+    };
 
-    // then
-    expect(electronDialog.showErrorBox).to.have.been.calledWith(title, message);
-  });
 
+    it('should return filepaths', async function() {
 
-  it('should set last used path to config via open', function(done) {
-    // given
-    var newPath = path.join(USER_PATH, 'bpmn', 'diagram_1.bpmn'),
-        defaultPath = path.dirname(newPath);
+      // given
+      const filePaths = [ 'foo' ];
 
-    electronDialog.setResponse(newPath);
+      electronDialog.setResponse(filePaths);
 
-    // when
-    dialog.showDialog('open', function() {
+      // when
+      const response = await dialog.showOpenDialog(options);
+
       // then
-      expect(config.get('defaultPath')).to.equal(defaultPath);
+      expect(response).to.eql(filePaths);
 
-      done();
+      const args = getDialogArgs(electronDialog.showOpenDialog);
+
+      expect(args).to.include(options);
+    });
+
+
+    it('should NOT return filepaths', async function() {
+
+      // given
+      electronDialog.setResponse(undefined);
+
+      // when
+      const response = await dialog.showOpenDialog(options);
+
+      // then
+      expect(response).to.eql([]);
+
+      const args = getDialogArgs(electronDialog.showOpenDialog);
+
+      expect(args).to.include(options);
+    });
+
+
+    describe('defaultPath', function() {
+
+      it('should use userDesktopPath by default', async function() {
+
+        // given
+        electronDialog.setResponse([]);
+
+        // when
+        await dialog.showOpenDialog(options);
+
+        // then
+        const args = getDialogArgs(electronDialog.showOpenDialog);
+
+        expect(args.defaultPath).to.equal(USER_DESKTOP_PATH);
+      });
+
+
+      it('should use specified defaultPath', async function() {
+
+        // given
+        const defaultPath = path.join(USER_PATH);
+
+        electronDialog.setResponse([]);
+
+        // when
+        await dialog.showOpenDialog(assign({}, options, {
+          defaultPath
+        }));
+
+        // then
+        const args = getDialogArgs(electronDialog.showOpenDialog);
+
+        expect(args.defaultPath).to.equal(defaultPath);
+      });
+
+
+      it('should set defaultPath when opening files', async function() {
+
+        // given
+        const fooPath = path.join(USER_PATH, 'foo', 'foo.file'),
+              defaultPath = path.dirname(fooPath);
+
+        const filePaths = [ fooPath ];
+
+        electronDialog.setResponse(filePaths);
+
+        // when
+        await dialog.showOpenDialog(options);
+
+        // then
+        expect(config.get('defaultPath')).to.equal(defaultPath);
+      });
+
     });
 
   });
 
 
-  it('should set last used path to config via open (active file\'s path)', function(done) {
-    // given
-    var newPath = path.join(USER_PATH, 'bpmn', 'diagram_1.bpmn'),
-        defaultPath = path.dirname(newPath);
+  describe('#showSaveDialog', function() {
 
-    electronDialog.setResponse(newPath);
+    const file = {
+      name: 'foo'
+    };
 
-    // when
-    dialog.showDialog('open', { filePath: '/Users/ricardo/bpmn' }, function() {
+    const options = {
+      filters: {
+        name: 'foo',
+        extensions: [ 'foo' ]
+      },
+      title: 'foo'
+    };
+
+
+    it('should return filepath', async function() {
+
+      // given
+      const filePath = 'foo';
+
+      electronDialog.setResponse(filePath);
+
+      // when
+      const response = await dialog.showSaveDialog(assign({}, options, { file }));
+
       // then
-      expect(config.get('defaultPath')).to.equal(defaultPath);
+      expect(response).to.eql(filePath);
 
-      done();
+      const args = getDialogArgs(electronDialog.showSaveDialog);
+
+      expect(args).to.include(options);
     });
 
-  });
 
+    it('should NOT return filepath', async function() {
 
-  it('should set last used path to config via save', function(done) {
-    // given
-    var newPath = path.join(USER_PATH, 'dmn', 'diagram_1.dmn'),
-        defaultPath = path.dirname(newPath);
-
-    electronDialog.setResponse(newPath);
-
-    // when
-    dialog.showDialog('save', {
-      name: 'diagram_1.dmn',
-      fileType: 'dmn'
-    }, function() {
+      // when
+      const response = await dialog.showSaveDialog(assign({}, options, { file }));
 
       // then
-      expect(config.get('defaultPath')).to.equal(defaultPath);
+      expect(response).not.to.exist;
 
-      done();
+      const args = getDialogArgs(electronDialog.showSaveDialog);
+
+      expect(args).to.include(options);
+    });
+
+
+    describe('defaultPath', function() {
+
+      it('should use userDesktopPath by default', async function() {
+
+        // when
+        await dialog.showSaveDialog(assign({}, options, { file }));
+
+        // then
+        const args = getDialogArgs(electronDialog.showSaveDialog);
+
+        expect(args.defaultPath).to.equal(`${ USER_DESKTOP_PATH }/${ file.name }`);
+      });
+
+
+      it('should use specified defaultPath', async function() {
+
+        // given
+        const defaultPath = path.join(USER_PATH);
+
+        // when
+        await dialog.showSaveDialog(assign({}, options, {
+          defaultPath,
+          file
+        }));
+
+        // then
+        const args = getDialogArgs(electronDialog.showSaveDialog);
+
+        expect(args.defaultPath).to.equal(`${ defaultPath }/${ file.name }`);
+      });
+
+
+      it('should set defaultPath when saving file', async function() {
+
+        // given
+        const fooPath = path.join(USER_PATH, 'foo', 'foo.file'),
+              defaultPath = path.dirname(fooPath);
+
+        electronDialog.setResponse(fooPath);
+
+        // when
+        await dialog.showSaveDialog(assign({}, options, { file }));
+
+        // then
+        expect(config.get('defaultPath')).to.equal(defaultPath);
+      });
+
     });
 
   });
 
 });
+
+// helpers //////////
+
+function getDialogArgs(method) {
+  return method.args[0][1];
+}

@@ -1,308 +1,172 @@
 'use strict';
 
-var path = require('path');
+const path = require('path');
 
-var {
-  map
-} = require('min-dash');
+const ensureOptions = require('./util/ensure-opts');
 
-var filterExtensions = require('./util/filter-extensions'),
-    ensureOptions = require('./util/ensure-opts');
+const { assign } = require('min-dash');
+
 
 /**
- * Interface for handling dialogs.
- *
- * @param  {Object} Options
+ * Dialogs.
  */
-function Dialog(options) {
-  ensureOptions([ 'dialog', 'config', 'userDesktopPath' ], options);
+class Dialog {
 
-  this.dialog = options.dialog;
-  this.config = options.config;
+  /**
+   * Constructor.
+   *
+   * @param {Object} options - Options.
+   * @param {Object} options.dialog - Electron dialog.
+   * @param {Object} options.config - Config.
+   * @param {Object} options.userDesktopPath - User desktop path.
+   */
+  constructor(options) {
+    ensureOptions([ 'dialog', 'config', 'userDesktopPath' ], options);
 
-  this.userDesktopPath = options.userDesktopPath;
-}
+    this.browserWindow = null;
 
-module.exports = Dialog;
+    this.dialog = options.dialog;
+    this.config = options.config;
 
-
-Dialog.prototype.getDialogOptions = function(type, options) {
-  var config = this.config,
-      userDesktopPath = this.userDesktopPath,
-      defaultPath;
-
-  // filepath is passed if a saved file is focused
-  if (options && options.filePath) {
-    defaultPath = path.dirname(options.filePath);
-  } else {
-    defaultPath = config.get('defaultPath', userDesktopPath);
+    this.userDesktopPath = options.userDesktopPath;
   }
 
-  const dialogs = {
-    contentChanged: function() {
-      return {
-        title: 'File changed',
-        message: 'The file has been changed externally.\nWould you like to reload it?',
-        type: 'question',
-        buttons: [
-          { id: 'ok', label: 'Reload' },
-          { id: 'cancel', label: 'Cancel' }
-        ]
-      };
-    },
-    open: function() {
-      return {
-        title: 'Open diagram',
-        defaultPath: defaultPath,
-        properties: [ 'openFile', 'multiSelections' ],
-        filters: filterExtensions([
-          'supported',
-          'bpmn', 'dmn', 'cmmn',
-          'all'
-        ])
-      };
-    },
-    exportAs: function(options) {
-      ensureOptions([ 'name', 'filters' ], options);
+  showOpenFileErrorDialog(options) {
+    const {
+      detail,
+      message,
+      name
+    } = options;
 
-      return {
-        title: 'Export ' + options.name + ' as...',
-        defaultPath: defaultPath + '/' + options.name,
-        filters: options.filters
-      };
-    },
-    save: function(options) {
-      ensureOptions([ 'name', 'fileType' ], options);
-
-      return {
-        title: 'Save ' + options.name + ' as...',
-        defaultPath: defaultPath + '/' + options.name,
-        filters: filterExtensions([ options.fileType, 'all' ])
-      };
-    },
-    close: function(options) {
-      ensureOptions([ 'name' ], options);
-
-      return {
-        title: 'Close diagram',
-        message: 'Save changes to ' + options.name + ' before closing?',
-        type: 'question',
-        buttons: [
-          { id: 'cancel', label: 'Cancel' },
-          { id: 'save', label: 'Save' },
-          { id: 'discard', label: 'Don\'t Save' }
-        ]
-      };
-    },
-    importError: function(options) {
-      ensureOptions([ 'name', 'errorDetails' ], options);
-
-      return {
+    return new Promise(resolve => {
+      this.showDialog('error', {
         type: 'error',
-        title: 'Importing Error',
-        buttons: [
-          { id: 'cancel', label: 'Close' },
-          { id: 'ask-forum', label: 'Ask in Forum' }
-        ],
-        message: 'Ooops, we could not display this diagram!',
-        detail: [
-          options.errorDetails,
-          '',
-          'Do you believe "' + options.name + '" is valid BPMN or DMN diagram?',
-          '',
-          'Post this error with your diagram in our forum for help.'
-        ].join('\n')
-      };
-    },
-    unrecognizedFile: function(options) {
-      ensureOptions([ 'name' ], options);
-
-      return {
-        type: 'warning',
-        title: 'Unrecognized file format',
+        title: 'File Open Error',
         buttons: [
           { id: 'cancel', label: 'Close' }
         ],
-        message: 'The file "' + options.name + '" is not a BPMN, DMN or CMMN file.'
-      };
-    },
-    existingFile: function(options) {
-      ensureOptions([ 'name' ], options);
-
-      return {
-        type: 'warning',
-        title: 'Existing file',
-        buttons: [
-          { id: 'cancel', label: 'Cancel' },
-          { id: 'no-overwrite', label: 'No' },
-          { id: 'overwrite', label: 'Overwrite' }
-        ],
-        message: 'The file "' + options.name + '" already exists. Do you want to overwrite it?'
-      };
-    },
-    namespace: function(options) {
-      var oldNs = '',
-          newNs = '',
-          details = [];
-
-      ensureOptions([ 'type' ], options);
-
-      if (options.type === 'bpmn') {
-        oldNs = '<activiti>';
-        newNs = '<camunda>';
-
-        details = [
-          'This will allow you to maintain execution related properties.',
-          '',
-          '<camunda> namespace support works from Camunda BPM versions 7.4.0, 7.3.3, 7.2.6 onwards.'
-        ];
-      }
-
-      if (options.type === 'dmn') {
-        oldNs = 'DMN';
-        newNs = 'new DMN';
-      }
-
-      return {
-        type: 'warning',
-        title: 'Deprecated ' + oldNs + ' namespace detected',
-        buttons: [
-          { id: 'cancel', label: 'Cancel' },
-          { id: 'no', label: 'No' },
-          { id: 'yes', label: 'Yes' }
-        ],
-        message: 'Would you like to convert your diagram to the ' + newNs + ' namespace?',
-        detail: details.join('\n')
-      };
-    },
-    savingDenied: function(options) {
-      return {
-        type: 'warning',
-        title: 'Cannot save file',
-        buttons: [
-          { id: 'cancel', label: 'Cancel' },
-          { id: 'save-as', label: 'Save File as..' }
-        ],
-        message: [
-          'We cannot save or overwrite the current file.',
-          'Do you want to save the file as.. ?'
-        ].join('\n')
-      };
-    },
-    emptyFile: function(options) {
-      ensureOptions([ 'fileType', 'name' ], options);
-
-      var type = options.fileType.toUpperCase();
-
-      return {
-        type: 'question',
-        title: [
-          'Empty ',
-          type,
-          ' file'
-        ].join(''),
-        buttons: [
-          { id: 'cancel', label: 'Cancel' },
-          { id: 'create', label: 'Create' }
-        ],
-        message: [
-          'The file "' + options.name + '" is empty.',
-          'Would you like to create a new ' + type + ' diagram?'
-        ].join('\n')
-      };
-    }
-  };
-
-  return dialogs[type](options);
-};
-
-Dialog.prototype.setDefaultPath = function(filenames) {
-  var config = this.config,
-      defaultPath,
-      dirname;
-
-  if (Array.isArray(filenames)) {
-    defaultPath = filenames[0];
-  } else {
-    defaultPath = filenames;
-  }
-
-  if (this.defaultPath && this.defaultPath === defaultPath) {
-    return this.defaultPath;
-  }
-
-  dirname = path.dirname(defaultPath);
-
-  config.set('defaultPath', dirname);
-
-  this.defaultPath = dirname;
-};
-
-Dialog.prototype.showDialog = function(type, opts, done) {
-  var self = this;
-
-  if (typeof opts === 'function') {
-    done = opts;
-    opts = undefined;
-  }
-
-  var dialog = this.dialog,
-      browserWindow = this.browserWindow,
-      dialogOptions = this.getDialogOptions(type, opts),
-      buttons = dialogOptions.buttons;
-
-  // windows needs this property
-  dialogOptions.noLink = true;
-
-  if (dialogOptions.buttons) {
-    dialogOptions.buttons = map(buttons, function(button) {
-      return button.label;
+        message: message || `Unable to open"${ name }"`,
+        detail
+      }, () => {
+        resolve();
+      });
     });
   }
 
-  done = done || function(err, result) {
-    console.log(result);
-  };
+  showSaveDialog(options) {
+    const {
+      file,
+      filters,
+      title
+    } = options;
 
-  function dialogCallback(answer) {
-    var result;
+    let { name } = file;
 
-    if (type !== 'open' && type !== 'save' && type !== 'exportAs') {
-      // get the button ID according to the result
-      result = buttons[answer].id;
+    // remove extension
+    name = path.parse(name).name;
+
+    let { defaultPath } = options;
+
+    if (!defaultPath) {
+      defaultPath = this.config.get('defaultPath', this.userDesktopPath);
+    }
+
+    return new Promise(resolve => {
+      this.dialog.showSaveDialog(this.browserWindow, {
+        defaultPath: `${ defaultPath }/${ name }`,
+        filters,
+        title: title || `Save "${ name }" as...`
+      }, (filePath) => {
+        if (filePath) {
+          this.setDefaultPath(filePath);
+        }
+
+        resolve(filePath);
+      });
+    });
+  }
+
+  showOpenDialog(options) {
+    const {
+      filters,
+      title
+    } = options;
+
+    let { defaultPath } = options;
+
+    if (!defaultPath) {
+      defaultPath = this.config.get('defaultPath', this.userDesktopPath);
+    }
+
+    return new Promise(resolve => {
+      this.dialog.showOpenDialog(this.browserWindow, {
+        defaultPath,
+        filters,
+        properties: [ 'openFile', 'multiSelections' ],
+        title: title || 'Open File'
+      }, (filePaths = []) => {
+        if (filePaths.length) {
+          this.setDefaultPath(filePaths[0]);
+        }
+
+        resolve(filePaths);
+      });
+    });
+  }
+
+  showDialog(options) {
+    let { buttons } = options;
+
+    if (buttons) {
+      assign(options, {
+        buttons: buttons.map(({ label }) => label)
+      });
     } else {
-      result = answer;
+      buttons = [{
+        id: 'close',
+        label: 'Close'
+      }];
+
+      assign(options, {
+        buttons: [ 'Close' ]
+      });
     }
 
-    // save last used path to config
-    if (result && (type === 'open' || type === 'save' || type === 'exportAs')) {
-      self.setDefaultPath(result);
+    // see https://github.com/electron/electron/blob/master/docs/api/dialog.md
+    assign(options, {
+      noLink: true
+    });
+
+    return new Promise((resolve) => {
+      this.dialog.showMessageBox(this.browserWindow, options, (index) => {
+        resolve(buttons[ index ].id);
+      });
+    });
+  }
+
+  setDefaultPath(filePaths) {
+    let defaultPath;
+
+    if (Array.isArray(filePaths)) {
+      defaultPath = filePaths[0];
+    } else {
+      defaultPath = filePaths;
     }
 
-    done(null, result);
+    if (this.defaultPath && this.defaultPath === defaultPath) {
+      return this.defaultPath;
+    }
+
+    const dirname = path.dirname(defaultPath);
+
+    this.config.set('defaultPath', dirname);
+
+    this.defaultPath = dirname;
   }
 
-  if (type === 'open') {
-    dialog.showOpenDialog(browserWindow, dialogOptions, dialogCallback);
-
-  } else
-  if (type === 'save' || type === 'exportAs') {
-    dialog.showSaveDialog(browserWindow, dialogOptions, dialogCallback);
-
-  } else {
-    dialog.showMessageBox(browserWindow, dialogOptions, dialogCallback);
+  setActiveWindow(browserWindow) {
+    this.browserWindow = browserWindow;
   }
-};
+}
 
-Dialog.prototype.showGeneralErrorDialog = function() {
-  var dialog = this.dialog;
-
-  dialog.showErrorBox(
-    'Error',
-    'There was an internal error.' + '\n' + 'Please try again.'
-  );
-};
-
-Dialog.prototype.setActiveWindow = function(browserWindow) {
-  this.browserWindow = browserWindow;
-};
+module.exports = Dialog;

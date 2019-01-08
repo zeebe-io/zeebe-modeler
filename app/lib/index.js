@@ -7,6 +7,7 @@ var electron = require('electron'),
 var path = require('path');
 
 var {
+  assign,
   forEach
 } = require('min-dash');
 
@@ -31,7 +32,7 @@ var Platform = require('./platform'),
     Menu = require('./menu'),
     Cli = require('./cli'),
     Plugins = require('./plugins'),
-    deploy = require('./createDeployer')({ fetch, fs, FormData });
+    Deployer = require('./deployer');
 
 var browserOpen = require('./util/browser-open'),
     renderer = require('./util/renderer');
@@ -55,7 +56,7 @@ global.metaData = {
 // get directory of executable
 var appPath = path.dirname(app.getPath('exe'));
 
-var plugins = app.plugins = new Plugins({
+app.plugins = new Plugins({
   paths: [
     app.getPath('userData'),
     appPath
@@ -65,24 +66,13 @@ var plugins = app.plugins = new Plugins({
 // set global modeler directory
 global.modelerDirectory = appPath;
 
-// bootstrap the application's menus
-//
-// TODO(nikku): remove app.menu binding when development
-// mode bootstrap issue is fixed in electron-connect
-app.menu = new Menu(
-  process.platform,
-  plugins.getPlugins()
-    .map(p => {
-      return {
-        menu: p.menu,
-        name: p.name,
-        error: p.error
-      };
-    })
-);
+var menu = new Menu(process.platform);
+
+// bootstrap filesystem
+var fileSystem = new FileSystem();
 
 // bootstrap workspace behavior
-new Workspace(config);
+new Workspace(config, fileSystem);
 
 // bootstrap client config behavior
 var clientConfig = new ClientConfig(app);
@@ -94,10 +84,9 @@ var dialog = new Dialog({
   userDesktopPath: app.getPath('userDesktop')
 });
 
-// bootstrap filesystem
-var fileSystem = new FileSystem({
-  dialog: dialog
-});
+
+// bootstrap deployer
+var deployer = new Deployer({ fetch, fs, FormData });
 
 
 // make app a singleton
@@ -125,98 +114,92 @@ if (config.get('single-instance', true)) {
   }
 }
 
-// client life-cycle //////////////////
+// external //////////
 
-renderer.on('dialog:unrecognized-file', function(file, done) {
-  dialog.showDialog('unrecognizedFile', { name: file.name });
+renderer.on('external:open-url', function(options) {
+  var url = options.url;
 
-  done(null);
+  browserOpen(url);
 });
 
-renderer.on('dialog:reimport-warning', function(done) {
+// dialogs //////////
 
-  dialog.showDialog('reimportWarning', done);
-});
+renderer.on('dialog:open-files', async function(options, done) {
+  const {
+    activeFile
+  } = options;
 
-renderer.on('dialog:convert-namespace', function(type, done) {
-  dialog.showDialog('namespace', { type: type }, done);
-});
-
-renderer.on('dialog:import-error', function(filename, errorDetails, done) {
-
-  dialog.showDialog('importError', { name: filename, errorDetails: errorDetails }, function(err, answer) {
-    if (answer === 'ask-forum') {
-      browserOpen('https://forum.zeebe.io/');
-    }
-
-    // the answer is irrelevant for the client
-    done(null);
-  });
-});
-
-renderer.on('dialog:close-tab', function(diagramFile, done) {
-  dialog.showDialog('close', { name: diagramFile.name }, done);
-});
-
-renderer.on('dialog:saving-denied', function(done) {
-  dialog.showDialog('savingDenied', done);
-});
-
-renderer.on('dialog:content-changed', function(done) {
-  dialog.showDialog('contentChanged', done);
-});
-
-renderer.on('dialog:empty-file', function(options, done) {
-  dialog.showDialog('emptyFile', {
-    fileType: options.fileType,
-    name: options.name
-  }, done);
-});
-
-renderer.on('deploy', function(data, done) {
-  var workspaceConfig = config.get('workspace', { endpoints: [] });
-
-  var endpointUrl = (workspaceConfig.endpoints || [])[0];
-
-  if (!endpointUrl) {
-
-    let err = new Error('no deploy endpoint configured');
-
-    console.error('failed to deploy', err);
-    return done(err.message);
+  if (activeFile && activeFile.path) {
+    assign(options, {
+      defaultPath: path.dirname(activeFile.path)
+    });
   }
 
-  deploy(endpointUrl, data, function(err, result) {
+  const filePaths = await dialog.showOpenDialog(options);
 
-    if (err) {
-      console.error('failed to deploy', err);
-
-      return done(err.message);
-    }
-
-    done(null, result);
-  });
-
+  done(null, filePaths);
 });
 
+renderer.on('dialog:open-file-error', async function(options, done) {
+  const response = await dialog.showOpenFileErrorDialog(options);
 
-function saveCallback(saveAction, ...args) {
+  done(null, response);
+});
 
-  var done = args[args.length - 1];
-  var actualArgs = args.slice(0, args.length - 1);
+renderer.on('dialog:save-file', async function(options, done) {
+  const { file } = options;
 
-  saveAction.apply(fileSystem, [ ...actualArgs, (err, updatedDiagram) => {
-    if (err) {
-      return done(err);
-    }
+  if (file.path) {
+    assign(options, {
+      defaultPath: path.dirname(file.path)
+    });
+  }
 
-    if (updatedDiagram && updatedDiagram !== 'cancel') {
-      app.emit('app:add-recent-file', updatedDiagram.path);
-    }
+  const filePath = await dialog.showSaveDialog(options);
 
-    done(null, updatedDiagram);
-  }]);
-}
+  done(null, filePath);
+});
+
+renderer.on('dialog:show', async function(options, done) {
+  const response = await dialog.showDialog(options, done);
+
+  done(null, response);
+});
+
+// deploying //////////
+// TODO: remove and add as plugin instead
+
+renderer.on('deploy', handleDeployment);
+
+// filesystem //////////
+
+renderer.on('file:read', function(filePath, options = {}, done) {
+  try {
+    const newFile = fileSystem.readFile(filePath, options);
+
+    done(null, newFile);
+  } catch (err) {
+    done(err);
+  }
+});
+
+renderer.on('file:read-stats', function(file, done) {
+  const newFile = fileSystem.readFileStats(file);
+
+  done(null, newFile);
+});
+
+renderer.on('file:write', async function(filePath, file, options = {}, done) {
+  try {
+    const newFile = fileSystem.writeFile(filePath, file, options);
+
+    done(null, newFile);
+  } catch (err) {
+    done(err);
+  }
+});
+
+// client config //////////
 
 renderer.on('client-config:get', function(...args) {
 
@@ -231,45 +214,7 @@ renderer.on('client-config:get', function(...args) {
   }
 });
 
-renderer.on('file:save-as', function(diagramFile, done) {
-
-  saveCallback(fileSystem.saveAs, diagramFile, done);
-});
-
-renderer.on('file:export-as', function(diagramFile, filters, done) {
-  saveCallback(fileSystem.exportAs, diagramFile, filters, done);
-});
-
-renderer.on('file:save', function(diagramFile, done) {
-  saveCallback(fileSystem.save, diagramFile, done);
-});
-
-renderer.on('file:read', function(diagramFile, done) {
-  done(null, fileSystem.readFile(diagramFile.path));
-});
-
-renderer.on('file:read-stats', function(diagramFile, done) {
-  done(null, fileSystem.readFileStats(diagramFile));
-});
-
-renderer.on('file:open', function(filePath, done) {
-  fileSystem.open(filePath, function(err, diagramFiles) {
-    if (err) {
-      return done(err);
-    }
-
-    if (diagramFiles && diagramFiles !== 'cancel') {
-      diagramFiles.forEach(file => {
-        app.emit('app:add-recent-file', file.path);
-      });
-    }
-
-    done(null, diagramFiles);
-  });
-});
-
-
-// open file handling //////////////////
+// open file handling //////////
 
 // list of files that should be opened by the editor
 app.openFiles = [];
@@ -277,6 +222,7 @@ app.openFiles = [];
 app.on('app:parse-cmd', function(argv, cwd) {
   console.log('app:parse-cmd', argv.join(' '), cwd);
 
+  // will result in opening dev.js as file
   var files = Cli.extractFiles(argv, cwd);
 
   files.forEach(function(file) {
@@ -290,6 +236,7 @@ app.on('app:open-file', function(filePath) {
   console.log('app:open-file', filePath);
 
   if (!app.clientReady) {
+
     // defer file open
     return app.openFiles.push(filePath);
   }
@@ -297,7 +244,9 @@ app.on('app:open-file', function(filePath) {
   try {
     file = fileSystem.readFile(filePath);
   } catch (e) {
-    return dialog.showDialog('unrecognizedFile', { name: path.basename(filePath) });
+    dialog.showOpenFileErrorDialog({
+      name: path.basename(filePath)
+    });
   }
 
   // open file immediately
@@ -313,11 +262,15 @@ app.on('app:client-ready', function() {
     try {
       files.push(fileSystem.readFile(filePath));
     } catch (e) {
-      dialog.showDialog('unrecognizedFile', { name: path.basename(filePath) });
+      dialog.showOpenFileErrorDialog({
+        name: path.basename(filePath)
+      });
     }
   });
 
-  renderer.send('client:open-files', files);
+  // renderer.send('client:open-files', files);
+
+  renderer.send('client:started');
 });
 
 renderer.on('client:ready', function() {
@@ -373,7 +326,15 @@ app.createEditorWindow = function() {
 
   dialog.setActiveWindow(mainWindow);
 
-  mainWindow.loadURL('file://' + path.resolve(__dirname + '/../public/index.html'));
+  menu.init();
+
+  var url = 'file://' + path.resolve(__dirname + '/../public/index.html');
+
+  if (app.developmentMode) {
+    url = 'http://localhost:3000';
+  }
+
+  mainWindow.loadURL(url);
 
   // handling case when user clicks on window close button
   mainWindow.on('close', function(e) {
@@ -446,6 +407,21 @@ app.on('ready', function() {
   app.emit('app:parse-cmd', process.argv, process.cwd());
 });
 
+
+function handleDeployment(data, done) {
+  const { endpointUrl } = data;
+
+  deployer.deploy(endpointUrl, data, function(error, result) {
+
+    if (error) {
+      console.error('failed to deploy', error);
+
+      return done(error);
+    }
+
+    done(null, result);
+  });
+}
 
 // expose app
 module.exports = app;
