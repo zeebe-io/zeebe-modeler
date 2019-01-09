@@ -60,7 +60,7 @@ export default class CustomContextPadProvider extends ContextPadProvider {
       function appendStart(event, element) {
 
         const shape = self._elementFactory.createShape(assign({ type: type }, options));
-        this._create.start(event, shape, element);
+        self._create.start(event, shape, element);
       }
 
 
