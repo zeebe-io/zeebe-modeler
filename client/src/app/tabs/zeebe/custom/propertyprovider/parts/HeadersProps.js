@@ -1,15 +1,20 @@
-var properties = require('./implementation/Headers'),
-    elementHelper = require('bpmn-js-properties-panel/lib/helper/ElementHelper'),
-    cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper'),
-    is = require('bpmn-js/lib/util/ModelUtil').is;
+import properties from './implementation/Headers';
 
-module.exports = function(group, element, bpmnFactory) {
+import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
+
+import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
+
+import {
+  is
+} from 'bpmn-js/lib/util/ModelUtil';
+
+export default function(group, element, bpmnFactory) {
 
   if (!is(element, 'bpmn:ServiceTask')) {
     return;
   }
 
-  var propertiesEntry = properties(element, bpmnFactory, {
+  const propertiesEntry = properties(element, bpmnFactory, {
     id: 'headers',
     modelProperties: [ 'key', 'value' ],
     labels: [ 'Key', 'Value' ],
@@ -19,8 +24,8 @@ module.exports = function(group, element, bpmnFactory) {
     },
 
     createParent: function(element, bo) {
-      var parent = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
-      var cmd = cmdHelper.updateBusinessObject(element, bo, { extensionElements: parent });
+      const parent = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
+      const cmd = cmdHelper.updateBusinessObject(element, bo, { extensionElements: parent });
       return {
         cmd: cmd,
         parent: parent
@@ -32,4 +37,4 @@ module.exports = function(group, element, bpmnFactory) {
     group.entries.push(propertiesEntry);
   }
 
-};
+}

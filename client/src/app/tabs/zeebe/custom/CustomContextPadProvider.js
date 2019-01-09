@@ -1,32 +1,44 @@
-'use strict';
-
-const {
+import {
   assign,
   bind
-} = require('min-dash');
+} from 'min-dash';
 
-var inherits = require('inherits'),
-    is = require('bpmn-js/lib/util/ModelUtil').is;
+import {
+  is
+} from 'bpmn-js/lib/util/ModelUtil';
 
-var ContextPadProvider = require('bpmn-js/lib/features/context-pad/ContextPadProvider').default;
+import ContextPadProvider from 'bpmn-js/lib/features/context-pad/ContextPadProvider';
 
-var availableActions = require('./modeler-options/Options').AVAILABLE_CONTEXTPAD_ENTRIES;
+import {
+  AVAILABLE_CONTEXTPAD_ENTRIES as availableActions
+} from './modeler-options/Options';
 
-function CustomContextPadProvider(config, injector, eventBus, contextPad, modeling, elementFactory, connect, create, popupMenu, canvas, rules, translate) {
-  ContextPadProvider.call(this, config, injector, eventBus, contextPad, modeling, elementFactory, connect, create, popupMenu, canvas, rules, translate);
-  var autoPlace = undefined;
-  if (config.autoPlace !== false) {
-    autoPlace = injector.get('autoPlace', false);
+export default class CustomContextPadProvider extends ContextPadProvider {
+
+  constructor(config, injector, eventBus, contextPad,
+      modeling, elementFactory, connect, create,
+      popupMenu, canvas, rules, translate) {
+
+    super(config, injector, eventBus, contextPad,
+      modeling, elementFactory, connect, create,
+      popupMenu, canvas, rules, translate);
+
+
+    this.autoPlace = undefined;
+
+    if (config.autoPlace !== false) {
+      this.autoPlace = injector.get('autoPlace', false);
+    }
+
+    this.cached = bind(super.getContextPadEntries, this);
   }
 
-  var cached = bind(this.getContextPadEntries, this);
+  getContextPadEntries = element => {
+    const actions = this.cached(element);
 
+    const businessObject = element.businessObject;
 
-
-  this.getContextPadEntries = function(element) {
-    var actions = cached(element);
-
-    var businessObject = element.businessObject;
+    const self = this;
 
     /**
    * Create an append action
@@ -42,20 +54,20 @@ function CustomContextPadProvider(config, injector, eventBus, contextPad, modeli
 
       if (typeof title !== 'string') {
         options = title;
-        title = translate('Append {type}', { type: type.replace(/^bpmn:/, '') });
+        title = self._translate('Append {type}', { type: type.replace(/^bpmn:/, '') });
       }
 
       function appendStart(event, element) {
 
-        var shape = elementFactory.createShape(assign({ type: type }, options));
-        create.start(event, shape, element);
+        const shape = self._elementFactory.createShape(assign({ type: type }, options));
+        this._create.start(event, shape, element);
       }
 
 
-      var append = autoPlace ? function(event, element) {
-        var shape = elementFactory.createShape(assign({ type: type }, options));
+      const append = self.autoPlace ? (event, element) => {
+        const shape = self._elementFactory.createShape(assign({ type: type }, options));
 
-        autoPlace.append(element, shape);
+        self.autoPlace.append(element, shape);
       } : appendStart;
 
 
@@ -70,8 +82,7 @@ function CustomContextPadProvider(config, injector, eventBus, contextPad, modeli
       };
     }
 
-
-    var filteredActions = {};
+    const filteredActions = {};
 
     if (!is(businessObject, 'bpmn:EndEvent')) {
       if (!is(businessObject, 'bpmn:EventBasedGateway')) {
@@ -82,20 +93,19 @@ function CustomContextPadProvider(config, injector, eventBus, contextPad, modeli
       assign(filteredActions, { 'append.append-timer-event': appendAction('bpmn:IntermediateCatchEvent', 'bpmn-icon-intermediate-event-catch-timer', 'Timer Event', { eventDefinitionType: 'bpmn:TimerEventDefinition' }) });
     }
 
-    for (var i = 0; i < availableActions.length; i++) {
-      var availableAction = availableActions[i];
+    availableActions.forEach(availableAction => {
       if (actions[availableAction]) {
         // if (availableAction == 'replace' && !is(businessObject, 'bpmn:SequenceFlow')) {
         //  continue;
         // }
         filteredActions[availableAction] = actions[availableAction];
       }
-    }
+    });
+
     return filteredActions;
   };
-}
 
-inherits(CustomContextPadProvider, ContextPadProvider);
+}
 
 CustomContextPadProvider.$inject = [
   'config',
@@ -111,5 +121,3 @@ CustomContextPadProvider.$inject = [
   'rules',
   'translate'
 ];
-
-module.exports = CustomContextPadProvider;

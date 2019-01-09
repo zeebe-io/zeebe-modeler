@@ -1,21 +1,24 @@
 
-'use strict';
-
-const {
+import {
   assign,
   find,
   forEach
-} = require('min-dash');
+} from 'min-dash';
 
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
-    is = require('bpmn-js/lib/util/ModelUtil').is;
+import {
+  getBusinessObject,
+  is
+} from 'bpmn-js/lib/util/ModelUtil';
 
-var factory = require('bpmn-js-properties-panel/lib//factory/EntryFactory');
+import factory from 'bpmn-js-properties-panel/lib//factory/EntryFactory';
 
-var elementHelper = require('bpmn-js-properties-panel/lib//helper/ElementHelper'),
-    extensionElementsHelper = require('bpmn-js-properties-panel/lib//helper/ExtensionElementsHelper'),
-    cmdHelper = require('bpmn-js-properties-panel/lib//helper/CmdHelper'),
-    utils = require('bpmn-js-properties-panel/lib//Utils');
+import elementHelper from 'bpmn-js-properties-panel/lib//helper/ElementHelper';
+
+import extensionElementsHelper from 'bpmn-js-properties-panel/lib//helper/ExtensionElementsHelper';
+
+import cmdHelper from 'bpmn-js-properties-panel/lib//helper/CmdHelper';
+
+import utils from 'bpmn-js-properties-panel/lib//Utils';
 
 function generatePropertyId() {
   return utils.nextId('Header_');
@@ -29,7 +32,7 @@ function generatePropertyId() {
  * @return {Array<ModdleElement>} a list of zeebe:header objects
  */
 function getPropertyValues(parent) {
-  var properties = parent && getPropertiesElement(parent);
+  const properties = parent && getPropertiesElement(parent);
   if (properties && properties.values) {
     return properties.values;
   }
@@ -61,7 +64,7 @@ function getPropertiesElement(element) {
  * @return {ModdleElement} a camunda:Properties object
  */
 function getPropertiesElementInsideExtensionElements(extensionElements) {
-  return find(extensionElements.values, function(elem) {
+  return find(extensionElements.values, elem => {
     return is(elem, 'zeebe:TaskHeaders');
   });
 }
@@ -89,14 +92,13 @@ function isExtensionElements(element) {
  * @param  {function} options.getParent Gets the parent business object
  * @param  {function} options.show Indicate when the entry will be shown, should return boolean
  */
-module.exports = function(element, bpmnFactory, options) {
+export default function(element, bpmnFactory, options) {
 
-  var getParent = options.getParent;
+  const getParent = options.getParent;
 
-  var modelProperties = options.modelProperties,
-      createParent = options.createParent;
+  const modelProperties = options.modelProperties, createParent = options.createParent;
 
-  var bo = getBusinessObject(element);
+  const bo = getBusinessObject(element);
 
   if (!is(element, 'bpmn:ServiceTask')) {
     return;
@@ -106,20 +108,20 @@ module.exports = function(element, bpmnFactory, options) {
   assign(options, {
     addLabel: 'Add Header',
     getElements: function(element, node) {
-      var parent = getParent(element, node, bo);
+      const parent = getParent(element, node, bo);
       return getPropertyValues(parent);
     },
     addElement: function(element, node) {
-      var commands = [],
-          parent = getParent(element, node, bo);
+      const commands = [];
+      let parent = getParent(element, node, bo);
 
       if (!parent && typeof createParent === 'function') {
-        var result = createParent(element, bo);
+        const result = createParent(element, bo);
         parent = result.parent;
         commands.push(result.cmd);
       }
 
-      var properties = getPropertiesElement(parent);
+      let properties = getPropertiesElement(parent);
       if (!properties) {
         properties = elementHelper.createElement('zeebe:TaskHeaders', {}, parent, bpmnFactory);
 
@@ -138,8 +140,8 @@ module.exports = function(element, bpmnFactory, options) {
         }
       }
 
-      var propertyProps = {};
-      forEach(modelProperties, function(prop) {
+      const propertyProps = {};
+      forEach(modelProperties, prop => {
         propertyProps[prop] = undefined;
       });
 
@@ -148,16 +150,15 @@ module.exports = function(element, bpmnFactory, options) {
         propertyProps.id = generatePropertyId();
       }
 
-      var property = elementHelper.createElement('zeebe:Header', propertyProps, properties, bpmnFactory);
+      const property = elementHelper.createElement('zeebe:Header', propertyProps, properties, bpmnFactory);
       commands.push(cmdHelper.addElementsTolist(element, properties, 'values', [ property ]));
 
       return commands;
     },
     updateElement: function(element, value, node, idx) {
-      var parent = getParent(element, node, bo),
-          property = getPropertyValues(parent)[idx];
+      const parent = getParent(element, node, bo), property = getPropertyValues(parent)[idx];
 
-      forEach(modelProperties, function(prop) {
+      forEach(modelProperties, prop => {
         value[prop] = value[prop] || undefined;
       });
 
@@ -167,13 +168,11 @@ module.exports = function(element, bpmnFactory, options) {
       // validate id if necessary
       if (modelProperties.indexOf('id') >= 0) {
 
-        var parent = getParent(element, node, bo),
-            properties = getPropertyValues(parent),
-            property = properties[idx];
+        const parent = getParent(element, node, bo), properties = getPropertyValues(parent), property = properties[idx];
 
         if (property) {
           // check if id is valid
-          var validationError = utils.isIdValid(property, value.id);
+          const validationError = utils.isIdValid(property, value.id);
 
           if (validationError) {
             return { id: validationError };
@@ -182,11 +181,7 @@ module.exports = function(element, bpmnFactory, options) {
       }
     },
     removeElement: function(element, node, idx) {
-      var commands = [],
-          parent = getParent(element, node, bo),
-          properties = getPropertiesElement(parent),
-          propertyValues = getPropertyValues(parent),
-          currentProperty = propertyValues[idx];
+      const commands = [], parent = getParent(element, node, bo), properties = getPropertiesElement(parent), propertyValues = getPropertyValues(parent), currentProperty = propertyValues[idx];
 
       commands.push(cmdHelper.removeElementsFromList(element, properties, 'values', null, [ currentProperty ]));
 
@@ -196,7 +191,7 @@ module.exports = function(element, bpmnFactory, options) {
           commands.push(cmdHelper.updateBusinessObject(element, parent, { headers: undefined }));
         }
         else {
-          forEach(parent.values, function(value) {
+          forEach(parent.values, value => {
             if (is(value, 'zeebe:TaskHeaders')) {
               commands.push(extensionElementsHelper.removeEntry(bo, element, value));
             }
@@ -209,4 +204,4 @@ module.exports = function(element, bpmnFactory, options) {
   });
 
   return factory.table(options);
-};
+}

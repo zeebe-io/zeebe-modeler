@@ -1,26 +1,21 @@
-'use strict';
+import {
+  getBusinessObject
+} from 'bpmn-js/lib/util/ModelUtil';
 
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
+import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
 
-var elementHelper = require('bpmn-js-properties-panel/lib/helper/ElementHelper'),
-    extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper'),
-    payloadMappingsHelper = require('../../helper/PayloadMappingsHelper'),
-    cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper');
+import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
-var extensionElementsEntry = require('bpmn-js-properties-panel/lib/provider/camunda/parts/implementation/ExtensionElements');
+import {
+  getMapping,
+  getMappings,
+  getPayloadMappings,
+  isPayloadMappingsSupported
+} from '../../helper/PayloadMappingsHelper';
 
+import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
-function getPayloadMappings(element) {
-  return payloadMappingsHelper.getPayloadMappings(element);
-}
-
-function getMappings(element) {
-  return payloadMappingsHelper.getMappings(element);
-}
-
-function getMapping(element, idx) {
-  return payloadMappingsHelper.getMapping(element, idx);
-}
+import extensionElementsEntry from 'bpmn-js-properties-panel/lib/provider/camunda/parts/implementation/ExtensionElements';
 
 function createElement(type, parent, factory, properties) {
   return elementHelper.createElement(type, properties, parent, factory);
@@ -35,39 +30,36 @@ function createMapping(type, parent, bpmnFactory, properties) {
 }
 
 function ensurePayloadMappingsSupported(element) {
-  return payloadMappingsHelper.isPayloadMappingsSupported(element);
+  return isPayloadMappingsSupported(element);
 }
 
-module.exports = function(element, bpmnFactory, options) {
+export default function(element, bpmnFactory, options = {}) {
+  const idPrefix = options.idPrefix || '';
 
-  options = options || {};
-
-  var idPrefix = options.idPrefix || '';
-
-  var getSelected = function(element, node) {
-    var selection = (inputEntry && inputEntry.getSelected(element, node)) || { idx: -1 };
-    var parameter = getMapping(element, selection.idx);
+  const getSelected = (element, node) => {
+    const selection = (inputEntry && inputEntry.getSelected(element, node)) || { idx: -1 };
+    const parameter = getMapping(element, selection.idx);
     return parameter;
   };
 
-  var result = {
+  const result = {
     getSelectedMapping: getSelected
   };
 
-  var entries = result.entries = [];
+  const entries = result.entries = [];
 
   if (!ensurePayloadMappingsSupported(element)) {
     return result;
   }
 
-  var newElement = function(type, prop, factory) {
+  const newElement = (type, prop, factory) => {
 
-    return function(element, extensionElements, value) {
-      var commands = [];
+    return (element, extensionElements, value) => {
+      const commands = [];
 
-      var payloadMappings = getPayloadMappings(element);
+      let payloadMappings = getPayloadMappings(element);
       if (!payloadMappings) {
-        var parent = extensionElements;
+        const parent = extensionElements;
         payloadMappings = createPayloadMappings(parent, bpmnFactory, {
           mapping: []
         });
@@ -82,22 +74,22 @@ module.exports = function(element, bpmnFactory, options) {
         ));
       }
 
-      var newElem = createMapping(type, payloadMappings, bpmnFactory, { source: 'sourceValue', target: 'targetValaue', type: 'PUT' });
+      const newElem = createMapping(type, payloadMappings, bpmnFactory, { source: 'sourceValue', target: 'targetValaue', type: 'PUT' });
       commands.push(cmdHelper.addElementsTolist(element, payloadMappings, prop, [newElem]));
 
       return commands;
     };
   };
 
-  var removeElement = function(getter, prop) {
-    return function(element, extensionElements, value, idx) {
-      var payloadMappings = getPayloadMappings(element);
-      var parameter = getter(element, idx);
+  const removeElement = (getter, prop) => {
+    return (element, extensionElements, value, idx) => {
+      const payloadMappings = getPayloadMappings(element);
+      const parameter = getter(element, idx);
 
-      var commands = [];
+      const commands = [];
       commands.push(cmdHelper.removeElementsFromList(element, payloadMappings, prop, null, [parameter]));
 
-      var firstLength = payloadMappings.get(prop).length - 1;
+      const firstLength = payloadMappings.get(prop).length - 1;
 
       if (!firstLength) {
 
@@ -108,11 +100,11 @@ module.exports = function(element, bpmnFactory, options) {
     };
   };
 
-  var setOptionLabelValue = function(getter) {
-    return function(element, node, option, property, value, idx) {
-      var parameter = getter(element, idx);
+  const setOptionLabelValue = getter => {
+    return (element, node, option, property, value, idx) => {
+      const parameter = getter(element, idx);
 
-      option.text = value + ' : ' + parameter['target'];
+      option.text = `${value} : ${parameter['target']}`;
     };
   };
 
@@ -120,7 +112,7 @@ module.exports = function(element, bpmnFactory, options) {
   // input parameters ///////////////////////////////////////////////////////////////
 
   var inputEntry = extensionElementsEntry(element, bpmnFactory, {
-    id: idPrefix + 'inputs',
+    id: `${idPrefix}inputs`,
     label: 'Input Parameters',
     modelProperty: 'source',
     prefix: 'Input',
@@ -139,5 +131,4 @@ module.exports = function(element, bpmnFactory, options) {
   entries.push(inputEntry);
 
   return result;
-
-};
+}

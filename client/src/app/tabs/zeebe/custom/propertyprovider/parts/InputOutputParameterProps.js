@@ -1,13 +1,11 @@
-'use strict';
+import inputOutputParameter from './implementation/InputOutputParameter';
 
-var inputOutputParameter = require('./implementation/InputOutputParameter');
-
-const {
+import {
   assign
-} = require('min-dash');
+} from 'min-dash';
 
-module.exports = function(group, element, bpmnFactory, options) {
+export default function(group, element, bpmnFactory, options) {
 
   group.entries = group.entries.concat(inputOutputParameter(element, bpmnFactory, assign({}, options)));
 
-};
+}

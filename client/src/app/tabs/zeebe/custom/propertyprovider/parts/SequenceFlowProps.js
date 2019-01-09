@@ -1,13 +1,21 @@
-'use strict';
+import {
+  isAny
+} from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
 
-var isAny = require('bpmn-js/lib/features/modeling/util/ModelingUtil').isAny,
-    getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
-    domQuery = require('min-dom').query,
-    cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper'),
-    elementHelper = require('bpmn-js-properties-panel/lib/helper/ElementHelper');
+import {
+  getBusinessObject
+} from 'bpmn-js/lib/util/ModelUtil';
 
-module.exports = function(group, element, bpmnFactory, translate) {
-  var bo = getBusinessObject(element);
+import {
+  query as domQuery
+} from 'min-dom';
+
+import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
+
+import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
+
+export default function(group, element, bpmnFactory, translate) {
+  const bo = getBusinessObject(element);
 
   if (!bo) {
     return;
@@ -21,22 +29,14 @@ module.exports = function(group, element, bpmnFactory, translate) {
     id: 'condition',
     label: translate('Condition expression'),
     html:  // expression
-            '<div class="bpp-row">' +
-              '<label for="zeebe-condition">'+translate('Condition expression')+'</label>' +
-              '<div class="bpp-field-wrapper">' +
-                '<input id="zeebe-condition" type="text" name="condition" />' +
-                '<button class="clear" data-action="clear" data-show="canClear">' +
-                  '<span>X</span>' +
-                '</button>' +
-              '</div>' +
-            '</div>',
+            `<div class="bpp-row"><label for="zeebe-condition">${translate('Condition expression')}</label><div class="bpp-field-wrapper"><input id="zeebe-condition" type="text" name="condition" /><button class="clear" data-action="clear" data-show="canClear"><span>X</span></button></div></div>`,
 
     get: function(element, propertyName) {
       // read values from xml:
-      var conditionExpression = bo.conditionExpression;
+      const conditionExpression = bo.conditionExpression;
 
-      var values = {},
-          conditionType = '';
+      const values = {};
+      let conditionType = '';
 
       if (conditionExpression) {
         conditionType = 'expression';
@@ -46,21 +46,20 @@ module.exports = function(group, element, bpmnFactory, translate) {
       values.conditionType = conditionType;
 
       return values;
-
     },
 
     set: function(element, values, containerElement) {
-      var conditionType = 'expression';
-      var commands = [];
+      const conditionType = 'expression';
+      const commands = [];
 
-      var conditionProps = {
+      const conditionProps = {
         body: undefined
       };
 
-      var condition = values.condition;
+      const condition = values.condition;
       conditionProps.body = condition;
 
-      var update = {
+      const update = {
         'conditionExpression': undefined
       };
 
@@ -72,7 +71,7 @@ module.exports = function(group, element, bpmnFactory, translate) {
           bpmnFactory
         );
 
-        var source = element.source;
+        const source = element.source;
 
         // if default-flow, remove default-property from source
         if (source.businessObject.default === bo) {
@@ -86,7 +85,7 @@ module.exports = function(group, element, bpmnFactory, translate) {
     },
 
     validate: function(element, values) {
-      var validationResult = {};
+      const validationResult = {};
 
       if (!values.condition && values.conditionType === 'expression') {
         validationResult.condition = 'Must provide a value';
@@ -96,7 +95,7 @@ module.exports = function(group, element, bpmnFactory, translate) {
     },
 
     isExpression: function(element, inputNode) {
-      var conditionType = domQuery('select[name=conditionType]', inputNode);
+      const conditionType = domQuery('select[name=conditionType]', inputNode);
       if (conditionType.selectedIndex >= 0) {
         return conditionType.options[conditionType.selectedIndex].value === 'expression';
       }
@@ -110,19 +109,19 @@ module.exports = function(group, element, bpmnFactory, translate) {
     },
 
     canClear: function(element, inputNode) {
-      var input = domQuery('input[name=condition]', inputNode);
+      const input = domQuery('input[name=condition]', inputNode);
 
       return input.value !== '';
     },
 
     cssClasses: ['bpp-textfield']
   });
-};
+}
 
 
-// utilities //////////////////////////
+// helper //////////////////////////
 
-var CONDITIONAL_SOURCES = [
+const CONDITIONAL_SOURCES = [
   'bpmn:Activity',
   'bpmn:ExclusiveGateway',
   'bpmn:InclusiveGateway',

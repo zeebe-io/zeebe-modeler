@@ -1,35 +1,38 @@
-'use strict';
+import inputOutput from './implementation/InputOutput';
 
-var inputOutput = require('./implementation/InputOutput');
+import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
 
-var elementHelper = require('bpmn-js-properties-panel/lib/helper/ElementHelper'),
-    cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper'),
-    inputOutputHelper = require('../helper/InputOutputHelper');
+import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
-var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory');
+import {
+  isInputOutputSupported
+} from '../helper/InputOutputHelper';
 
-var extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper');
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
+import entryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 
-module.exports = function(group, element, bpmnFactory) {
+import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
+import {
+  getBusinessObject
+} from 'bpmn-js/lib/util/ModelUtil';
+
+export default function(group, element, bpmnFactory) {
 
 
   function getIoMapping(element) {
-    var bo = getBusinessObject(element);
+    const bo = getBusinessObject(element);
     return (getElements(bo, 'zeebe:IoMapping') || [])[0];
   }
 
   function getElements(bo, type, prop) {
-    var elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
+    const elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
     return !prop ? elems : (elems[0] || {})[prop] || [];
   }
 
   function ensureInputOutputSupported(element) {
-    return inputOutputHelper.isInputOutputSupported(element);
+    return isInputOutputSupported(element);
   }
 
   if (ensureInputOutputSupported(element)) {
-
 
     group.entries.push(entryFactory.selectBox({
       id: 'io-mapping-outputBehavior',
@@ -48,17 +51,17 @@ module.exports = function(group, element, bpmnFactory) {
       },
 
       set: function(element, values, node) {
-        var bo = getBusinessObject(element);
-        var commands = [];
+        const bo = getBusinessObject(element);
+        const commands = [];
 
         // CREATE extensionElemente
-        var extensionElements = bo.get('extensionElements');
+        let extensionElements = bo.get('extensionElements');
         if (!extensionElements) {
           extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
           commands.push(cmdHelper.updateProperties(element, { extensionElements: extensionElements }));
         }
         // create taskDefinition
-        var ioMapping = getIoMapping(element);
+        let ioMapping = getIoMapping(element);
 
         if (!ioMapping) {
           ioMapping = elementHelper.createElement('zeebe:IoMapping', {}, extensionElements, bpmnFactory);
@@ -78,10 +81,10 @@ module.exports = function(group, element, bpmnFactory) {
     }));
   }
 
-  var inputOutputEntry = inputOutput(element, bpmnFactory);
+  const inputOutputEntry = inputOutput(element, bpmnFactory);
   group.entries = group.entries.concat(inputOutputEntry.entries);
   return {
     getSelectedParameter: inputOutputEntry.getSelectedParameter
   };
 
-};
+}

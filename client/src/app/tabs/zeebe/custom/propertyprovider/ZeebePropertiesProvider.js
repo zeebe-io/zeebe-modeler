@@ -1,26 +1,34 @@
-'use strict';
+import {
+  is
+} from 'bpmn-js/lib/util/ModelUtil';
 
-var inherits = require('inherits'),
-    is = require('bpmn-js/lib/util/ModelUtil').is;
+import PropertiesActivator from 'bpmn-js-properties-panel/lib/PropertiesActivator';
 
-var PropertiesActivator = require('bpmn-js-properties-panel/lib/PropertiesActivator');
+import idProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/IdProps';
 
+import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps';
 
-var idProps = require('bpmn-js-properties-panel/lib/provider/bpmn/parts/IdProps'),
-    nameProps = require('bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps'),
-    executableProps = require('bpmn-js-properties-panel/lib/provider/bpmn/parts/ExecutableProps'),
-    inputOutput = require('./parts/InputOutputProps'),
-    inputOutputParameter = require('./parts/InputOutputParameterProps'),
-    mappingProps = require('./parts/MappingProps'),
-    headers = require('./parts/HeadersProps'),
-    taskDefinition = require('./parts/TaskDefinitionProps'),
-    sequenceFlowProps = require('./parts/SequenceFlowProps'),
-    messageProps = require('./parts/MessageProps'),
-    timerProps = require('./parts/TimerEventProps'),
-    payloadMappingsProps = require('./parts/PayloadMappingsProps');
+import executableProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/ExecutableProps';
 
+import inputOutput from './parts/InputOutputProps';
 
-var getInputOutputParameterLabel = function(param) {
+import inputOutputParameter from './parts/InputOutputParameterProps';
+
+import mappingProps from './parts/MappingProps';
+
+import headers from './parts/HeadersProps';
+
+import taskDefinition from './parts/TaskDefinitionProps';
+
+import sequenceFlowProps from './parts/SequenceFlowProps';
+
+import messageProps from './parts/MessageProps';
+
+import timerProps from './parts/TimerEventProps';
+
+import payloadMappingsProps from './parts/PayloadMappingsProps';
+
+const getInputOutputParameterLabel = param => {
 
   if (is(param, 'zeebe:InputParameter')) {
     return 'Input Parameter';
@@ -33,7 +41,7 @@ var getInputOutputParameterLabel = function(param) {
   return '';
 };
 
-var getMappingLabel = function(param) {
+const getMappingLabel = param => {
 
   if (is(param, 'zeebe:Mapping')) {
     return 'Mapping';
@@ -44,7 +52,7 @@ var getMappingLabel = function(param) {
 
 
 function createGeneralTabGroups(element, bpmnFactory, elementRegistry, translate) {
-  var generalGroup = {
+  const generalGroup = {
     id: 'general',
     label: 'General',
     entries: []
@@ -64,7 +72,7 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, translate
 
 function createHeadersGroups(element, bpmnFactory, elementRegistry) {
 
-  var headersGroup = {
+  const headersGroup = {
     id: 'headers-properties',
     label: 'Headers',
     entries: []
@@ -79,22 +87,22 @@ function createHeadersGroups(element, bpmnFactory, elementRegistry) {
 
 function createPayloadMappingsTabGroups(element, bpmnFactory, elementRegistry) {
 
-  var payloadMappingsGroup = {
+  const payloadMappingsGroup = {
     id: 'payload-mappings',
     label: 'Payload Mappings',
     entries: []
   };
 
-  var options = payloadMappingsProps(payloadMappingsGroup, element, bpmnFactory);
+  const options = payloadMappingsProps(payloadMappingsGroup, element, bpmnFactory);
 
-  var mappingGroup = {
+  const mappingGroup = {
     id: 'mapping',
     entries: [],
     enabled: function(element, node) {
       return options.getSelectedMapping(element, node);
     },
     label: function(element, node) {
-      var param = options.getSelectedMapping(element, node);
+      const param = options.getSelectedMapping(element, node);
       return getMappingLabel(param);
     }
   };
@@ -110,22 +118,22 @@ function createPayloadMappingsTabGroups(element, bpmnFactory, elementRegistry) {
 
 function createInputOutputTabGroups(element, bpmnFactory, elementRegistry) {
 
-  var inputOutputGroup = {
+  const inputOutputGroup = {
     id: 'input-output',
     label: 'Parameters',
     entries: []
   };
 
-  var options = inputOutput(inputOutputGroup, element, bpmnFactory);
+  const options = inputOutput(inputOutputGroup, element, bpmnFactory);
 
-  var inputOutputParameterGroup = {
+  const inputOutputParameterGroup = {
     id: 'input-output-parameter',
     entries: [],
     enabled: function(element, node) {
       return options.getSelectedParameter(element, node);
     },
     label: function(element, node) {
-      var param = options.getSelectedParameter(element, node);
+      const param = options.getSelectedParameter(element, node);
       return getInputOutputParameterLabel(param);
     }
   };
@@ -138,32 +146,45 @@ function createInputOutputTabGroups(element, bpmnFactory, elementRegistry) {
   ];
 }
 
-function ZeebePropertiesProvider(eventBus, bpmnFactory, elementRegistry, elementTemplates, translate) {
+export default class ZeebePropertiesProvider extends PropertiesActivator {
+  constructor(eventBus, bpmnFactory, elementRegistry, elementTemplates, translate) {
 
-  PropertiesActivator.call(this, eventBus);
-  this.getTabs = function(element) {
-    var generalTab = {
+    super(eventBus);
+
+    this._bpmnFactory = bpmnFactory;
+    this._elementRegistry = elementRegistry;
+    this._elementTemplates = elementTemplates;
+    this._translate = translate;
+
+  }
+
+  getTabs(element) {
+    const generalTab = {
       id: 'general',
       label: 'General',
-      groups: createGeneralTabGroups(element, bpmnFactory, elementRegistry, translate)
+      groups: createGeneralTabGroups(
+        element, this._bpmnFactory, this._elementRegistry, this._translate)
     };
 
-    var inputOutputTab = {
+    const inputOutputTab = {
       id: 'input-output',
       label: 'Input/Output',
-      groups: createInputOutputTabGroups(element, bpmnFactory, elementRegistry)
+      groups: createInputOutputTabGroups(
+        element, this._bpmnFactory, this._elementRegistry)
     };
 
-    var payloadMappingsTab = {
+    const payloadMappingsTab = {
       id: 'payload-mappings',
       label: 'Payload Mappings',
-      groups: createPayloadMappingsTabGroups(element, bpmnFactory, elementRegistry)
+      groups: createPayloadMappingsTabGroups(
+        element, this._bpmnFactory, this._elementRegistry)
     };
 
-    var headersTab = {
+    const headersTab = {
       id: 'headers-tab',
       label: 'Headers',
-      groups: createHeadersGroups(element, bpmnFactory, elementRegistry)
+      groups: createHeadersGroups(
+        element, this._bpmnFactory, this._elementRegistry)
     };
 
     return [
@@ -172,7 +193,8 @@ function ZeebePropertiesProvider(eventBus, bpmnFactory, elementRegistry, element
       payloadMappingsTab,
       headersTab
     ];
-  };
+  }
+
 }
 
 ZeebePropertiesProvider.$inject = [
@@ -182,7 +204,3 @@ ZeebePropertiesProvider.$inject = [
   'elementTemplates',
   'translate'
 ];
-
-inherits(ZeebePropertiesProvider, PropertiesActivator);
-
-module.exports = ZeebePropertiesProvider;

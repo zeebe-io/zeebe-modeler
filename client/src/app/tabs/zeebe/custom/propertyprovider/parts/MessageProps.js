@@ -1,14 +1,17 @@
+import {
+  getBusinessObject,
+  is
+} from 'bpmn-js/lib/util/ModelUtil';
 
+import eventDefinitionHelper from 'bpmn-js-properties-panel/lib/helper/EventDefinitionHelper';
 
-var is = require('bpmn-js/lib/util/ModelUtil').is,
-    getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject,
-    eventDefinitionHelper = require('bpmn-js-properties-panel/lib/helper/EventDefinitionHelper');
-var message = require('bpmn-js-properties-panel/lib/provider/bpmn/parts/implementation/MessageEventDefinition');
-var referenceExtensionElementProperty = require('./implementation/ElementReferenceExtensionElementProperty');
+import message from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/implementation/MessageEventDefinition';
 
-module.exports = function(group, element, bpmnFactory, elementRegistry, translate) {
+import referenceExtensionElementProperty from './implementation/ElementReferenceExtensionElementProperty';
 
-  var messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(element);
+export default function(group, element, bpmnFactory, elementRegistry, translate) {
+
+  const messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(element);
 
   if (is(element, 'bpmn:ReceiveTask')) {
     message(group, element, bpmnFactory, getBusinessObject(element));
@@ -32,7 +35,6 @@ module.exports = function(group, element, bpmnFactory, elementRegistry, translat
     }));
   }
 
-
-};
+}
 
 

@@ -1,13 +1,11 @@
-'use strict';
+import payloadMappings from './implementation/PayloadMappings';
 
-var payloadMappings = require('./implementation/PayloadMappings');
+export default function(group, element, bpmnFactory) {
 
-module.exports = function(group, element, bpmnFactory) {
-
-  var payloadMappingsEntry = payloadMappings(element, bpmnFactory);
+  const payloadMappingsEntry = payloadMappings(element, bpmnFactory);
   group.entries = group.entries.concat(payloadMappingsEntry.entries);
   return {
     getSelectedMapping: payloadMappingsEntry.getSelectedMapping
   };
 
-};
+}

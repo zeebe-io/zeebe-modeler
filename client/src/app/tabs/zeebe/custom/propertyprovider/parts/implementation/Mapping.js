@@ -1,30 +1,29 @@
-'use strict';
+import {
+  isPayloadMappingsSupported
+} from '../../helper/PayloadMappingsHelper';
 
-var payloadMappingsHelper = require('../../helper/PayloadMappingsHelper'),
-    cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper'),
-    utils = require('bpmn-js-properties-panel/lib/Utils');
+import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
-var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory');
+import utils from 'bpmn-js-properties-panel/lib/Utils';
+
+import entryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 
 function ensurePayloadMappingsSupported(element) {
-  return payloadMappingsHelper.isPayloadMappingsSupported(element);
+  return isPayloadMappingsSupported(element);
 }
 
-module.exports = function(element, bpmnFactory, options) {
+export default function(element, bpmnFactory, options = {}) {
+  const idPrefix = options.idPrefix || '';
 
-  options = options || {};
-
-  var idPrefix = options.idPrefix || '';
-
-  var getSelected = options.getSelectedMapping;
+  const getSelected = options.getSelectedMapping;
 
   if (!ensurePayloadMappingsSupported(element)) {
     return [];
   }
 
-  var entries = [];
+  const entries = [];
 
-  var isSelected = function(element, node) {
+  const isSelected = (element, node) => {
     return getSelected(element, node);
   };
 
@@ -32,7 +31,7 @@ module.exports = function(element, bpmnFactory, options) {
   // parameter source ////////////////////////////////////////////////////////
 
   entries.push(entryFactory.validationAwareTextField({
-    id: idPrefix + 'mappingSource',
+    id: `${idPrefix}mappingSource`,
     label: 'Source',
     modelProperty: 'source',
 
@@ -41,16 +40,16 @@ module.exports = function(element, bpmnFactory, options) {
     },
 
     setProperty: function(element, values, node) {
-      var param = getSelected(element, node);
+      const param = getSelected(element, node);
       return cmdHelper.updateBusinessObject(element, param, values);
     },
 
     validate: function(element, values, node) {
-      var bo = getSelected(element, node);
+      const bo = getSelected(element, node);
 
-      var validation = {};
+      const validation = {};
       if (bo) {
-        var sourceValue = values.source;
+        const sourceValue = values.source;
 
         if (sourceValue) {
           if (utils.containsSpace(sourceValue)) {
@@ -74,7 +73,7 @@ module.exports = function(element, bpmnFactory, options) {
   // parameter target ////////////////////////////////////////////////////////
 
   entries.push(entryFactory.validationAwareTextField({
-    id: idPrefix + 'mappingTarget',
+    id: `${idPrefix}mappingTarget`,
     label: 'Target',
     modelProperty: 'target',
 
@@ -83,16 +82,16 @@ module.exports = function(element, bpmnFactory, options) {
     },
 
     setProperty: function(element, values, node) {
-      var param = getSelected(element, node);
+      const param = getSelected(element, node);
       return cmdHelper.updateBusinessObject(element, param, values);
     },
 
     validate: function(element, values, node) {
-      var bo = getSelected(element, node);
+      const bo = getSelected(element, node);
 
-      var validation = {};
+      const validation = {};
       if (bo) {
-        var targetValue = values.target;
+        const targetValue = values.target;
 
         if (targetValue) {
           if (utils.containsSpace(targetValue)) {
@@ -128,11 +127,10 @@ module.exports = function(element, bpmnFactory, options) {
 
     set: function(element, values, node) {
 
-      var param = getSelected(element, node);
+      const param = getSelected(element, node);
       return cmdHelper.updateBusinessObject(element, param, values);
     }
   }));
 
   return entries;
-
-};
+}

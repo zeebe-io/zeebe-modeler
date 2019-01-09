@@ -1,14 +1,13 @@
-'use strict';
+import TimerEventDefinition from './implementation/TimerEventDefinition';
 
-var timer = require('./implementation/TimerEventDefinition'),
-    eventDefinitionHelper = require('bpmn-js-properties-panel/lib/helper/EventDefinitionHelper');
+import eventDefinitionHelper from 'bpmn-js-properties-panel/lib/helper/EventDefinitionHelper';
 
-module.exports = function(group, element, bpmnFactory, options) {
+export default function(group, element, bpmnFactory, options) {
 
-  var timerEventDefinition = eventDefinitionHelper.getTimerEventDefinition(element);
+  const timerEventDefinition = eventDefinitionHelper.getTimerEventDefinition(element);
   if (timerEventDefinition) {
-    timer(group,element,bpmnFactory,timerEventDefinition);
+    new TimerEventDefinition(group,element,bpmnFactory,timerEventDefinition);
   }
 
-};
+}
 

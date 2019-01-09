@@ -1,6 +1,10 @@
-module.exports = {
+import CustomPalette from './CustomPalette';
+import CustomReplaceMenuProvider from './CustomReplaceMenuProvider';
+import CustomContextPadProvider from './CustomContextPadProvider';
+
+export default {
   __init__: [ 'paletteProvider', 'contextPadProvider', 'replaceMenuProvider' ],
-  paletteProvider: [ 'type', require('./CustomPalette') ],
-  replaceMenuProvider: [ 'type', require('./CustomReplaceMenuProvider') ],
-  contextPadProvider: [ 'type', require('./CustomContextPadProvider') ]
+  paletteProvider: [ 'type', CustomPalette ],
+  replaceMenuProvider: [ 'type', CustomReplaceMenuProvider ],
+  contextPadProvider: [ 'type', CustomContextPadProvider ]
 };

@@ -13,6 +13,7 @@ import propertiesProviderModule from '../custom/propertyprovider';
 
 import zeebeModdleExtension from '../custom/zeebe-bpmn-moddle/zeebe';
 
+import zeebeCustoms from '../custom';
 
 import 'bpmn-js-properties-panel/styles/properties.less';
 
@@ -52,7 +53,7 @@ const extensionModules = [
   propertiesPanelModule,
   propertiesProviderModule,
   zeebeModdleExtension,
-  require('../custom')
+  zeebeCustoms
 ];
 
 ZeebeModeler.prototype._modules = [

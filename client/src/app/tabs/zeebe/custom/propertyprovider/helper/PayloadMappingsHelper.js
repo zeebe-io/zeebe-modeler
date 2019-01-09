@@ -1,18 +1,13 @@
-'use strict';
+import {
+  getBusinessObject,
+  is
+} from 'bpmn-js/lib/util/ModelUtil';
 
-var ModelUtil = require('bpmn-js/lib/util/ModelUtil'),
-    is = ModelUtil.is,
-    getBusinessObject = ModelUtil.getBusinessObject;
-
-var extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper');
-
-var PayloadMappingHelper = {};
-
-module.exports = PayloadMappingHelper;
+import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
 
 function getElements(bo, type, prop) {
-  var elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
+  const elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
   return !prop ? elems : (elems[0] || {})[prop] || [];
 }
 
@@ -27,7 +22,7 @@ function getElements(bo, type, prop) {
  */
 
 function getParameters(element, prop) {
-  var inputOutput = PayloadMappingHelper.getPayloadMappings(element);
+  const inputOutput = getPayloadMappings(element);
   return (inputOutput && inputOutput.get(prop)) || [];
 }
 
@@ -38,10 +33,10 @@ function getParameters(element, prop) {
  *
  * @return {ModdleElement} the payloadMappings object
  */
-PayloadMappingHelper.getPayloadMappings = function(element) {
-  var bo = getBusinessObject(element);
+export function getPayloadMappings(element) {
+  const bo = getBusinessObject(element);
   return (getElements(bo, 'zeebe:PayloadMappings') || [])[0];
-};
+}
 
 
 /**
@@ -52,9 +47,9 @@ PayloadMappingHelper.getPayloadMappings = function(element) {
  *
  * @return {Array} a list of mapping objects
  */
-PayloadMappingHelper.getMappings = function(element) {
+export function getMappings(element) {
   return getParameters.apply(this, [ element, 'mapping' ]);
-};
+}
 
 /**
  * Get a mappings from the business object at given index
@@ -64,9 +59,9 @@ PayloadMappingHelper.getMappings = function(element) {
  *
  * @return {ModdleElement} input parameter
  */
-PayloadMappingHelper.getMapping = function(element, idx) {
-  return this.getMappings(element)[idx];
-};
+export function getMapping(element, idx) {
+  return getMappings(element)[idx];
+}
 
 /**
  * Returns 'true' if the given element supports inputOutput
@@ -75,11 +70,11 @@ PayloadMappingHelper.getMapping = function(element, idx) {
  *
  * @return {boolean} a boolean value
  */
-PayloadMappingHelper.isPayloadMappingsSupported = function(element) {
-  var bo = getBusinessObject(element);
+export function isPayloadMappingsSupported(element) {
+  const bo = getBusinessObject(element);
 
   if (is(bo, 'bpmn:SequenceFlow') && is(element.target, 'bpmn:ParallelGateway')) {
     return true;
   }
   return (is(bo, 'bpmn:EndEvent'));
-};
+}

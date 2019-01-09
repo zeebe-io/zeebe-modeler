@@ -1,28 +1,31 @@
+import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
 
+import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
-var elementHelper = require('bpmn-js-properties-panel/lib/helper/ElementHelper'),
-    cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper'),
-    is = require('bpmn-js/lib/util/ModelUtil').is,
-    utils = require('bpmn-js-properties-panel/lib/Utils');
+import {
+  getBusinessObject,
+  is
+} from 'bpmn-js/lib/util/ModelUtil';
 
-var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory');
+import utils from 'bpmn-js-properties-panel/lib/Utils';
 
-var extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper');
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
+import entryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 
-module.exports = function(group, element, bpmnFactory) {
+import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
+
+export default function(group, element, bpmnFactory) {
 
   if (!is(element, 'bpmn:ServiceTask')) {
     return;
   }
 
   function getElements(bo, type, prop) {
-    var elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
+    const elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
     return !prop ? elems : (elems[0] || {})[prop] || [];
   }
 
   function getTaskDefinition(element) {
-    var bo = getBusinessObject(element);
+    const bo = getBusinessObject(element);
     return (getElements(bo, 'zeebe:TaskDefinition') || [])[0];
   }
 
@@ -36,17 +39,17 @@ module.exports = function(group, element, bpmnFactory) {
     },
 
     setProperty: function(element, values, node) {
-      var bo = getBusinessObject(element);
-      var commands = [];
+      const bo = getBusinessObject(element);
+      const commands = [];
 
       // CREATE extensionElemente
-      var extensionElements = bo.get('extensionElements');
+      let extensionElements = bo.get('extensionElements');
       if (!extensionElements) {
         extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
         commands.push(cmdHelper.updateProperties(element, { extensionElements: extensionElements }));
       }
       // create taskDefinition
-      var taskDefinition = getTaskDefinition(element);
+      let taskDefinition = getTaskDefinition(element);
 
       if (!taskDefinition) {
         taskDefinition = elementHelper.createElement('zeebe:TaskDefinition', { }, extensionElements, bpmnFactory);
@@ -65,10 +68,10 @@ module.exports = function(group, element, bpmnFactory) {
     },
 
     validate: function(element, values, node) {
-      var bo = getTaskDefinition(element, node);
-      var validation = {};
+      const bo = getTaskDefinition(element, node);
+      const validation = {};
       if (bo) {
-        var sourceValue = values.source;
+        const sourceValue = values.source;
 
         if (sourceValue) {
           if (utils.containsSpace(sourceValue)) {
@@ -93,17 +96,17 @@ module.exports = function(group, element, bpmnFactory) {
     },
 
     setProperty: function(element, values, node) {
-      var bo = getBusinessObject(element);
-      var commands = [];
+      const bo = getBusinessObject(element);
+      const commands = [];
 
       // CREATE extensionElemente
-      var extensionElements = bo.get('extensionElements');
+      let extensionElements = bo.get('extensionElements');
       if (!extensionElements) {
         extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
         commands.push(cmdHelper.updateProperties(element, { extensionElements: extensionElements }));
       }
       // create taskDefinition
-      var taskDefinition = getTaskDefinition(element);
+      let taskDefinition = getTaskDefinition(element);
 
       if (!taskDefinition) {
         taskDefinition = elementHelper.createElement('zeebe:TaskDefinition', { }, extensionElements, bpmnFactory);
@@ -128,7 +131,7 @@ module.exports = function(group, element, bpmnFactory) {
 
   }));
 
-};
+}
 
 
 

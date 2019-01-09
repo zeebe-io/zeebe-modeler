@@ -1,13 +1,14 @@
-'use strict';
+import entryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 
-var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory');
+import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
-var cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper'),
-    elementHelper = require('bpmn-js-properties-panel/lib/helper/ElementHelper');
+import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
 
-var extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper');
+import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
+import {
+  getBusinessObject
+} from 'bpmn-js/lib/util/ModelUtil';
 
 /**
  * Create an entry to modify a property of an element which
@@ -26,51 +27,51 @@ var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
  *
  * @return {Array<Object>} return an array containing the entries
  */
-module.exports = function(element, definition, bpmnFactory, options) {
+export default function(element, definition, bpmnFactory, options) {
 
-  var id = options.id || 'element-property';
-  var label = options.label;
-  var referenceProperty = options.referenceProperty;
-  var modelProperty = options.modelProperty || 'name';
-  var extensionElementKey = options.extensionElement || 'zeebe:Subscription';
-  var shouldValidate = options.shouldValidate || false;
+  const id = options.id || 'element-property';
+  const label = options.label;
+  const referenceProperty = options.referenceProperty;
+  const modelProperty = options.modelProperty || 'name';
+  const extensionElementKey = options.extensionElement || 'zeebe:Subscription';
+  const shouldValidate = options.shouldValidate || false;
 
 
   function getElements(bo, type, prop) {
-    var elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
+    const elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
     return !prop ? elems : (elems[0] || {})[prop] || [];
   }
 
   function getExtensionElement(element) {
-    var bo = getBusinessObject(element);
+    const bo = getBusinessObject(element);
     return (getElements(bo, extensionElementKey) || [])[0];
   }
 
-  var entry = entryFactory.textField({
+  const entry = entryFactory.textField({
     id: id,
     label: label,
     modelProperty: modelProperty,
 
     get: function(element, node) {
-      var reference = definition.get(referenceProperty);
-      var props = {};
+      const reference = definition.get(referenceProperty);
+      const props = {};
       props[modelProperty] = reference && (getExtensionElement(reference) || {})[modelProperty];
       return props;
     },
 
     set: function(element, values, node) {
 
-      var reference = definition.get(referenceProperty);
-      var bo = getBusinessObject(reference);
+      const reference = definition.get(referenceProperty);
+      const bo = getBusinessObject(reference);
       reference.businessObject = bo;
-      var commands = [];
-      var extensionElements = bo.get('extensionElements');
+      const commands = [];
+      let extensionElements = bo.get('extensionElements');
       if (!extensionElements) {
         extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
         commands.push(cmdHelper.updateProperties(reference, { extensionElements: extensionElements }));
       }
 
-      var extensionElement = getExtensionElement(reference);
+      let extensionElement = getExtensionElement(reference);
 
       if (!extensionElement) {
         extensionElement = elementHelper.createElement(extensionElementKey, { }, extensionElements, bpmnFactory);
@@ -94,10 +95,10 @@ module.exports = function(element, definition, bpmnFactory, options) {
   });
 
   if (shouldValidate) {
-    entry.validate = function(element, values, node) {
-      var reference = definition.get(referenceProperty);
+    entry.validate = (element, values, node) => {
+      const reference = definition.get(referenceProperty);
       if (reference && !values[modelProperty]) {
-        var validationErrors = {};
+        const validationErrors = {};
         validationErrors[modelProperty] = 'Must provide a value';
         return validationErrors;
       }
@@ -105,4 +106,4 @@ module.exports = function(element, definition, bpmnFactory, options) {
   }
 
   return [ entry ];
-};
+}

@@ -1,35 +1,25 @@
-'use strict';
+import {
+  getBusinessObject
+} from 'bpmn-js/lib/util/ModelUtil';
 
-var getBusinessObject = require('bpmn-js/lib/util/ModelUtil').getBusinessObject;
+import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
 
-var elementHelper = require('bpmn-js-properties-panel/lib/helper/ElementHelper'),
-    extensionElementsHelper = require('bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper'),
-    inputOutputHelper = require('../../helper/InputOutputHelper'),
-    cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper');
+import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
-var extensionElementsEntry = require('bpmn-js-properties-panel/lib/provider/camunda/parts/implementation/ExtensionElements');
+import {
+  areOutputParametersSupported,
+  getInputOutput,
+  isInputOutputSupported,
+  getInputParameter,
+  getInputParameters,
+  getOutputParameter,
+  getOutputParameters
+} from '../../helper/InputOutputHelper';
 
+import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
-function getInputOutput(element) {
-  return inputOutputHelper.getInputOutput(element);
-}
+import extensionElementsEntry from 'bpmn-js-properties-panel/lib/provider/camunda/parts/implementation/ExtensionElements';
 
-
-function getInputParameters(element) {
-  return inputOutputHelper.getInputParameters(element);
-}
-
-function getOutputParameters(element) {
-  return inputOutputHelper.getOutputParameters(element);
-}
-
-function getInputParameter(element, idx) {
-  return inputOutputHelper.getInputParameter(element, idx);
-}
-
-function getOutputParameter(element, idx) {
-  return inputOutputHelper.getOutputParameter(element, idx);
-}
 
 
 function createElement(type, parent, factory, properties) {
@@ -46,23 +36,20 @@ function createParameter(type, parent, bpmnFactory, properties) {
 
 
 function ensureInputOutputSupported(element) {
-  return inputOutputHelper.isInputOutputSupported(element);
+  return isInputOutputSupported(element);
 }
 
 function ensureOutparameterSupported(element) {
-  return inputOutputHelper.areOutputParametersSupported(element);
+  return areOutputParametersSupported(element);
 }
 
-module.exports = function(element, bpmnFactory, options) {
+export default function(element, bpmnFactory, options = {}) {
+  const idPrefix = options.idPrefix || '';
 
-  options = options || {};
+  const getSelected = (element, node) => {
+    let selection = (inputEntry && inputEntry.getSelected(element, node)) || { idx: -1 };
 
-  var idPrefix = options.idPrefix || '';
-
-  var getSelected = function(element, node) {
-    var selection = (inputEntry && inputEntry.getSelected(element, node)) || { idx: -1 };
-
-    var parameter = getInputParameter(element, selection.idx);
+    let parameter = getInputParameter(element, selection.idx);
     if (!parameter && outputEntry) {
       selection = outputEntry.getSelected(element, node);
       parameter = getOutputParameter(element, selection.idx);
@@ -70,24 +57,24 @@ module.exports = function(element, bpmnFactory, options) {
     return parameter;
   };
 
-  var result = {
+  const result = {
     getSelectedParameter: getSelected
   };
 
-  var entries = result.entries = [];
+  const entries = result.entries = [];
 
   if (!ensureInputOutputSupported(element)) {
     return result;
   }
 
-  var newElement = function(type, prop, factory) {
+  const newElement = (type, prop, factory) => {
 
-    return function(element, extensionElements, value) {
-      var commands = [];
+    return (element, extensionElements, value) => {
+      const commands = [];
 
-      var inputOutput = getInputOutput(element);
+      let inputOutput = getInputOutput(element);
       if (!inputOutput) {
-        var parent = extensionElements;
+        const parent = extensionElements;
         inputOutput = createInputOutput(parent, bpmnFactory, {
           inputParameters: [],
           outputParameters: []
@@ -103,23 +90,23 @@ module.exports = function(element, bpmnFactory, options) {
         ));
       }
 
-      var newElem = createParameter(type, inputOutput, bpmnFactory, { source: 'sourceValue', target: 'targetValaue' });
+      const newElem = createParameter(type, inputOutput, bpmnFactory, { source: 'sourceValue', target: 'targetValaue' });
       commands.push(cmdHelper.addElementsTolist(element, inputOutput, prop, [ newElem ]));
 
       return commands;
     };
   };
 
-  var removeElement = function(getter, prop, otherProp) {
-    return function(element, extensionElements, value, idx) {
-      var inputOutput = getInputOutput(element);
-      var parameter = getter(element, idx);
+  const removeElement = (getter, prop, otherProp) => {
+    return (element, extensionElements, value, idx) => {
+      const inputOutput = getInputOutput(element);
+      const parameter = getter(element, idx);
 
-      var commands = [];
+      const commands = [];
       commands.push(cmdHelper.removeElementsFromList(element, inputOutput, prop, null, [ parameter ]));
 
-      var firstLength = inputOutput.get(prop).length-1;
-      var secondLength = (inputOutput.get(otherProp) || []).length;
+      const firstLength = inputOutput.get(prop).length-1;
+      const secondLength = (inputOutput.get(otherProp) || []).length;
 
       if (!firstLength && !secondLength) {
 
@@ -130,11 +117,11 @@ module.exports = function(element, bpmnFactory, options) {
     };
   };
 
-  var setOptionLabelValue = function(getter) {
-    return function(element, node, option, property, value, idx) {
-      var parameter = getter(element, idx);
+  const setOptionLabelValue = getter => {
+    return (element, node, option, property, value, idx) => {
+      const parameter = getter(element, idx);
 
-      option.text = value +' : '+ parameter['target'];
+      option.text = `${value} : ${parameter['target']}`;
     };
   };
 
@@ -142,7 +129,7 @@ module.exports = function(element, bpmnFactory, options) {
   // input parameters ///////////////////////////////////////////////////////////////
 
   var inputEntry = extensionElementsEntry(element, bpmnFactory, {
-    id: idPrefix + 'inputs',
+    id: `${idPrefix}inputs`,
     label: 'Input Parameters',
     modelProperty: 'source',
     prefix: 'Input',
@@ -169,7 +156,7 @@ module.exports = function(element, bpmnFactory, options) {
 
   if (ensureOutparameterSupported(element)) {
     var outputEntry = extensionElementsEntry(element, bpmnFactory, {
-      id: idPrefix + 'outputs',
+      id: `${idPrefix}outputs`,
       label: 'Output Parameters',
       modelProperty: 'source',
       prefix: 'Output',
@@ -193,5 +180,4 @@ module.exports = function(element, bpmnFactory, options) {
   }
 
   return result;
-
-};
+}

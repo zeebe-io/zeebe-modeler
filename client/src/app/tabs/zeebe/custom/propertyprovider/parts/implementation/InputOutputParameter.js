@@ -1,30 +1,29 @@
-'use strict';
+import {
+  isInputOutputSupported
+} from '../../helper/InputOutputHelper';
 
-var inputOutputHelper = require('../../helper/InputOutputHelper'),
-    cmdHelper = require('bpmn-js-properties-panel/lib/helper/CmdHelper'),
-    utils = require('bpmn-js-properties-panel/lib/Utils');
+import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
-var entryFactory = require('bpmn-js-properties-panel/lib/factory/EntryFactory');
+import utils from 'bpmn-js-properties-panel/lib/Utils';
+
+import entryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 
 function ensureInputOutputSupported(element) {
-  return inputOutputHelper.isInputOutputSupported(element);
+  return isInputOutputSupported(element);
 }
 
-module.exports = function(element, bpmnFactory, options) {
+export default function(element, bpmnFactory, options = {}) {
+  const idPrefix = options.idPrefix || '';
 
-  options = options || {};
-
-  var idPrefix = options.idPrefix || '';
-
-  var getSelected = options.getSelectedParameter;
+  const getSelected = options.getSelectedParameter;
 
   if (!ensureInputOutputSupported(element)) {
     return [];
   }
 
-  var entries = [];
+  const entries = [];
 
-  var isSelected = function(element, node) {
+  const isSelected = (element, node) => {
     return getSelected(element, node);
   };
 
@@ -32,7 +31,7 @@ module.exports = function(element, bpmnFactory, options) {
   // parameter source ////////////////////////////////////////////////////////
 
   entries.push(entryFactory.validationAwareTextField({
-    id: idPrefix + 'parameterSource',
+    id: `${idPrefix}parameterSource`,
     label: 'Source',
     modelProperty: 'source',
 
@@ -41,16 +40,16 @@ module.exports = function(element, bpmnFactory, options) {
     },
 
     setProperty: function(element, values, node) {
-      var param = getSelected(element, node);
+      const param = getSelected(element, node);
       return cmdHelper.updateBusinessObject(element, param, values);
     },
 
     validate: function(element, values, node) {
-      var bo = getSelected(element, node);
+      const bo = getSelected(element, node);
 
-      var validation = {};
+      const validation = {};
       if (bo) {
-        var sourceValue = values.source;
+        const sourceValue = values.source;
 
         if (sourceValue) {
           if (utils.containsSpace(sourceValue)) {
@@ -74,7 +73,7 @@ module.exports = function(element, bpmnFactory, options) {
   // parameter target ////////////////////////////////////////////////////////
 
   entries.push(entryFactory.validationAwareTextField({
-    id: idPrefix + 'parameterTarget',
+    id: `${idPrefix}parameterTarget`,
     label: 'Target',
     modelProperty: 'target',
 
@@ -83,16 +82,16 @@ module.exports = function(element, bpmnFactory, options) {
     },
 
     setProperty: function(element, values, node) {
-      var param = getSelected(element, node);
+      const param = getSelected(element, node);
       return cmdHelper.updateBusinessObject(element, param, values);
     },
 
     validate: function(element, values, node) {
-      var bo = getSelected(element, node);
+      const bo = getSelected(element, node);
 
-      var validation = {};
+      const validation = {};
       if (bo) {
-        var targetValue = values.target;
+        const targetValue = values.target;
 
         if (targetValue) {
           if (utils.containsSpace(targetValue)) {
@@ -113,5 +112,4 @@ module.exports = function(element, bpmnFactory, options) {
   }));
 
   return entries;
-
-};
+}
