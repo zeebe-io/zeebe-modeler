@@ -10,6 +10,10 @@ import {
 } from '../../primitives';
 
 import {
+  debounce
+} from '../../../util';
+
+import {
   WithCache,
   WithCachedState,
   CachedComponent
@@ -69,6 +73,8 @@ export class ZeebeEditor extends CachedComponent {
 
     this.ref = React.createRef();
     this.propertiesPanelRef = React.createRef();
+
+    this.handleResize = debounce(this.handleResize);
   }
 
   componentDidMount() {
@@ -98,7 +104,7 @@ export class ZeebeEditor extends CachedComponent {
 
     this.checkImport();
 
-    this.resize();
+    this.handleResize();
   }
 
   componentWillUnmount() {
@@ -429,7 +435,7 @@ export class ZeebeEditor extends CachedComponent {
     } = this.getCached();
 
     if (action === 'resize') {
-      return this.resize();
+      return this.handleResize();
     }
 
     // TODO(nikku): handle all editor actions
@@ -470,11 +476,9 @@ export class ZeebeEditor extends CachedComponent {
     }
   }
 
-  resize = () => {
-    const {
-      modeler
-    } = this.getCached();
 
+  handleResize = () => {
+    const modeler = this.getModeler();
     const canvas = modeler.get('canvas');
     const eventBus = modeler.get('eventBus');
 
