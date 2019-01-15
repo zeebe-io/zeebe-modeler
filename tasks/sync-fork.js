@@ -260,7 +260,9 @@ const sync = async (options) => {
               'client/src/app/tabs/bpmn/',
               'client/src/app/tabs/dmn/',
               'client/src/app/tabs/cmmn/',
-              'client/src/app/tabs/zeebe/'
+              'client/src/app/tabs/zeebe/',
+              'client/test/mocks/cmmn-js/',
+              'client/test/mocks/dmn-js/'
             ]
           });
 
