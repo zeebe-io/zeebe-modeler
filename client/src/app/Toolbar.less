@@ -1,0 +1,28 @@
+:local(.Toolbar) {
+
+  flex: none;
+
+  display: flex;
+  flex-direction: row;
+
+  align-items: center;
+
+  > * {
+    margin: 2px 4px;
+    display: block;
+  }
+
+  > * + * {
+    margin-left: 0;
+  }
+
+  > .separator {
+    background: #CCC;
+    width: 1px;
+    box-shadow: 0 0 1px #EEE;
+    margin-top: 6px;
+    margin-bottom: 6px;
+
+    align-self: stretch;
+  }
+}

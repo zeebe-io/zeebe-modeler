@@ -114,6 +114,6 @@ async function archive(path, archivePath, archiveType) {
     archive.on('end', resolve);
     archive.on('error', reject);
 
-    archive.directory(path, 'camunda-modeler').finalize();
+    archive.directory(path, 'zeebe-modeler').finalize();
   });
 }

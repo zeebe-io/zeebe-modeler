@@ -14,9 +14,6 @@ const {
   config
 } = argv;
 
-console.log("ARGV: ")
-console.log(argv)
-
 let nightlyVersion = nightly && getVersion(pkg, {
   nightly: 'nightly'
 });
@@ -66,15 +63,12 @@ const platforms = [
   argv.mac ? 'mac' : null
 ].filter(f => f);
 
-console.log("ARGV: ")
-console.log(argv)
-
 const platformOptions = platforms.map(p => `--${p}`);
 
 const publishOptions = typeof publish !== undefined ? [
   `--publish=${ publish ? 'always' : 'never' }`,
   publish && nightly && '-c.publish.provider=s3',
-  publish && nightly && '-c.publish.bucket=camunda-modeler-nightly'
+  publish && nightly && '-c.publish.bucket=zeebe-modeler-nightly'
 ].filter(f => f) : [];
 
 const signingOptions = [

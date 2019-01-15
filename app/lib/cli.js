@@ -21,7 +21,7 @@ function extractFiles(args, cwd) {
 
   // parse command line from the end up to the first
   // command line switch, i.e. "--enable-logging" (or simply) "--"
-  // camunda-modeler [arguments] -- fileA fileB ...
+  // zeebe-modeler [arguments] -- fileA fileB ...
   for (idx = args.length - 1; idx > 0; idx--) {
 
     maybePath = args[idx];

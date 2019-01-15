@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0r13zjy" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_1" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" />
+    <bpmn:serviceTask id="ServiceTask_1" />
+    <bpmn:receiveTask id="MessageTask_1" />
+    <bpmn:subProcess id="SubProcess_1" />
+    <bpmn:endEvent id="EndEvent_1" />
+    <bpmn:intermediateCatchEvent id="TimerEvent_1">
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">durationa</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="MessageEvent_1">
+      <bpmn:messageEventDefinition />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:subProcess id="SubProcess_2" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_1" />
+    <bpmn:parallelGateway id="ParallelGateway_1" />
+    <bpmn:eventBasedGateway id="EventBasedGateway_1" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="269" y="184" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1enrqg1_di" bpmnElement="ServiceTask_1">
+        <dc:Bounds x="367" y="368" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask_1ynm5tw_di" bpmnElement="MessageTask_1">
+        <dc:Bounds x="367" y="162" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_1xr3isb_di" bpmnElement="SubProcess_1" isExpanded="false">
+        <dc:Bounds x="367" y="266" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1dzfqos_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="269" y="390" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_0yesqgt_di" bpmnElement="TimerEvent_1">
+        <dc:Bounds x="269" y="466" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1onhsg6_di" bpmnElement="MessageEvent_1">
+        <dc:Bounds x="269" y="288" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_0n2mbjo_di" bpmnElement="SubProcess_2" isExpanded="true">
+        <dc:Bounds x="543" y="172" width="350" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1s9hr7o_di" bpmnElement="ExclusiveGateway_1" isMarkerVisible="true">
+        <dc:Bounds x="377" y="483" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway_1s5grhk_di" bpmnElement="ParallelGateway_1">
+        <dc:Bounds x="457" y="483" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EventBasedGateway_10pzqj9_di" bpmnElement="EventBasedGateway_1">
+        <dc:Bounds x="377" y="559" width="50" height="50" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

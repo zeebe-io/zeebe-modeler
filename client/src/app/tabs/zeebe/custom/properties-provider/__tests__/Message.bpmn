@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_0mce3k2" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_1" isExecutable="true">
+    <bpmn:intermediateCatchEvent id="MessageEvent_1">
+      <bpmn:messageEventDefinition messageRef="Message_0knv8lx" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:receiveTask id="MessageTask_1" messageRef="Message_1fykwuh" />
+  </bpmn:process>
+  <bpmn:message id="Message_1fykwuh" name="Message_1">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="subscription" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_0knv8lx" name="Message_3ar01mn">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="subscription" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_17817xz_di" bpmnElement="MessageEvent_1">
+        <dc:Bounds x="180" y="170" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask_1bd8yax_di" bpmnElement="MessageTask_1">
+        <dc:Bounds x="293" y="148" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

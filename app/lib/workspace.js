@@ -4,36 +4,37 @@ var {
   forEach
 } = require('min-dash');
 
-var fs = require('fs');
-
 var renderer = require('./util/renderer');
 
 
-function Workspace(config) {
+function Workspace(config, fileSystem) {
 
   renderer.on('workspace:restore', function(defaultConfig, done) {
-    var tabs = [],
+    var files = [],
         workspace = config.get('workspace', null);
 
     if (!workspace) {
       return done(null, defaultConfig);
     }
 
-    forEach(workspace.tabs, function(diagram) {
+    // ensure backwards compatibility
+    forEach((workspace.files || workspace.tabs), function(diagram) {
+      const {
+        path
+      } = diagram;
+
       try {
-        var contents = fs.readFileSync(diagram.path, { encoding: 'utf8' });
+        files.push(fileSystem.readFile(path));
 
-        diagram.contents = contents;
-
-        tabs.push(diagram);
-
-        console.log('[workspace]', 'restore', diagram.path);
+        console.log('[workspace]', 'restore', path);
       } catch (err) {
-        console.error('[workspace]', 'failed to restore file ', diagram.path, err);
+        console.error('[workspace]', 'failed to restore file ', path, err);
       }
     });
 
-    workspace.tabs = tabs;
+    workspace.files = files;
+
+    workspace.endpoints = workspace.endpoints || [];
 
     done(null, workspace);
   });

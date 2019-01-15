@@ -7,16 +7,18 @@
   "author": {
     "name": "Camunda Services GmbH",
     "email": "info@camunda.com",
-    "url": "https://zeebe.io"
+    "url": "https://camunda.com"
   },
   "devDependencies": {
-    "electron-reload": "^1.2.2"
+    "electron-devtools-installer": "^2.2.4",
+    "electron-reload": "^1.2.2",
+    "proxyquire": "^2.1.0"
   },
   "dependencies": {
     "form-data": "^2.3.1",
     "glob": "^7.0.3",
     "inherits": "^2.0.1",
-    "min-dash": "^3.1.0",
+    "min-dash": "^3.4.0",
     "node-fetch": "^2.1.2",
     "parents": "^1.0.1"
   },
