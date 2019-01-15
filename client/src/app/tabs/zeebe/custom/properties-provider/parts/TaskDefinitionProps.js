@@ -42,7 +42,7 @@ export default function(group, element, bpmnFactory) {
       const bo = getBusinessObject(element);
       const commands = [];
 
-      // CREATE extensionElemente
+      // CREATE extensionElements
       let extensionElements = bo.get('extensionElements');
       if (!extensionElements) {
         extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
@@ -99,7 +99,7 @@ export default function(group, element, bpmnFactory) {
       const bo = getBusinessObject(element);
       const commands = [];
 
-      // CREATE extensionElemente
+      // CREATE extensionElements
       let extensionElements = bo.get('extensionElements');
       if (!extensionElements) {
         extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);

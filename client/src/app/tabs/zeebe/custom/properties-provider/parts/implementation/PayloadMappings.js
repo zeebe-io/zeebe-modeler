@@ -74,7 +74,7 @@ export default function(element, bpmnFactory, options = {}) {
         ));
       }
 
-      const newElem = createMapping(type, payloadMappings, bpmnFactory, { source: 'sourceValue', target: 'targetValaue', type: 'PUT' });
+      const newElem = createMapping(type, payloadMappings, bpmnFactory, { source: 'sourceValue', target: 'targetValue', type: 'PUT' });
       commands.push(cmdHelper.addElementsTolist(element, payloadMappings, prop, [newElem]));
 
       return commands;

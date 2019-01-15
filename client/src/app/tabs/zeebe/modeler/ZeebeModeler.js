@@ -9,7 +9,7 @@ import globalClipboardModule from './features/global-clipboard';
 import signavioCompatModule from 'bpmn-js-signavio-compat';
 
 import propertiesPanelModule from 'bpmn-js-properties-panel';
-import propertiesProviderModule from '../custom/propertyprovider';
+import propertiesProviderModule from '../custom/properties-provider';
 
 import zeebeModdleExtension from '../custom/zeebe-bpmn-moddle/zeebe';
 

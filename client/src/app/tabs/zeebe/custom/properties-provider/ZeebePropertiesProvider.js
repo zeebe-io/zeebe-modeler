@@ -181,7 +181,7 @@ export default class ZeebePropertiesProvider extends PropertiesActivator {
     };
 
     const headersTab = {
-      id: 'headers-tab',
+      id: 'headers',
       label: 'Headers',
       groups: createHeadersGroups(
         element, this._bpmnFactory, this._elementRegistry)

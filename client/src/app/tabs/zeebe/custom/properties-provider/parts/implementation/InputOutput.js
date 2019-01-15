@@ -20,8 +20,6 @@ import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
 import extensionElementsEntry from 'bpmn-js-properties-panel/lib/provider/camunda/parts/implementation/ExtensionElements';
 
-
-
 function createElement(type, parent, factory, properties) {
   return elementHelper.createElement(type, properties, parent, factory);
 }
@@ -90,7 +88,7 @@ export default function(element, bpmnFactory, options = {}) {
         ));
       }
 
-      const newElem = createParameter(type, inputOutput, bpmnFactory, { source: 'sourceValue', target: 'targetValaue' });
+      const newElem = createParameter(type, inputOutput, bpmnFactory, { source: 'sourceValue', target: 'targetValue' });
       commands.push(cmdHelper.addElementsTolist(element, inputOutput, prop, [ newElem ]));
 
       return commands;
