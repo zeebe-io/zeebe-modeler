@@ -476,9 +476,9 @@ export class ZeebeEditor extends CachedComponent {
     }
   }
 
-
   handleResize = () => {
     const modeler = this.getModeler();
+
     const canvas = modeler.get('canvas');
     const eventBus = modeler.get('eventBus');
 
