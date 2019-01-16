@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.com/zeebe-io/zeebe-modeler.svg?branch=master)](https://travis-ci.com/zeebe-io/zeebe-modeler)
 
+The visual workflow editor for [Zeebe](https://zeebe.io/) based on [bpmn.io](http://bpmn.io).
+
+![Zeebe Modeler](docs/screenshot.png)
+
 
 ## Install:
 
