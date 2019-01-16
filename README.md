@@ -7,11 +7,19 @@ The visual workflow editor for [Zeebe](https://zeebe.io/) based on [bpmn.io](htt
 ![Zeebe Modeler](docs/screenshot.png)
 
 
-## Install:
+## Installation
 
-npm install
+#### All Platforms
 
-MacOSX users: `brew cask install zeebe-modeler` (requires [homebrew](https://brew.sh/index_de.html) and [cask](https://caskroom.github.io))
+[Download](https://github.com/zeebe-io/zeebe-modeler/releases), extract and execute app.
+
+#### MacOSX
+
+Requires [homebrew](https://brew.sh/index_de.html) and [cask](https://caskroom.github.io):
+
+```sh
+brew cask install zeebe-modeler
+```
 
 
 ## Resources
@@ -24,7 +32,7 @@ MacOSX users: `brew cask install zeebe-modeler` (requires [homebrew](https://bre
 
 ## Building the Application
 
-```
+```sh
 # checkout a tag
 git checkout v1.1.0
 
@@ -40,7 +48,7 @@ npm run all
 
 Spin up the application for development, all strings attached:
 
-```
+```sh
 npm run dev
 ```
 
