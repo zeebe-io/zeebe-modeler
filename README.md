@@ -1,5 +1,7 @@
-
 # Zeebe Modeler
+
+[![Build Status](https://travis-ci.com/zeebe-io/zeebe-modeler.svg?branch=master)](https://travis-ci.com/zeebe-io/zeebe-modeler)
+
 
 ## Install:
 
