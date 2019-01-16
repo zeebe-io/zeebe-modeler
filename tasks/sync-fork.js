@@ -225,9 +225,9 @@ const sync = async (options) => {
 
   return new Promise((resolve, reject) => {
 
-    const _success = async function(changes) {
+    const _success = async function(response) {
 
-      if ((changes || []).length) {
+      if ((response.files || []).length || (response.merges || []).length) {
         await setCommitMessage({
           message: 'chore(project): synchronize with base modeler'
         });
@@ -267,7 +267,7 @@ const sync = async (options) => {
           });
 
           if (result.conflicts && result.conflicts.length == 0) {
-            await _success(err.files);
+            await _success(err);
           }
 
           // todo(pinussilvestrus): offer auto-merge tool for left merge conflicts?
@@ -281,7 +281,7 @@ const sync = async (options) => {
 
       }
 
-      await _success(res.files);
+      await _success(res);
     });
   });
 };
