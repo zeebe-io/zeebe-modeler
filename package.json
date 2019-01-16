@@ -14,7 +14,7 @@
     "auto-test": "run-p *:auto-test",
     "clean": "del-cli 'distro/*' app/public",
     "dev": "run-p *:dev",
-    "distro": "node tasks/distro.js --win --linux --mac",
+    "distro": "node tasks/distro.js",
     "distro:test-archives": "node tasks/test-distro.js",
     "build": "run-s client:build \"distro -- {@}\" \"distro:test-archives -- {@}\" --",
     "lint": "eslint .",
