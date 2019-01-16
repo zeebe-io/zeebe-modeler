@@ -25,7 +25,7 @@ brew cask install zeebe-modeler
 ## Resources
 
 * [Changelog](./CHANGELOG.md)
-* [Download](https://github.com/zeebe-io/zeebe-modeler/releases)
+* [Download](https://github.com/zeebe-io/zeebe-modeler/releases) (see also [nightly builds](https://zeebe-modeler-nightly.s3.eu-central-1.amazonaws.com/))
 * [Give Feedback](https://forum.zeebe.io/)
 * [Report a Bug](https://github.com/zeebe-io/zeebe-modeler/issues/new/choose)
 
