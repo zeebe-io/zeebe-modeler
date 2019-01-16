@@ -13,29 +13,48 @@ npm install
 
 MacOSX users: `brew cask install zeebe-modeler` (requires [homebrew](https://brew.sh/index_de.html) and [cask](https://caskroom.github.io))
 
-## Dev-Mode
-npm run dev
 
-## Distro
-npm run distro
-run this command for creating install files
+## Resources
+
+* [Changelog](./CHANGELOG.md)
+* [Download](https://github.com/zeebe-io/zeebe-modeler/releases)
+* [Give Feedback](https://forum.zeebe.io/)
+* [Report a Bug](https://github.com/zeebe-io/zeebe-modeler/issues/new/choose)
 
 
-Tests are currently not working.
+## Building the Application
 
-Refectoring is coming soon....
+```
+# checkout a tag
+git checkout v1.1.0
 
-## Fork synchronization
+# install
+npm install
 
-In order to keep changes inside the original [camunda-modeler](https://github.com/camunda/camunda-modeler) synced with the Zeebe Modeler fork, a proper synchronization of the fork is needed. For this, the [sync-fork task](./tasks/sync-fork.js) exists inside this project.
-
-For executing the synchronization task, simple use
-
-```sh
-$ npm run sync
+# run all tests
+npm run all
 ```
 
-If no merge conflicts appeared, the synchronization task is done and the changes can be pushed remotely. If there were merge conflicts detected, the task automatically exclude unrelated files from the conflicts (e.g. changes inside `tabs/bpmn/*`). After this, another merge conflicts have to be solved manually.
+
+### Development Setup
+
+Spin up the application for development, all strings attached:
+
+```
+npm run dev
+```
+
+
+## Upstream Sync
+
+We use a `sync` task to keep up with changes in the upstream [Camunda Modeler](https://github.com/camunda/camunda-modeler) repository. Execute it via:
+
+```sh
+npm run sync
+```
+
+If no merge conflicts appeared, the synchronization task is done and the changes can be pushed remotely. If there were merge conflicts detected, the task automatically exclude unrelated files from the conflicts (e.g. changes inside `tabs/bpmn/*`). Other merge conflicts must be resolved manually.
+
 
 ## Code of Conduct
 
@@ -43,6 +62,7 @@ This project adheres to the Contributor Covenant [Code of
 Conduct](/CODE_OF_CONDUCT.md). By participating, you are expected to uphold
 this code. Please report unacceptable behavior to
 code-of-conduct@zeebe.io.
+
 
 ## License
 
