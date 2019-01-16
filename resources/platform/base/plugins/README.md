@@ -1,6 +1,6 @@
 # Plugins Directory
 
-Place plugins into this directory to extend the Camunda Modeler.
+Place plugins into this directory to extend the Zeebe Modeler.
 
 
 ## Learn More
