@@ -147,13 +147,12 @@ function createInputOutputTabGroups(element, bpmnFactory, elementRegistry) {
 }
 
 export default class ZeebePropertiesProvider extends PropertiesActivator {
-  constructor(eventBus, bpmnFactory, elementRegistry, elementTemplates, translate) {
+  constructor(eventBus, bpmnFactory, elementRegistry, translate) {
 
     super(eventBus);
 
     this._bpmnFactory = bpmnFactory;
     this._elementRegistry = elementRegistry;
-    this._elementTemplates = elementTemplates;
     this._translate = translate;
 
   }
@@ -201,6 +200,5 @@ ZeebePropertiesProvider.$inject = [
   'eventBus',
   'bpmnFactory',
   'elementRegistry',
-  'elementTemplates',
   'translate'
 ];
