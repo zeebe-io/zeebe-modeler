@@ -161,8 +161,6 @@ export class ZeebeEditor extends CachedComponent {
       modeler[fn](event, this.handleChanged);
     });
 
-    modeler[fn]('elementTemplates.errors', this.handleElementTemplateErrors);
-
     modeler[fn]('error', 1500, this.handleError);
 
     modeler[fn]('minimap.toggle', this.handleMinimapToggle);
@@ -199,16 +197,6 @@ export class ZeebeEditor extends CachedComponent {
       minimap: {
         open: event.open
       }
-    });
-  }
-
-  handleElementTemplateErrors = (event) => {
-    const {
-      errors
-    } = event;
-
-    errors.forEach(error => {
-      this.handleError({ error });
     });
   }
 
