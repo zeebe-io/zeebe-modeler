@@ -21,10 +21,10 @@ let nightlyVersion = nightly && getVersion(pkg, {
 if (nightlyVersion) {
 
   const publishNightlyArgs = [
-    'publish',
-    `--repo-version=${nightlyVersion}`,
-    '--skip-npm',
-    '--skip-git',
+    'version',
+    `${nightlyVersion}`,
+    '--no-git-tag-version',
+    '--no-push',
     '--yes'
   ];
 
