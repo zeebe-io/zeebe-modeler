@@ -36,7 +36,7 @@ describe('customs - palette', function() {
     const entries = domQueryAll('.entry', paletteElement);
 
     // then
-    expect(entries.length).to.equal(13);
+    expect(entries.length).to.equal(12);
 
   }));
 
