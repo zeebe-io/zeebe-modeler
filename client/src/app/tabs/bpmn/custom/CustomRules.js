@@ -1,62 +1,133 @@
+import BpmnRules from 'bpmn-js/lib/features/rules/BpmnRules';
+
 import {
-  is
-} from 'bpmn-js/lib/util/ModelUtil';
+  find
+} from 'min-dash';
 
-import RuleProvider from 'diagram-js/lib/features/rules/RuleProvider';
+import {
+  isLabel
+} from 'bpmn-js/lib//util/LabelUtil';
 
-const HIGH_PRIORITY = 1500;
+import {
+  is,
+  getBusinessObject
+} from 'bpmn-js/lib//util/ModelUtil';
 
-function hasOutgoings(element) {
-  return element.outgoing && element.outgoing.length > 0;
-}
+
+import {
+  isEventSubProcess
+} from 'bpmn-js/lib/util/DiUtil';
+
+import {
+  getBoundaryAttachment as isBoundaryAttachment
+} from 'bpmn-js/lib/features/snapping/BpmnSnappingUtil';
+
+const HIGH_PRIORITY = 15000;
 
 /**
- * Specific rules for custom elements
+ * Zeebe rule provider that allows to create boundary events with catch events
+ *
+ * See {@link CustomRules} for the default implementation
+ * of BPMN 2.0 modeling rules provided by bpmn-js.
+ *
+ * @param {EventBus} eventBus
  */
-export default class CustomRules extends RuleProvider {
+export default class CustomRules extends BpmnRules {
+
   constructor(eventBus) {
     super(eventBus);
   }
 
   init() {
+    super.init();
+    this.addRule('shape.attach', HIGH_PRIORITY,(context) => {
+      return this.canAttach(
+        context.shape,
+        context.target,
+        null,
+        context.position);
+    });
+  }
 
-    /**
-     * Can shape be created on target container?
-     */
-    function canCreate(source) {
-
-      if (is(source, 'bpmn:ExclusiveGateway')) {
-        return true;
-      }
-
-      return !hasOutgoings(source);
+  canAttach(elements, target, source, position) {
+    function isBoundaryEvent(element) {
+      return !isLabel(element) && is(element, 'bpmn:BoundaryEvent');
     }
 
     /**
-     * Can source and target be connected?
-     */
-    function canConnect(source, target) {
-
-      if (is(source, 'bpmn:ExclusiveGateway')) {
-        return true;
-      }
-
-      return !hasOutgoings(source);
-
+   * In Zeebe we treat IntermediateCatchEvents as boundary events too,
+   * this must be reflected in the rules.
+   */
+    function isBoundaryCandidate(element) {
+      return isBoundaryEvent(element) ||
+          ((is(element, 'bpmn:IntermediateCatchEvent') ||is(element, 'bpmn:IntermediateThrowEvent')) && !element.parent);
     }
 
-    this.addRule('shape.append', HIGH_PRIORITY, context => {
-      const source = context.source;
+    function isForCompensation(e) {
+      return getBusinessObject(e).isForCompensation;
+    }
 
-      return canCreate(source);
-    });
+    function isReceiveTaskAfterEventBasedGateway(element) {
+      return (
+        is(element, 'bpmn:ReceiveTask') &&
+      find(element.incoming, function(incoming) {
+        return is(incoming.source, 'bpmn:EventBasedGateway');
+      })
+      );
+    }
 
+    if (!Array.isArray(elements)) {
+      elements = [ elements ];
+    }
 
-    this.addRule('connection.create', HIGH_PRIORITY, context => {
-      const source = context.source, target = context.target;
+    // disallow appending as boundary event
+    if (source) {
+      return false;
+    }
 
-      return canConnect(source, target);
-    });
+    // only (re-)attach one element at a time
+    if (elements.length !== 1) {
+      return false;
+    }
+
+    const element = elements[0];
+
+    // do not attach labels
+    if (isLabel(element)) {
+      return false;
+    }
+
+    // only handle boundary events
+    if (!isBoundaryCandidate(element)) {
+      return false;
+    }
+
+    // allow default move operation
+    if (!target) {
+      return true;
+    }
+
+    // disallow drop on event sub processes
+    if (isEventSubProcess(target)) {
+      return false;
+    }
+
+    // only allow drop on non compensation activities
+    if (!is(target, 'bpmn:Activity') || isForCompensation(target)) {
+      return false;
+    }
+
+    // only attach to subprocess border
+    if (position && !isBoundaryAttachment(position, target)) {
+      return false;
+    }
+
+    // do not attach on receive tasks after event based gateways
+    if (isReceiveTaskAfterEventBasedGateway(target)) {
+      return false;
+    }
+
+    return 'attach';
   }
 }
 
