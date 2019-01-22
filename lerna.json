@@ -1,5 +1,5 @@
 {
-  "version": "2.2.3",
+  "version": "0.5.0",
   "packages": [
     "app",
     "client"
