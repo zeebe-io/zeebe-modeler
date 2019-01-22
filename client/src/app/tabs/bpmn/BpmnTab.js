@@ -1,13 +1,13 @@
-import ZeebeEditor from './ZeebeEditor';
+import BpmnEditor from './BpmnEditor';
 import XMLEditor from '../xml';
 
 import { createTab } from '../EditorTab';
 
 
-const ZeebeTab = createTab('ZeebeTab', [
+const BpmnTab = createTab('BpmnTab', [
   {
     type: 'bpmn',
-    editor: ZeebeEditor,
+    editor: BpmnEditor,
     defaultName: 'Diagram'
   },
   {
@@ -18,4 +18,4 @@ const ZeebeTab = createTab('ZeebeTab', [
   }
 ]);
 
-export default ZeebeTab;
+export default BpmnTab;

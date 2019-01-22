@@ -15,6 +15,6 @@ function getCopyPasteEntries({
   }];
 }
 
-export default function getZeebeContextMenu(state) {
+export default function getBpmnContextMenu(state) {
   return getCopyPasteEntries(state);
 }

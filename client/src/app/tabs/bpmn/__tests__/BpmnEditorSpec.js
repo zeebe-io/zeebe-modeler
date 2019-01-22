@@ -10,8 +10,8 @@ import {
 } from '../../../cached';
 
 import {
-  ZeebeEditor
-} from '../ZeebeEditor';
+  BpmnEditor
+} from '../BpmnEditor';
 
 import ZeebeModeler from 'test/mocks/bpmn-js/Modeler';
 
@@ -22,7 +22,7 @@ import diagramXML from './diagram.bpmn';
 const { spy } = sinon;
 
 
-describe('<ZeebeEditor>', function() {
+describe('<BpmnEditor>', function() {
 
   it('should render', function() {
     const {
@@ -38,7 +38,7 @@ describe('<ZeebeEditor>', function() {
     let createSpy;
 
     beforeEach(function() {
-      createSpy = sinon.spy(ZeebeEditor, 'createCachedState');
+      createSpy = sinon.spy(BpmnEditor, 'createCachedState');
     });
 
     afterEach(function() {
@@ -554,7 +554,7 @@ describe('<ZeebeEditor>', function() {
 
 function noop() {}
 
-const TestEditor = WithCachedState(ZeebeEditor);
+const TestEditor = WithCachedState(BpmnEditor);
 
 function renderEditor(xml, options = {}) {
   const {
@@ -588,7 +588,7 @@ function renderEditor(xml, options = {}) {
     </SlotFillRoot>
   );
 
-  const wrapper = slotFillRoot.find(ZeebeEditor);
+  const wrapper = slotFillRoot.find(BpmnEditor);
 
   const instance = wrapper.instance();
 

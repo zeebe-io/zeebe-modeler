@@ -25,13 +25,13 @@ import ZeebeModeler from './modeler';
 
 import { active as isInputActive } from '../../../util/dom/isInput';
 
-import getZeebeContextMenu from './getZeebeContextMenu';
+import getBpmnContextMenu from './getBpmnContextMenu';
 
-import { getZeebeEditMenu } from './getZeebeEditMenu';
+import { getBpmnEditMenu } from './getBpmnEditMenu';
 
-import getZeebeWindowMenu from './getZeebeWindowMenu';
+import getBpmnWindowMenu from './getBpmnWindowMenu';
 
-import css from './ZeebeEditor.less';
+import css from './BpmnEditor.less';
 
 import generateImage from '../../util/generateImage';
 
@@ -64,7 +64,7 @@ const COLORS = [{
 }];
 
 
-export class ZeebeEditor extends CachedComponent {
+export class BpmnEditor extends CachedComponent {
 
   constructor(props) {
     super(props);
@@ -286,11 +286,11 @@ export class ZeebeEditor extends CachedComponent {
       zoom: true
     };
 
-    const contextMenu = getZeebeContextMenu(newState);
+    const contextMenu = getBpmnContextMenu(newState);
 
-    const editMenu = getZeebeEditMenu(newState);
+    const editMenu = getBpmnEditMenu(newState);
 
-    const windowMenu = getZeebeWindowMenu(newState);
+    const windowMenu = getBpmnWindowMenu(newState);
 
     if (typeof onChanged === 'function') {
       onChanged({
@@ -486,7 +486,7 @@ export class ZeebeEditor extends CachedComponent {
     } = this.state;
 
     return (
-      <div className={ css.ZeebeEditor }>
+      <div className={ css.BpmnEditor }>
 
         <Loader hidden={ !importing } />
 
@@ -615,7 +615,7 @@ export class ZeebeEditor extends CachedComponent {
 }
 
 
-export default WithCache(WithCachedState(ZeebeEditor));
+export default WithCache(WithCachedState(BpmnEditor));
 
 class Color extends Component {
   render() {

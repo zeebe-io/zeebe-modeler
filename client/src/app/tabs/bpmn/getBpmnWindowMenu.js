@@ -1,4 +1,4 @@
-export default function getZeebeWindowMenu(state) {
+export default function getBpmnWindowMenu(state) {
   return [
     ...getZoomEntries(state),
     ...getPropertiesPanelEntries(state)

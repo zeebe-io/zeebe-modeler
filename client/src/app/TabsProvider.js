@@ -1,6 +1,6 @@
 import Ids from 'ids';
 
-import zeebeDiagram from './tabs/zeebe/diagram.bpmn';
+import bpmnDiagram from './tabs/bpmn/diagram.bpmn';
 
 import EmptyTab from './EmptyTab';
 
@@ -64,10 +64,10 @@ export default class TabsProvider {
         },
         extensions: [ 'bpmn', 'xml' ],
         getComponent(options) {
-          return import('./tabs/zeebe');
+          return import('./tabs/bpmn');
         },
         getInitialContents(options) {
-          return zeebeDiagram;
+          return bpmnDiagram;
         },
         getHelpMenu() {
           return [{

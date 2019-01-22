@@ -46,7 +46,7 @@ function getAlignDistributeEntries({
   }];
 }
 
-export function getZeebeEditMenu(state) {
+export function getBpmnEditMenu(state) {
   const { defaultCopyCutPaste } = state;
 
   const copyCutPasteEntries = defaultCopyCutPaste
