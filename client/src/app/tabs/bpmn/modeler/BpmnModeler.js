@@ -12,6 +12,8 @@ import signavioCompatModule from 'bpmn-js-signavio-compat';
 import propertiesPanelModule from 'bpmn-js-properties-panel';
 import propertiesProviderModule from '../custom/properties-provider';
 
+import zeebeModelingModule from '../custom/modeling';
+
 import zeebeModdleExtension from '../custom/zeebe-bpmn-moddle/zeebe';
 
 import zeebeCustoms from '../custom';
@@ -55,6 +57,7 @@ const extensionModules = [
   propertiesProviderModule,
   propertiesPanelKeyboardBindingsModule,
   zeebeModdleExtension,
+  zeebeModelingModule,
   zeebeCustoms
 ];
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0r13zjy" targetNamespace="http://bpmn.io/schema/bpmn">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0r13zjy" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn:process id="Process_1" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1" />
     <bpmn:serviceTask id="ServiceTask_1" />
@@ -17,7 +17,13 @@
     <bpmn:subProcess id="SubProcess_2" />
     <bpmn:exclusiveGateway id="ExclusiveGateway_1" />
     <bpmn:parallelGateway id="ParallelGateway_1" />
-    <bpmn:eventBasedGateway id="EventBasedGateway_1" />
+    <bpmn:eventBasedGateway id="EventBasedGateway_1">
+      <bpmn:outgoing>SequenceFlow_0bqiybf</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:receiveTask id="MessageTask_2">
+      <bpmn:incoming>SequenceFlow_0bqiybf</bpmn:incoming>
+    </bpmn:receiveTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0bqiybf" sourceRef="EventBasedGateway_1" targetRef="MessageTask_2" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
@@ -54,6 +60,13 @@
       <bpmndi:BPMNShape id="EventBasedGateway_10pzqj9_di" bpmnElement="EventBasedGateway_1">
         <dc:Bounds x="377" y="559" width="50" height="50" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask_1tj6cz3_di" bpmnElement="MessageTask_2">
+        <dc:Bounds x="529" y="544" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0bqiybf_di" bpmnElement="SequenceFlow_0bqiybf">
+        <di:waypoint x="427" y="584" />
+        <di:waypoint x="529" y="584" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
