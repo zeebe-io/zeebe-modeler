@@ -1,1 +1,1 @@
-export { default } from './ZeebeModeler';
+export { default } from './BpmnModeler';

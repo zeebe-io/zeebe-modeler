@@ -21,7 +21,7 @@ import {
 
 import PropertiesContainer from '../PropertiesContainer';
 
-import ZeebeModeler from './modeler';
+import BpmnModeler from './modeler';
 
 import { active as isInputActive } from '../../../util/dom/isInput';
 
@@ -581,7 +581,7 @@ export class BpmnEditor extends CachedComponent {
       version
     } = Metadata;
 
-    const modeler = new ZeebeModeler({
+    const modeler = new BpmnModeler({
       position: 'absolute',
       exporter: {
         name,
