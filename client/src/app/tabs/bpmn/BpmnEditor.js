@@ -35,7 +35,9 @@ import css from './BpmnEditor.less';
 
 import generateImage from '../../util/generateImage';
 
-const EXPORT_AS = [ 'svg', 'png' ];
+import Metadata from '../../../util/Metadata';
+
+const EXPORT_AS = [ 'png', 'jpeg', 'svg' ];
 
 const COLORS = [{
   title: 'White',
@@ -77,16 +79,14 @@ export class BpmnEditor extends CachedComponent {
     this.handleResize = debounce(this.handleResize);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this._isMounted = true;
 
     const {
       layout
     } = this.props;
 
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     this.listen('on');
 
@@ -110,9 +110,7 @@ export class BpmnEditor extends CachedComponent {
   componentWillUnmount() {
     this._isMounted = false;
 
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     this.listen('off');
 
@@ -146,9 +144,7 @@ export class BpmnEditor extends CachedComponent {
   }
 
   listen(fn) {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     [
       'import.done',
@@ -156,7 +152,9 @@ export class BpmnEditor extends CachedComponent {
       'commandStack.changed',
       'selection.changed',
       'attach',
-      'elements.copied'
+      'elements.copied',
+      'propertiesPanel.focusin',
+      'propertiesPanel.focusout'
     ].forEach((event) => {
       modeler[fn](event, this.handleChanged);
     });
@@ -167,25 +165,19 @@ export class BpmnEditor extends CachedComponent {
   }
 
   undo = () => {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     modeler.get('commandStack').undo();
   }
 
   redo = () => {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     modeler.get('commandStack').redo();
   }
 
   align = (type) => {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     const selection = modeler.get('selection').get();
 
@@ -218,9 +210,7 @@ export class BpmnEditor extends CachedComponent {
       xml
     } = this.props;
 
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     const commandStack = modeler.get('commandStack');
 
@@ -329,16 +319,17 @@ export class BpmnEditor extends CachedComponent {
         importing: true
       });
 
-      // TODO(nikku): apply default element templates to initial diagram
       modeler.importXML(xml, this.ifMounted(this.handleImport));
     }
   }
 
+  /**
+   * @returns {ZeebeModeler}
+   */
   getModeler() {
     const {
       modeler
     } = this.getCached();
-
 
     return modeler;
   }
@@ -359,7 +350,6 @@ export class BpmnEditor extends CachedComponent {
         return resolve(lastXML || this.props.xml);
       }
 
-      // TODO(nikku): set current modeler version and name to the diagram
       modeler.saveXML({ format: true }, (err, xml) => {
         this.setCached({
           lastXML: xml,
@@ -380,9 +370,7 @@ export class BpmnEditor extends CachedComponent {
   }
 
   exportAs(type) {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     return new Promise((resolve, reject) => {
 
@@ -418,9 +406,7 @@ export class BpmnEditor extends CachedComponent {
   }
 
   triggerAction = (action, context) => {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     if (action === 'resize') {
       return this.handleResize();
@@ -590,10 +576,17 @@ export class BpmnEditor extends CachedComponent {
   }
 
   static createCachedState() {
+    const {
+      name,
+      version
+    } = Metadata;
 
-    // TODO(nikku): wire element template loading
     const modeler = new ZeebeModeler({
-      position: 'absolute'
+      position: 'absolute',
+      exporter: {
+        name,
+        version
+      }
     });
 
     const commandStack = modeler.get('commandStack');

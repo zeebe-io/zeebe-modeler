@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 
 import { WithCache } from './cached';
 
@@ -10,7 +10,8 @@ import {
 import {
   assign,
   debounce,
-  forEach
+  forEach,
+  reduce
 } from 'min-dash';
 
 import Toolbar from './Toolbar';
@@ -56,6 +57,7 @@ const FILTER_ALL_EXTENSIONS = {
 const INITIAL_STATE = {
   activeTab: EMPTY_TAB,
   dirtyTabs: {},
+  unsavedTabs: {},
   layout: {},
   tabs: [],
   tabState: {},
@@ -65,7 +67,7 @@ const INITIAL_STATE = {
 };
 
 
-export class App extends Component {
+export class App extends PureComponent {
 
   constructor(props, context) {
     super();
@@ -124,14 +126,14 @@ export class App extends Component {
 
       const insertIdx = tabs.indexOf(activeTab) + 1;
 
-      let dirtyState = {};
+      let unsavedState = {};
 
-      if ('dirty' in properties) {
-        dirtyState = this.markAsDirty(tab);
+      if ('unsaved' in properties) {
+        unsavedState = this.setUnsaved(tab, properties.unsaved);
       }
 
       return {
-        ...dirtyState,
+        ...unsavedState,
         tabs: [
           ...tabs.slice(0, insertIdx),
           tab,
@@ -203,7 +205,7 @@ export class App extends Component {
     const tabLastModified = (file || {}).lastModified;
 
     // skip new file
-    if (isNew(tab) || typeof tabLastModified === 'undefined') {
+    if (this.isUnsaved(tab) || typeof tabLastModified === 'undefined') {
       return;
     }
 
@@ -330,7 +332,11 @@ export class App extends Component {
   }
 
   isDirty = (tab) => {
-    return Boolean(isNew(tab) || this.state.dirtyTabs[tab.id]);
+    return !!this.state.dirtyTabs[tab.id];
+  }
+
+  isUnsaved = (tab) => {
+    return tab.file && !tab.file.path;
   }
 
   async _removeTab(tab) {
@@ -356,7 +362,7 @@ export class App extends Component {
 
     navigationHistory.purge(tab);
 
-    if (!isNew(tab)) {
+    if (!this.isUnsaved(tab)) {
       closedTabs.push(tab);
     }
 
@@ -522,7 +528,7 @@ export class App extends Component {
           ...file,
           contents: tabsProvider.getInitialFileContents(fileType)
         }),
-        { dirty: true }
+        { unsaved: true }
       );
 
       await this.selectTab(tab);
@@ -688,7 +694,7 @@ export class App extends Component {
     let dirtyState = {};
 
     if ('dirty' in properties) {
-      dirtyState = this.markAsDirty(tab, properties.dirty);
+      dirtyState = this.setDirty(tab, properties.dirty);
     }
 
     this.setState({
@@ -706,19 +712,45 @@ export class App extends Component {
     return tab.triggerAction('resize');
   }
 
-  markAsDirty(tab, dirty = true) {
+  setDirty(tab, dirty = true) {
+    const { tabs } = this.state;
 
-    let {
-      dirtyTabs
-    } = this.state;
+    const newDirtyTabs = reduce(tabs, (dirtyTabs, t) => {
+      if (t === tab) {
+        return dirtyTabs;
+      }
 
-    const newDirtyTabs = {
-      ...dirtyTabs,
-      [tab.id]: dirty
-    };
+      return {
+        ...dirtyTabs,
+        [ t.id ]: this.isDirty(t)
+      };
+    }, {
+      [ tab.id ]: dirty
+    });
 
     return {
       dirtyTabs: newDirtyTabs
+    };
+  }
+
+  setUnsaved(tab, unsaved = true) {
+    const { tabs } = this.state;
+
+    const newUnsavedTabs = reduce(tabs, (unsavedTabs, t) => {
+      if (t === tab) {
+        return unsavedTabs;
+      }
+
+      return {
+        ...unsavedTabs,
+        [ t.id ]: this.isUnsaved(t)
+      };
+    }, {
+      [ tab.id ]: unsaved
+    });
+
+    return {
+      unsavedTabs: newUnsavedTabs
     };
   }
 
@@ -743,18 +775,18 @@ export class App extends Component {
   tabSaved(tab, newFile) {
 
     const {
-      dirtyTabs,
       tabs
     } = this.state;
 
     tab.file = newFile;
 
+    const dirtyState = this.setDirty(tab, false);
+    const unsavedState = this.setUnsaved(tab, false);
+
     this.setState({
       tabs: [ ...tabs ],
-      dirtyTabs: {
-        ...dirtyTabs,
-        [tab.id]: false
-      }
+      ...dirtyState,
+      ...unsavedState
     });
   }
 
@@ -957,7 +989,7 @@ export class App extends Component {
 
     let { saveAs } = options;
 
-    saveAs = saveAs || isNew(tab);
+    saveAs = saveAs || this.isUnsaved(tab);
 
     if (saveAs) {
       filters = getSaveFileDialogFilters(provider);
@@ -1009,9 +1041,12 @@ export class App extends Component {
       tabs
     } = this.state;
 
-    const saveTasks = tabs.filter(this.isDirty).map((tab) => {
-      return () => this.saveTab(tab);
-    });
+    const saveTasks = tabs
+      .filter((tab) => {
+        return this.isDirty(tab) || this.isUnsaved(tab);
+      }).map((tab) => {
+        return () => this.saveTab(tab);
+      });
 
     return pSeries(saveTasks);
   }
@@ -1056,10 +1091,7 @@ export class App extends Component {
     return Promise.reject(new Error('no last tab'));
   }
 
-  showShortcuts = () => {
-    // TODO(nikku): implement
-    console.error('NOT IMPLEMENTED');
-  }
+  showShortcuts = () => this.openModal('KEYBOARD_SHORTCUTS');
 
   updateMenu = (options) => {
     const { onMenuUpdate } = this.props;
@@ -1279,6 +1311,10 @@ export class App extends Component {
     this.logEntry(`Deploy error: ${JSON.stringify(error)}`, 'deploy-error');
   }
 
+  handleCloseTab = (tab) => {
+    this.triggerAction('close-tab', { tabId: tab.id }).catch(console.error);
+  }
+
   loadConfig = (key, ...args) => {
     return this.props.globals.config.get(key, this.state.activeTab, ...args);
   }
@@ -1287,8 +1323,37 @@ export class App extends Component {
     return true;
   }
 
-  composeAction = (...args) => async (event) => {
-    await this.triggerAction(...args);
+  composeAction = (...args) => {
+
+    const actionName = args[0];
+
+    this.__actionCache = this.__actionCache || {};
+
+    const cachedAction = this.__actionCache[actionName];
+
+    if (cachedAction) {
+      const lastArgs = cachedAction.args;
+
+      const changed = lastArgs.length !== args.length || lastArgs.find((arg, idx) => {
+        return arg !== args[idx];
+      });
+
+      if (!changed) {
+        return cachedAction.fn;
+      }
+
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('re-defining App#composeAction args', args);
+      }
+    }
+
+    const fn = async (event) => {
+      await this.triggerAction(...args);
+    };
+
+    this.__actionCache[actionName] = { fn, args };
+
+    return fn;
   }
 
   render() {
@@ -1298,12 +1363,14 @@ export class App extends Component {
       activeTab,
       tabState,
       layout,
-      logEntries
+      logEntries,
+      dirtyTabs,
+      unsavedTabs
     } = this.state;
 
     const Tab = this.getTabComponent(activeTab);
 
-    const isDirty = this.isDirty(activeTab);
+    const canSave = this.isUnsaved(activeTab) || this.isDirty(activeTab);
 
     return (
       <div className={ css.App }>
@@ -1335,8 +1402,8 @@ export class App extends Component {
 
           <Fill name="toolbar" group="save">
             <Button
-              disabled={ !isDirty }
-              onClick={ isDirty ? this.composeAction('save') : null }
+              disabled={ !canSave }
+              onClick={ canSave ? this.composeAction('save') : null }
               title="Save diagram"
             >
               <Icon name="save" />
@@ -1381,14 +1448,13 @@ export class App extends Component {
             <TabLinks
               className="primary"
               tabs={ tabs }
-              isDirty={ this.isDirty }
+              dirtyTabs={ dirtyTabs }
+              unsavedTabs={ unsavedTabs }
               activeTab={ activeTab }
               onSelect={ this.selectTab }
               onMoveTab={ this.moveTab }
               onContextMenu={ this.openTabLinksMenu }
-              onClose={ (tab) => {
-                this.triggerAction('close-tab', { tabId: tab.id }).catch(console.error);
-              } }
+              onClose={ this.handleCloseTab }
               onCreate={ this.composeAction('create-bpmn-diagram') }
               draggable
               scrollable
@@ -1427,6 +1493,7 @@ export class App extends Component {
         <ModalConductor
           currentModal={ this.state.currentModal }
           endpoints={ this.state.endpoints }
+          isMac={ this.props.globals.isMac }
           onClose={ this.closeModal }
           onDeploy={ this.handleDeploy }
           onDeployError={ this.handleDeployError }
@@ -1440,7 +1507,7 @@ export class App extends Component {
 
 
 function missingProvider(providerType) {
-  class MissingProviderTab extends Component {
+  class MissingProviderTab extends PureComponent {
 
     componentDidMount() {
       this.props.onShown();
@@ -1460,7 +1527,7 @@ function missingProvider(providerType) {
   return MissingProviderTab;
 }
 
-class LoadingTab extends Component {
+class LoadingTab extends PureComponent {
 
   render() {
     return (
@@ -1484,10 +1551,6 @@ function getNextTab(tabs, activeTab, direction) {
   }
 
   return tabs[nextIdx];
-}
-
-function isNew(tab) {
-  return tab.file && !tab.file.path;
 }
 
 export default WithCache(App);
