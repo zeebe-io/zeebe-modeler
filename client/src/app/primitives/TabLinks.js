@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 
 import classNames from 'classnames';
 
@@ -29,7 +29,7 @@ const TABS_OPTS = {
 };
 
 
-export default class TabLinks extends Component {
+export default class TabLinks extends PureComponent {
   constructor(props) {
     super(props);
 
@@ -93,12 +93,21 @@ export default class TabLinks extends Component {
     onMoveTab(tab, newIndex);
   }
 
+  isDirty = (tab) => {
+    const {
+      dirtyTabs,
+      unsavedTabs
+    } = this.props;
+
+    return (dirtyTabs && !!dirtyTabs[ tab.id ]) ||
+           (unsavedTabs && !!unsavedTabs[ tab.id ]);
+  }
+
   render() {
 
     const {
       activeTab,
       tabs,
-      isDirty,
       onSelect,
       onContextMenu,
       onClose,
@@ -113,13 +122,15 @@ export default class TabLinks extends Component {
         <div className="tabs-container">
           {
             tabs.map(tab => {
+              const dirty = this.isDirty(tab);
+
               return (
                 <span
                   key={ tab.id }
                   data-tab-id={ tab.id }
                   className={ classNames('tab', {
                     active: tab === activeTab,
-                    dirty: isDirty && isDirty(tab)
+                    dirty
                   }) }
                   onClick={ () => onSelect(tab, event) }
                   onContextMenu={ (event) => (onContextMenu || noop)(tab, event) }

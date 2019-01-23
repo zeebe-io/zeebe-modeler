@@ -363,14 +363,14 @@ describe('<App>', function() {
       const {
         activeTab,
         tabs,
-        dirtyTabs
+        unsavedTabs
       } = app.state;
 
       expect(tabs).to.have.length(1);
       expect(tabs).to.eql([ tab ]);
       expect(activeTab).to.eql(tab);
 
-      expect(dirtyTabs).to.have.property(tab.id, true);
+      expect(unsavedTabs).to.have.property(tab.id, true);
     });
 
 
@@ -512,6 +512,10 @@ describe('<App>', function() {
             saveTabSpy = spy(app, 'saveTab');
 
       const tab = await app.createDiagram();
+
+      app.setState({
+        ...app.setDirty(tab)
+      });
 
       dialog.setShowCloseFileDialogResponse('discard');
 
@@ -2131,13 +2135,13 @@ describe('<App>', function() {
     });
 
 
-    it('should be dirty after creating a diagram', async function() {
+    it('should NOT be dirty after creating a diagram', async function() {
 
       // when
       const tab = await app.createDiagram();
 
       // then
-      expect(app.isDirty(tab)).to.be.true;
+      expect(app.isDirty(tab)).to.be.false;
     });
 
 
@@ -2159,17 +2163,13 @@ describe('<App>', function() {
       // given
       const tab = await app.createDiagram();
 
-      console.log(tab);
-
       dialog.setShowSaveFileDialogResponse('diagram_1.bpmn');
 
       // when
       await app.triggerAction('save');
 
       // then
-      setTimeout(() => {
-        expect(app.isDirty(tab)).to.be.false;
-      }, 100);
+      expect(app.isDirty(tab)).to.be.false;
     });
 
   });

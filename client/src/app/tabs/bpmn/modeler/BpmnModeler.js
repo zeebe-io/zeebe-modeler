@@ -5,6 +5,7 @@ import minimapModule from 'diagram-js-minimap';
 
 import executableFixModule from './features/executable-fix';
 import globalClipboardModule from './features/global-clipboard';
+import propertiesPanelKeyboardBindingsModule from './features/properties-panel-keyboard-bindings';
 
 import signavioCompatModule from 'bpmn-js-signavio-compat';
 
@@ -23,7 +24,7 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import 'diagram-js-minimap/assets/diagram-js-minimap.css';
 
 
-export default class ZeebeModeler extends BpmnModeler {
+export default class ZeebeBpmnModeler extends BpmnModeler {
 
   constructor(options = {}) {
 
@@ -52,11 +53,12 @@ const extensionModules = [
   signavioCompatModule,
   propertiesPanelModule,
   propertiesProviderModule,
+  propertiesPanelKeyboardBindingsModule,
   zeebeModdleExtension,
   zeebeCustoms
 ];
 
-ZeebeModeler.prototype._modules = [
+ZeebeBpmnModeler.prototype._modules = [
   ...defaultModules,
   ...extensionModules
 ];

@@ -29,6 +29,34 @@ describe('TabsProvider', function() {
   });
 
 
+  it('should export BPMN as JPEG, PNG and SVG', function() {
+
+    // given
+    const tabsProvider = new TabsProvider();
+
+    const expected = {
+      png: {
+        name: 'PNG image',
+        encoding: 'base64',
+        extensions: [ 'png' ]
+      },
+      jpeg: {
+        name: 'JPEG image',
+        encoding: 'base64',
+        extensions: [ 'jpeg' ]
+      },
+      svg: {
+        name: 'SVG image',
+        encoding: 'utf8',
+        extensions: [ 'svg' ]
+      }
+    };
+
+    // then
+    expect(tabsProvider.getProvider('bpmn').exports).to.eql(expected);
+  });
+
+
   it('should provide initial tab contents', function() {
 
     // given
@@ -36,7 +64,6 @@ describe('TabsProvider', function() {
 
     // then
     expect(tabsProvider.getInitialFileContents('bpmn')).to.exist;
-
   });
 
 
@@ -47,7 +74,6 @@ describe('TabsProvider', function() {
 
     // then
     expect(tabsProvider.createTab('bpmn')).to.exist;
-
   });
 
 

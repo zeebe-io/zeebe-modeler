@@ -12,8 +12,12 @@ import {
   config,
   dialog,
   fileSystem,
+  metadata,
   workspace
 } from './remote';
+
+import Metadata from './util/Metadata';
+
 
 const isMac = backend.getPlatform() === 'darwin';
 
@@ -28,8 +32,11 @@ const globals = {
   config,
   dialog,
   fileSystem,
+  isMac,
   workspace
 };
+
+Metadata.init(metadata);
 
 const rootElement = document.getElementById('root');
 ReactDOM.render(

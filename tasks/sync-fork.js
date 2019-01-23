@@ -12,8 +12,7 @@ const git = require('simple-git')('');
 const CAMUNDA_MODELER_UPSTREAM = 'camunda';
 const CAMUNDA_MODELER_REPOSITORY = 'https://github.com/camunda/camunda-modeler.git';
 
-// todo(pinussilvestrus): switch to master after refactoring
-const CAMUNDA_MODELER_BRANCH = 'next';
+const CAMUNDA_MODELER_BRANCH = 'master';
 
 /**
  * $ git remote add @upstream @repository
@@ -257,10 +256,8 @@ const sync = async (options) => {
           const result = await excludeFilesFromMerge({
             conflicts: err.conflicts,
             files: [
-              'client/src/app/tabs/bpmn/',
               'client/src/app/tabs/dmn/',
               'client/src/app/tabs/cmmn/',
-              'client/src/app/tabs/zeebe/',
               'client/test/mocks/cmmn-js/',
               'client/test/mocks/dmn-js/'
             ]

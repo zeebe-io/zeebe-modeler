@@ -21,21 +21,23 @@ import {
 
 import PropertiesContainer from '../PropertiesContainer';
 
-import ZeebeModeler from './modeler';
+import BpmnModeler from './modeler';
 
 import { active as isInputActive } from '../../../util/dom/isInput';
 
-import getZeebeContextMenu from './getZeebeContextMenu';
+import getBpmnContextMenu from './getBpmnContextMenu';
 
-import { getZeebeEditMenu } from './getZeebeEditMenu';
+import { getBpmnEditMenu } from './getBpmnEditMenu';
 
-import getZeebeWindowMenu from './getZeebeWindowMenu';
+import getBpmnWindowMenu from './getBpmnWindowMenu';
 
-import css from './ZeebeEditor.less';
+import css from './BpmnEditor.less';
 
 import generateImage from '../../util/generateImage';
 
-const EXPORT_AS = [ 'svg', 'png' ];
+import Metadata from '../../../util/Metadata';
+
+const EXPORT_AS = [ 'png', 'jpeg', 'svg' ];
 
 const COLORS = [{
   title: 'White',
@@ -64,7 +66,7 @@ const COLORS = [{
 }];
 
 
-export class ZeebeEditor extends CachedComponent {
+export class BpmnEditor extends CachedComponent {
 
   constructor(props) {
     super(props);
@@ -77,16 +79,14 @@ export class ZeebeEditor extends CachedComponent {
     this.handleResize = debounce(this.handleResize);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this._isMounted = true;
 
     const {
       layout
     } = this.props;
 
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     this.listen('on');
 
@@ -110,9 +110,7 @@ export class ZeebeEditor extends CachedComponent {
   componentWillUnmount() {
     this._isMounted = false;
 
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     this.listen('off');
 
@@ -146,9 +144,7 @@ export class ZeebeEditor extends CachedComponent {
   }
 
   listen(fn) {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     [
       'import.done',
@@ -156,7 +152,9 @@ export class ZeebeEditor extends CachedComponent {
       'commandStack.changed',
       'selection.changed',
       'attach',
-      'elements.copied'
+      'elements.copied',
+      'propertiesPanel.focusin',
+      'propertiesPanel.focusout'
     ].forEach((event) => {
       modeler[fn](event, this.handleChanged);
     });
@@ -167,25 +165,19 @@ export class ZeebeEditor extends CachedComponent {
   }
 
   undo = () => {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     modeler.get('commandStack').undo();
   }
 
   redo = () => {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     modeler.get('commandStack').redo();
   }
 
   align = (type) => {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     const selection = modeler.get('selection').get();
 
@@ -218,9 +210,7 @@ export class ZeebeEditor extends CachedComponent {
       xml
     } = this.props;
 
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     const commandStack = modeler.get('commandStack');
 
@@ -286,11 +276,11 @@ export class ZeebeEditor extends CachedComponent {
       zoom: true
     };
 
-    const contextMenu = getZeebeContextMenu(newState);
+    const contextMenu = getBpmnContextMenu(newState);
 
-    const editMenu = getZeebeEditMenu(newState);
+    const editMenu = getBpmnEditMenu(newState);
 
-    const windowMenu = getZeebeWindowMenu(newState);
+    const windowMenu = getBpmnWindowMenu(newState);
 
     if (typeof onChanged === 'function') {
       onChanged({
@@ -329,16 +319,17 @@ export class ZeebeEditor extends CachedComponent {
         importing: true
       });
 
-      // TODO(nikku): apply default element templates to initial diagram
       modeler.importXML(xml, this.ifMounted(this.handleImport));
     }
   }
 
+  /**
+   * @returns {ZeebeModeler}
+   */
   getModeler() {
     const {
       modeler
     } = this.getCached();
-
 
     return modeler;
   }
@@ -359,7 +350,6 @@ export class ZeebeEditor extends CachedComponent {
         return resolve(lastXML || this.props.xml);
       }
 
-      // TODO(nikku): set current modeler version and name to the diagram
       modeler.saveXML({ format: true }, (err, xml) => {
         this.setCached({
           lastXML: xml,
@@ -380,9 +370,7 @@ export class ZeebeEditor extends CachedComponent {
   }
 
   exportAs(type) {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     return new Promise((resolve, reject) => {
 
@@ -418,9 +406,7 @@ export class ZeebeEditor extends CachedComponent {
   }
 
   triggerAction = (action, context) => {
-    const {
-      modeler
-    } = this.getCached();
+    const modeler = this.getModeler();
 
     if (action === 'resize') {
       return this.handleResize();
@@ -486,7 +472,7 @@ export class ZeebeEditor extends CachedComponent {
     } = this.state;
 
     return (
-      <div className={ css.ZeebeEditor }>
+      <div className={ css.BpmnEditor }>
 
         <Loader hidden={ !importing } />
 
@@ -590,10 +576,17 @@ export class ZeebeEditor extends CachedComponent {
   }
 
   static createCachedState() {
+    const {
+      name,
+      version
+    } = Metadata;
 
-    // TODO(nikku): wire element template loading
-    const modeler = new ZeebeModeler({
-      position: 'absolute'
+    const modeler = new BpmnModeler({
+      position: 'absolute',
+      exporter: {
+        name,
+        version
+      }
     });
 
     const commandStack = modeler.get('commandStack');
@@ -615,7 +608,7 @@ export class ZeebeEditor extends CachedComponent {
 }
 
 
-export default WithCache(WithCachedState(ZeebeEditor));
+export default WithCache(WithCachedState(BpmnEditor));
 
 class Color extends Component {
   render() {
