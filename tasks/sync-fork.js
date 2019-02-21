@@ -1,12 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * js task for keep zeebe modeler in sync with original camunda modeler
- * https://help.github.com/articles/syncing-a-fork/
+ * js task for keep Zeebe Modeler in sync with original camunda modeler
  */
-
-// todo(pinussilvestrus): maybe get rid of simple-git and build own module,
-// e.g. with execa
 const git = require('simple-git')('');
 
 const CAMUNDA_MODELER_UPSTREAM = 'camunda';
@@ -16,6 +12,8 @@ const CAMUNDA_MODELER_BRANCH = 'master';
 
 /**
  * $ git remote add @upstream @repository
+ * @param {String} options.repository
+ * @param {String} options.upstream
  */
 const createUpstream = async (options) => {
 
@@ -46,6 +44,7 @@ const createUpstream = async (options) => {
 /**
  * $ git remote -v
  * Fetches all remote and check whether given @upstream is included
+ * @param {String} options.upstream
  */
 const hasUpstream = async (options) => {
 
@@ -74,6 +73,8 @@ const hasUpstream = async (options) => {
 
 /**
  * $ git fetch @upstream @branch
+ * @param {String} options.branch
+ * @param {String} options.upstream
  */
 const fetchUpstream = async (options) => {
 
@@ -101,6 +102,7 @@ const fetchUpstream = async (options) => {
 
 /**
  * $ git commit -m @message
+ * @param {String} options.message
  */
 const setCommitMessage = async (options) => {
 
@@ -128,6 +130,7 @@ const setCommitMessage = async (options) => {
 
 /**
  * $ git clean -@mode
+ * @param {String} options.mode
  */
 const cleanUp = async (options) => {
 
@@ -151,9 +154,9 @@ const cleanUp = async (options) => {
 
 /**
  * $ git reset HEAD -- @files
- * exclude files that should be ignored in the merge procedure,
- * e.g. old tabs (e.g. tabs/bpmn)
- * e.g. new tabs (e.g. tabs/zeebe)
+ * exclude files that should be ignored in the merge procedure
+ * @param {Array<String>} options.conflicts
+ * @param {Array<String>} options.files
  */
 const excludeFilesFromMerge = async (options) => {
 
@@ -186,8 +189,9 @@ const excludeFilesFromMerge = async (options) => {
         mode: 'fd'
       });
 
-      // filter out excluded conflicts
       const filteredConflicts = conflicts.filter(c => {
+
+        // filter out excluded conflicts
         const includedPaths = (files || []).filter(f => {
           return c.file.includes(f);
         });
@@ -212,6 +216,8 @@ const excludeFilesFromMerge = async (options) => {
 /**
  * $ git merge @upstream/@branch --no-commit --no-ff
  * Overall syncing procedure
+ * @param {String} options.branch
+ * @param {String} options.upstream
  */
 const sync = async (options) => {
 
