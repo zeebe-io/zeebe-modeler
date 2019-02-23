@@ -265,7 +265,9 @@ const sync = async (options) => {
               'client/src/app/tabs/dmn/',
               'client/src/app/tabs/cmmn/',
               'client/test/mocks/cmmn-js/',
-              'client/test/mocks/dmn-js/'
+              'client/test/mocks/dmn-js/',
+              'client/src/app/tabs/bpmn/modeler/features/apply-default-templates/',
+              'client/src/app/tabs/bpmn/util/**/*namespace*'
             ]
           });
 
