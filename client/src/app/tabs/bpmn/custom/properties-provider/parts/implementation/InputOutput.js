@@ -13,7 +13,8 @@ import {
   getInputParameter,
   getInputParameters,
   getOutputParameter,
-  getOutputParameters
+  getOutputParameters,
+  areInputParametersSupported
 } from '../../helper/InputOutputHelper';
 
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
@@ -38,6 +39,10 @@ function ensureInputOutputSupported(element) {
 
 function ensureOutparameterSupported(element) {
   return areOutputParametersSupported(element);
+}
+
+function ensureInputparameterSupported(element) {
+  return areInputParametersSupported(element);
 }
 
 export default function(element, bpmnFactory, options = {}) {
@@ -124,29 +129,30 @@ export default function(element, bpmnFactory, options = {}) {
 
 
   // input parameters ///////////////////////////////////////////////////////////////
+  if (ensureInputparameterSupported(element)) {
+    var inputEntry = extensionElementsEntry(element, bpmnFactory, {
+      id: `${idPrefix}inputs`,
+      label: 'Input Parameters',
+      modelProperty: 'source',
+      prefix: 'Input',
+      resizable: true,
 
-  var inputEntry = extensionElementsEntry(element, bpmnFactory, {
-    id: `${idPrefix}inputs`,
-    label: 'Input Parameters',
-    modelProperty: 'source',
-    prefix: 'Input',
-    resizable: true,
+      createExtensionElement: newElement('zeebe:Input', 'inputParameters'),
+      removeExtensionElement: removeElement(getInputParameter, 'inputParameters', 'outputParameters'),
 
-    createExtensionElement: newElement('zeebe:Input', 'inputParameters'),
-    removeExtensionElement: removeElement(getInputParameter, 'inputParameters', 'outputParameters'),
+      getExtensionElements: function(element) {
+        return getInputParameters(element);
+      },
 
-    getExtensionElements: function(element) {
-      return getInputParameters(element);
-    },
+      onSelectionChange: function(element, node, event, scope) {
+        outputEntry && outputEntry.deselect(element, node);
+      },
 
-    onSelectionChange: function(element, node, event, scope) {
-      outputEntry && outputEntry.deselect(element, node);
-    },
+      setOptionLabelValue: setOptionLabelValue(getInputParameter)
 
-    setOptionLabelValue: setOptionLabelValue(getInputParameter)
-
-  });
-  entries.push(inputEntry);
+    });
+    entries.push(inputEntry);
+  }
 
 
   // output parameters ///////////////////////////////////////////////////////
@@ -167,7 +173,8 @@ export default function(element, bpmnFactory, options = {}) {
       },
 
       onSelectionChange: function(element, node, event, scope) {
-        inputEntry.deselect(element, node);
+        if (inputEntry)
+          inputEntry.deselect(element, node);
       },
 
       setOptionLabelValue: setOptionLabelValue(getOutputParameter)
