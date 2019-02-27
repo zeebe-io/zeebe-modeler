@@ -26,9 +26,9 @@ import selectionModule from 'diagram-js/lib/features/selection';
 import modelingModule from 'bpmn-js/lib/features/modeling';
 import propertiesProviderModule from '../';
 
-describe('customs - timer-event properties', function() {
+describe('customs - timer-event duration property', function() {
 
-  const diagramXML = require('./TimerEvent.bpmn');
+  const diagramXML = require('./TimerDuration.bpmn');
 
   const testModules = [
     coreModule, selectionModule, modelingModule,

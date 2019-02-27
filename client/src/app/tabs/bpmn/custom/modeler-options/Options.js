@@ -15,7 +15,10 @@ export const AVAILABLE_REPLACE_ELEMENTS = [
   'replace-with-message-boundary',
   'replace-with-event-based-gateway',
   'replace-with-receive-task',
-  'replace-with-message-start'
+  'replace-with-message-start',
+  'replace-with-timer-start',
+  'replace-with-non-interrupting-message-boundary',
+  'replace-with-non-interrupting-timer-boundary'
 ];
 
 export const AVAILABLE_CONTEXTPAD_ENTRIES = [
