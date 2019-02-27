@@ -30,7 +30,7 @@ import eventDefinitionHelper from 'bpmn-js-properties-panel/lib/helper/EventDefi
 import coreModule from 'bpmn-js/lib/core';
 import selectionModule from 'diagram-js/lib/features/selection';
 import modelingModule from 'bpmn-js/lib/features/modeling';
-import propertiesProviderModule from '../';
+import propertiesProviderModule from '..';
 
 function getGeneralTab(container) {
   return domQuery('div[data-tab="general"]', container);
@@ -84,9 +84,9 @@ function isInputHidden(node) {
   return isHidden(node.parentNode);
 }
 
-describe('timer-event-properties', function() {
+describe('boundary-event-timer-event-properties', function() {
 
-  var diagramXML = require('./TimerEventDefinition.bpmn');
+  var diagramXML = require('./BoundaryEventTimerEventDefinition.bpmn');
 
   var testModules = [
     coreModule, selectionModule, modelingModule,
@@ -143,17 +143,17 @@ describe('timer-event-properties', function() {
     }));
 
 
-    it('should fetch timeDate as timer definition type', inject(function(elementRegistry, selection) {
+    it('should fetch timeDuration as timer definition type', inject(function(elementRegistry, selection) {
 
       // given
-      var shape = elementRegistry.get('TIME_DATE');
+      var shape = elementRegistry.get('TIME_DURATION');
 
       // when
       selection.select(shape);
 
       // then
-      expect(getTimerDefinitionTypeField(container).value).to.equal('timeDate');
-      expect(getTimerDefinitionField(container).value).to.equal('date');
+      expect(getTimerDefinitionTypeField(container).value).to.equal('timeDuration');
+      expect(getTimerDefinitionField(container).value).to.equal('duration');
     }));
 
 
@@ -195,74 +195,6 @@ describe('timer-event-properties', function() {
         timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
       }));
 
-      describe('to timeDate', function() {
-
-        beforeEach(function() {
-
-          // when
-          selectTimerDefinitionType('timeDate', container);
-
-        });
-
-        describe('in the DOM', function() {
-
-          it('should execute', function() {
-            // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDate');
-          });
-
-
-          it('should undo', inject(function(commandStack) {
-            // when
-            commandStack.undo();
-
-            // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('');
-          }));
-
-
-          it('should redo', inject(function(commandStack) {
-            // when
-            commandStack.undo();
-            commandStack.redo();
-
-            // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDate');
-          }));
-
-        });
-
-
-        describe('on the business object', function() {
-
-          it('should execute', function() {
-            // then
-            expect(timerDefinition.timeDate).to.be.ok;
-          });
-
-
-          it('should undo', inject(function(commandStack) {
-            // when
-            commandStack.undo();
-
-            // then
-            expect(timerDefinition.timeDate).not.to.be.ok;
-          }));
-
-
-          it('should redo', inject(function(commandStack) {
-            // when
-            commandStack.undo();
-            commandStack.redo();
-
-            // then
-            expect(timerDefinition.timeDate).to.be.ok;
-          }));
-
-        });
-
-      });
-
 
       describe('to timeCycle', function() {
 
@@ -332,28 +264,13 @@ describe('timer-event-properties', function() {
 
       });
 
-    });
 
-    describe('from timeDate', function() {
-
-      var timerDefinition;
-
-      beforeEach(inject(function(elementRegistry, selection) {
-
-        // when
-        var shape = elementRegistry.get('TIME_DATE');
-        selection.select(shape);
-
-        var bo = getBusinessObject(shape);
-        timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
-      }));
-
-      describe('to undefined', function() {
+      describe('to timeDuration', function() {
 
         beforeEach(function() {
 
           // when
-          selectTimerDefinitionType('', container);
+          selectTimerDefinitionType('timeDuration', container);
 
         });
 
@@ -361,7 +278,7 @@ describe('timer-event-properties', function() {
 
           it('should execute', function() {
             // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('');
+            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDuration');
           });
 
 
@@ -370,7 +287,7 @@ describe('timer-event-properties', function() {
             commandStack.undo();
 
             // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDate');
+            expect(getTimerDefinitionTypeField(container).value).to.equal('');
           }));
 
 
@@ -380,7 +297,7 @@ describe('timer-event-properties', function() {
             commandStack.redo();
 
             // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('');
+            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDuration');
           }));
 
         });
@@ -390,7 +307,7 @@ describe('timer-event-properties', function() {
 
           it('should execute', function() {
             // then
-            expect(timerDefinition.timeDate).not.to.be.ok;
+            expect(timerDefinition.timeDuration).to.be.ok;
           });
 
 
@@ -399,7 +316,7 @@ describe('timer-event-properties', function() {
             commandStack.undo();
 
             // then
-            expect(timerDefinition.timeDate).to.be.ok;
+            expect(timerDefinition.timeDuration).not.to.be.ok;
           }));
 
 
@@ -409,85 +326,7 @@ describe('timer-event-properties', function() {
             commandStack.redo();
 
             // then
-            expect(timerDefinition.timeDate).not.to.be.ok;
-          }));
-
-        });
-
-      });
-
-
-      describe('to timeCycle', function() {
-
-        beforeEach(function() {
-
-          // when
-          selectTimerDefinitionType('timeCycle', container);
-
-        });
-
-        describe('in the DOM', function() {
-
-          it('should execute', function() {
-            // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('timeCycle');
-            expect(getTimerDefinitionField(container).value).to.equal('date');
-          });
-
-
-          it('should undo', inject(function(commandStack) {
-            // when
-            commandStack.undo();
-
-            // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDate');
-            expect(getTimerDefinitionField(container).value).to.equal('date');
-          }));
-
-
-          it('should redo', inject(function(commandStack) {
-            // when
-            commandStack.undo();
-            commandStack.redo();
-
-            // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('timeCycle');
-            expect(getTimerDefinitionField(container).value).to.equal('date');
-          }));
-
-        });
-
-
-        describe('on the business object', function() {
-
-          it('should execute', function() {
-            // then
-            expect(timerDefinition.timeCycle).to.be.ok;
-            expect(timerDefinition.timeCycle.body).to.equal('date');
-            expect(timerDefinition.timeDate).not.to.be.ok;
-          });
-
-
-          it('should undo', inject(function(commandStack) {
-            // when
-            commandStack.undo();
-
-            // then
-            expect(timerDefinition.timeCycle).not.to.be.ok;
-            expect(timerDefinition.timeDate).to.be.ok;
-            expect(timerDefinition.timeDate.body).to.equal('date');
-          }));
-
-
-          it('should redo', inject(function(commandStack) {
-            // when
-            commandStack.undo();
-            commandStack.redo();
-
-            // then
-            expect(timerDefinition.timeCycle).to.be.ok;
-            expect(timerDefinition.timeCycle.body).to.equal('date');
-            expect(timerDefinition.timeDate).not.to.be.ok;
+            expect(timerDefinition.timeDuration).to.be.ok;
           }));
 
         });
@@ -495,7 +334,6 @@ describe('timer-event-properties', function() {
       });
 
     });
-
 
     describe('from timeCycle', function() {
 
@@ -580,12 +418,12 @@ describe('timer-event-properties', function() {
       });
 
 
-      describe('to timeDate', function() {
+      describe('to timeDuration', function() {
 
         beforeEach(function() {
 
           // when
-          selectTimerDefinitionType('timeDate', container);
+          selectTimerDefinitionType('timeDuration', container);
 
         });
 
@@ -593,7 +431,7 @@ describe('timer-event-properties', function() {
 
           it('should execute', function() {
             // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDate');
+            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDuration');
             expect(getTimerDefinitionField(container).value).to.equal('cycle');
           });
 
@@ -614,7 +452,7 @@ describe('timer-event-properties', function() {
             commandStack.redo();
 
             // then
-            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDate');
+            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDuration');
             expect(getTimerDefinitionField(container).value).to.equal('cycle');
           }));
 
@@ -625,8 +463,8 @@ describe('timer-event-properties', function() {
 
           it('should execute', function() {
             // then
-            expect(timerDefinition.timeDate).to.be.ok;
-            expect(timerDefinition.timeDate.body).to.equal('cycle');
+            expect(timerDefinition.timeDuration).to.be.ok;
+            expect(timerDefinition.timeDuration.body).to.equal('cycle');
             expect(timerDefinition.timeCycle).not.to.be.ok;
           });
 
@@ -636,7 +474,7 @@ describe('timer-event-properties', function() {
             commandStack.undo();
 
             // then
-            expect(timerDefinition.timeDate).not.to.be.ok;
+            expect(timerDefinition.timeDuration).not.to.be.ok;
             expect(timerDefinition.timeCycle).to.be.ok;
             expect(timerDefinition.timeCycle.body).to.equal('cycle');
           }));
@@ -648,9 +486,172 @@ describe('timer-event-properties', function() {
             commandStack.redo();
 
             // then
-            expect(timerDefinition.timeDate).to.be.ok;
-            expect(timerDefinition.timeDate.body).to.equal('cycle');
+            expect(timerDefinition.timeDuration).to.be.ok;
+            expect(timerDefinition.timeDuration.body).to.equal('cycle');
             expect(timerDefinition.timeCycle).not.to.be.ok;
+          }));
+
+        });
+
+      });
+
+    });
+
+
+    describe('from timeDuration', function() {
+
+      var timerDefinition;
+
+      beforeEach(inject(function(elementRegistry, selection) {
+
+        // when
+        var shape = elementRegistry.get('TIME_DURATION');
+        selection.select(shape);
+
+        var bo = getBusinessObject(shape);
+        timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
+      }));
+
+      describe('to undefined', function() {
+
+        beforeEach(function() {
+
+          // when
+          selectTimerDefinitionType('', container);
+
+        });
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+            // then
+            expect(getTimerDefinitionTypeField(container).value).to.equal('');
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+            // when
+            commandStack.undo();
+
+            // then
+            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDuration');
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+            // when
+            commandStack.undo();
+            commandStack.redo();
+
+            // then
+            expect(getTimerDefinitionTypeField(container).value).to.equal('');
+          }));
+
+        });
+
+
+        describe('on the business object', function() {
+
+          it('should execute', function() {
+            // then
+            expect(timerDefinition.timeDuration).not.to.be.ok;
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+            // when
+            commandStack.undo();
+
+            // then
+            expect(timerDefinition.timeDuration).to.be.ok;
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+            // when
+            commandStack.undo();
+            commandStack.redo();
+
+            // then
+            expect(timerDefinition.timeDuration).not.to.be.ok;
+          }));
+
+        });
+
+      });
+
+
+      describe('to timeCycle', function() {
+
+        beforeEach(function() {
+
+          // when
+          selectTimerDefinitionType('timeCycle', container);
+
+        });
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+            // then
+            expect(getTimerDefinitionTypeField(container).value).to.equal('timeCycle');
+            expect(getTimerDefinitionField(container).value).to.equal('duration');
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+            // when
+            commandStack.undo();
+
+            // then
+            expect(getTimerDefinitionTypeField(container).value).to.equal('timeDuration');
+            expect(getTimerDefinitionField(container).value).to.equal('duration');
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+            // when
+            commandStack.undo();
+            commandStack.redo();
+
+            // then
+            expect(getTimerDefinitionTypeField(container).value).to.equal('timeCycle');
+            expect(getTimerDefinitionField(container).value).to.equal('duration');
+          }));
+
+        });
+
+
+        describe('on the business object', function() {
+
+          it('should execute', function() {
+            // then
+            expect(timerDefinition.timeCycle).to.be.ok;
+            expect(timerDefinition.timeCycle.body).to.equal('duration');
+            expect(timerDefinition.timeDuration).not.to.be.ok;
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+            // when
+            commandStack.undo();
+
+            // then
+            expect(timerDefinition.timeCycle).not.to.be.ok;
+            expect(timerDefinition.timeDuration).to.be.ok;
+            expect(timerDefinition.timeDuration.body).to.equal('duration');
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+            // when
+            commandStack.undo();
+            commandStack.redo();
+
+            // then
+            expect(timerDefinition.timeCycle).to.be.ok;
+            expect(timerDefinition.timeCycle.body).to.equal('duration');
+            expect(timerDefinition.timeDuration).not.to.be.ok;
           }));
 
         });
@@ -669,19 +670,19 @@ describe('timer-event-properties', function() {
       container = propertiesPanel._container;
     }));
 
-    describe('of time date', function() {
+    describe('of time duration', function() {
 
-      var input, timeDate;
+      var input, timeDuration;
 
       beforeEach(inject(function(elementRegistry, selection) {
 
         // given
-        var shape = elementRegistry.get('TIME_DATE');
+        var shape = elementRegistry.get('TIME_DURATION');
         selection.select(shape);
 
         var bo = getBusinessObject(shape);
         var timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
-        timeDate = timerDefinition.timeDate;
+        timeDuration = timerDefinition.timeDuration;
 
         input = getTimerDefinitionField(container);
 
@@ -702,7 +703,7 @@ describe('timer-event-properties', function() {
           commandStack.undo();
 
           // then
-          expect(input.value).to.equal('date');
+          expect(input.value).to.equal('duration');
         }));
 
 
@@ -721,7 +722,7 @@ describe('timer-event-properties', function() {
 
         it('should execute', function() {
           // then
-          expect(timeDate.body).to.equal('foo');
+          expect(timeDuration.body).to.equal('foo');
         });
 
 
@@ -730,7 +731,7 @@ describe('timer-event-properties', function() {
           commandStack.undo();
 
           // then
-          expect(timeDate.body).to.equal('date');
+          expect(timeDuration.body).to.equal('duration');
         }));
 
 
@@ -740,7 +741,7 @@ describe('timer-event-properties', function() {
           commandStack.redo();
 
           // then
-          expect(timeDate.body).to.equal('foo');
+          expect(timeDuration.body).to.equal('foo');
         }));
 
       });
