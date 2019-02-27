@@ -44,12 +44,9 @@ function createFormalExpression(parent, body, bpmnFactory) {
 
 export default class TimerEventDefinition {
 
-  constructor(group, element, bpmnFactory, timerEventDefinition) {
+  constructor(group, element, bpmnFactory, timerEventDefinition, timerOptions) {
 
-    var selectOptions = [
-      { value: 'timeDate', name: 'Date' },
-      { value: 'timeCycle', name: 'Cycle' }
-    ];
+    var selectOptions = timerOptions;
 
     group.entries.push(entryFactory.selectBox({
       id: 'timer-event-definition-type',
