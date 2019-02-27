@@ -40,7 +40,7 @@ export function getPayloadMappings(element) {
 
 
 /**
- * Return all input parameters existing in the business object, and
+ * Return all mappings existing in the business object, and
  * an empty array if none exist.
  *
  * @param  {djs.model.Base} element
@@ -52,7 +52,7 @@ export function getMappings(element) {
 }
 
 /**
- * Get a mappings from the business object at given index
+ * Get mappings from the business object at given index
  *
  * @param {djs.model.Base} element
  * @param {number} idx
@@ -64,17 +64,12 @@ export function getMapping(element, idx) {
 }
 
 /**
- * Returns 'true' if the given element supports inputOutput
+ * Returns 'true' if the given element supports payloadmappings
  *
  * @param {djs.model.Base} element
  *
  * @return {boolean} a boolean value
  */
 export function isPayloadMappingsSupported(element) {
-  const bo = getBusinessObject(element);
-
-  if (is(bo, 'bpmn:SequenceFlow') && is(element.target, 'bpmn:ParallelGateway')) {
-    return true;
-  }
-  return (is(bo, 'bpmn:EndEvent'));
+  return (is(element, 'bpmn:EndEvent'));
 }
