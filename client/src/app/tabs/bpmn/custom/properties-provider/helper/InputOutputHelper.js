@@ -5,6 +5,8 @@ import {
 
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
+import eventDefinitionHelper from 'bpmn-js-properties-panel/lib/helper/EventDefinitionHelper';
+
 const getElements = (bo, type, prop) => {
   const elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
   return !prop ? elems : (elems[0] || {})[prop] || [];
@@ -84,6 +86,17 @@ export function getOutputParameter(element, idx) {
    * @return {boolean} a boolean value
    */
 export function isInputOutputSupported(element) {
+  return areOutputParametersSupported(element) || areOutputParametersSupported(element);
+}
+
+/**
+   * Returns 'true' if the given element supports input parameters
+   *
+   * @param {djs.model.Base} element
+   *
+   * @return {boolean} a boolean value
+   */
+export function areInputParametersSupported(element) {
   const bo = getBusinessObject(element);
   return (is(bo, 'bpmn:ServiceTask') || is(bo, 'bpmn:SubProcess'));
 }
@@ -97,7 +110,11 @@ export function isInputOutputSupported(element) {
    */
 export function areOutputParametersSupported(element) {
   const bo = getBusinessObject(element);
-  return (is(bo, 'bpmn:ServiceTask') || is(bo, 'bpmn:SubProcess'));
+  if (is(bo, 'bpmn:ServiceTask') || is(bo, 'bpmn:SubProcess') || is(bo, 'bpmn:ReceiveTask'))
+    return true;
+
+  const messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(element);
+  return messageEventDefinition;
 }
 
 
