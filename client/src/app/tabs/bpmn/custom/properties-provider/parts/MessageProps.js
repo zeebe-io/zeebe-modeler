@@ -25,14 +25,16 @@ export default function(group, element, bpmnFactory, elementRegistry, translate)
     }));
   } else if (messageEventDefinition) {
     message(group, element, bpmnFactory, messageEventDefinition);
-    group.entries = group.entries.concat(referenceExtensionElementProperty(element, messageEventDefinition, bpmnFactory, {
-      id: 'message-element-subscription',
-      label: 'Subscription Correlation Key',
-      referenceProperty: 'messageRef',
-      modelProperty: 'correlationKey',
-      extensionElement: 'zeebe:Subscription',
-      shouldValidate: true
-    }));
+    if (!is(element, 'bpmn:StartEvent')) {
+      group.entries = group.entries.concat(referenceExtensionElementProperty(element, messageEventDefinition, bpmnFactory, {
+        id: 'message-element-subscription',
+        label: 'Subscription Correlation Key',
+        referenceProperty: 'messageRef',
+        modelProperty: 'correlationKey',
+        extensionElement: 'zeebe:Subscription',
+        shouldValidate: true
+      }));
+    }
   }
 
 }

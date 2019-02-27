@@ -115,6 +115,9 @@ export default class PaletteProvider {
       'create.receive-task': createAction(
         'bpmn:ReceiveTask', 'activity', 'bpmn-icon-receive-task'
       ),
+      'create.send-task': createAction(
+        'bpmn:SendTask', 'activity', 'bpmn-icon-send-task'
+      ),
       'create.subprocess-expanded': createAction(
         'bpmn:SubProcess', 'activity', 'bpmn-icon-subprocess-expanded',
         translate('Create expanded SubProcess'),

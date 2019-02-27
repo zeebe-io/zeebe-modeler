@@ -37,10 +37,12 @@ describe('customs - replaceMenu', function() {
 
     openPopup(startEvent);
 
-    const endEventEntry = queryEntry(popupMenu, 'replace-with-none-end');
+    const endEventEntry = queryEntry(popupMenu, 'replace-with-none-end'),
+          messageStartEntry = queryEntry(popupMenu, 'replace-with-message-start');
 
     // then
     expect(endEventEntry).to.exist;
+    expect(messageStartEntry).to.exist;
 
   }));
 
@@ -131,6 +133,7 @@ describe('customs - replaceMenu', function() {
     openPopup(serviceTask);
 
     const sendTaskEntry = queryEntry(popupMenu, 'replace-with-send-task'),
+          receiveTaskEntry = queryEntry(popupMenu, 'replace-with-receive-task'),
           collapsedSubProcessEntry = queryEntry(popupMenu, 'replace-with-collapsed-subprocess'),
           expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess');
 
@@ -138,6 +141,7 @@ describe('customs - replaceMenu', function() {
     expect(sendTaskEntry).to.exist;
     expect(collapsedSubProcessEntry).to.exist;
     expect(expandedSubProcessEntry).to.exist;
+    expect(receiveTaskEntry).to.exist;
 
   }));
 
@@ -205,6 +209,7 @@ describe('customs - replaceMenu', function() {
     openPopup(subProcess);
 
     const sendTaskEntry = queryEntry(popupMenu, 'replace-with-send-task'),
+          receiveTaskEntry = queryEntry(popupMenu, 'replace-with-receive-task'),
           serviceTaskEntry = queryEntry(popupMenu, 'replace-with-service-task'),
           expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess');
 
@@ -212,6 +217,7 @@ describe('customs - replaceMenu', function() {
     expect(sendTaskEntry).to.exist;
     expect(serviceTaskEntry).to.exist;
     expect(expandedSubProcessEntry).to.exist;
+    expect(receiveTaskEntry).to.exist;
 
   }));
 
