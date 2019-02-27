@@ -13,14 +13,7 @@ export default class CustomReplaceMenuProvider extends ReplaceMenuProvider {
   // For future element support!!
   _createEntries(element, replaceOptions) {
     let options = ReplaceMenuProvider.prototype._createEntries.call(this, element, replaceOptions);
-
-    options = options.filter(option => {
-
-      if (availableElements.indexOf(option.id) != -1) {
-        return true;
-      }
-    });
-    return options;
+    return options.filter(option => availableElements.indexOf(option.id) != -1);
   }
 
   _getLoopEntries(element) {
