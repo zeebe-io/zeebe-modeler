@@ -32,7 +32,6 @@ function createParameter(type, parent, bpmnFactory, properties) {
   return createElement(type, parent, bpmnFactory, properties);
 }
 
-
 function ensureInputOutputSupported(element) {
   return isInputOutputSupported(element);
 }
