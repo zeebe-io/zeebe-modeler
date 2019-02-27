@@ -13,7 +13,9 @@ export const AVAILABLE_REPLACE_ELEMENTS = [
   'replace-with-expanded-subprocess',
   'replace-with-timer-boundary',
   'replace-with-message-boundary',
-  'replace-with-event-based-gateway'
+  'replace-with-event-based-gateway',
+  'replace-with-receive-task',
+  'replace-with-message-start'
 ];
 
 export const AVAILABLE_CONTEXTPAD_ENTRIES = [
