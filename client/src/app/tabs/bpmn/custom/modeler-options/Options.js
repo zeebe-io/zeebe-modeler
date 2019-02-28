@@ -1,6 +1,5 @@
 export const AVAILABLE_REPLACE_ELEMENTS = [
   'replace-with-service-task',
-  'replace-with-send-task',
   'replace-with-message-intermediate-catch',
   'replace-with-none-start',
   'replace-with-none-end',
