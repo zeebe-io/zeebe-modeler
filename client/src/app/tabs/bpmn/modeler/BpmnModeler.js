@@ -12,6 +12,7 @@ import minimapModule from 'diagram-js-minimap';
 import diagramOriginModule from 'diagram-js-origin';
 
 import alignToOriginModule from '@bpmn-io/align-to-origin';
+import addExporterModule from '@bpmn-io/add-exporter';
 
 import executableFixModule from './features/executable-fix';
 import globalClipboardModule from './features/global-clipboard';
@@ -62,6 +63,7 @@ const defaultModules = BpmnModeler.prototype._modules;
 const extensionModules = [
   minimapModule,
   executableFixModule,
+  addExporterModule,
   Flags.get(DISABLE_ADJUST_ORIGIN) ? diagramOriginModule : alignToOriginModule,
   globalClipboardModule,
   signavioCompatModule,
