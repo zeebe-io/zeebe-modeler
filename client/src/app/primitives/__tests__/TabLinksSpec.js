@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 /* global sinon */
 
 import React from 'react';
@@ -60,6 +67,71 @@ describe('<TabLinks>', function() {
 
   });
 
+
+  describe('title', function() {
+
+    it('should display tab title', function() {
+
+      const {
+        tree
+      } = renderTabLinks();
+
+      // when
+      const node = tree.find('.tab[data-tab-id="tab1"]').getDOMNode();
+
+      // then
+      expect(node.title).to.eql(tab1.title);
+    });
+
+  });
+
+
+  describe('placeholder', function() {
+
+    it('should display empty tab handle', function() {
+
+      const clickSpy = spy();
+
+      const placeholder = {
+        onClick: clickSpy,
+        title: 'CREATE STUFF',
+        label: '+'
+      };
+
+      const {
+        tree
+      } = renderTabLinks({ placeholder });
+
+      // when
+      const tab = tree.find('.tab.placeholder');
+
+      // then
+      expect(tab.exists()).to.be.true;
+
+      // and when
+      tab.simulate('click');
+
+      // then
+      expect(clickSpy).to.have.been.calledOnce;
+    });
+
+
+    it('should hide empty tab handle', function() {
+
+      const {
+        tree
+      } = renderTabLinks();
+
+      // when
+      const tab = tree.find('.tab.placeholder');
+
+      // then
+      expect(tab.exists()).to.be.false;
+    });
+
+  });
+
+
   describe('scrolling', function() {
 
     it('should handle scroll', function() {
@@ -87,6 +159,30 @@ describe('<TabLinks>', function() {
 
 
   describe('dragging', function() {
+
+    it('should handle dragstart', function() {
+
+      // given
+      const onSelectSpy = spy();
+
+      const {
+        tree,
+        tabLinks
+      } = renderTabLinks({
+        onSelect: onSelectSpy
+      });
+
+      const node = tree.find('.tab[data-tab-id="tab2"]').getDOMNode();
+
+      // when
+      tabLinks.handleDragStart({
+        dragTab: node
+      });
+
+      // then
+      expect(onSelectSpy).to.have.been.calledWith(defaultTabs[1]);
+    });
+
 
     it('should handle drag', function() {
 
@@ -125,7 +221,8 @@ function renderTabLinks(options = {}) {
     onMoveTab,
     onSelect,
     dirtyTabs,
-    unsavedTabs
+    unsavedTabs,
+    placeholder
   } = options;
 
   const tree = mount(
@@ -135,7 +232,8 @@ function renderTabLinks(options = {}) {
       onMoveTab={ onMoveTab || noop }
       onSelect={ onSelect || noop }
       dirtyTabs={ dirtyTabs || {} }
-      unsavedTabs={ unsavedTabs || {} } />
+      unsavedTabs={ unsavedTabs || {} }
+      placeholder={ placeholder } />
   );
 
   const tabLinks = tree.instance();

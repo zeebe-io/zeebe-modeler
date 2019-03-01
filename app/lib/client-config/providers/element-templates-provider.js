@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 'use strict';
 
 var parents = require('parents');
@@ -10,7 +17,9 @@ var findTemplates = require('./find-templates');
 /**
  * Nop, you aint gonna load this configuration.
  */
-function ElementTemplatesProvider(app) {
+function ElementTemplatesProvider(options) {
+
+  const defaultPaths = options.paths;
 
   /**
    * Return element templates for the given diagram.
@@ -27,15 +36,10 @@ function ElementTemplatesProvider(app) {
 
     var localPaths = diagram ? parents(diagram.path) : [];
 
-    var defaultPaths = [
-      app.getPath('userData'),
-      app.developmentMode ? process.cwd() : path.dirname(app.getPath('exe'))
+    var searchPaths = [
+      ...suffixAll(localPaths, '.camunda'),
+      ...defaultPaths
     ];
-
-    var searchPaths = [].concat(
-      suffixAll(localPaths, '.camunda'),
-      suffixAll(defaultPaths, 'resources')
-    );
 
     var templates = [];
 

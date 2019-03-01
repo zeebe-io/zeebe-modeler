@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 'use strict';
 
 class Deployer {
@@ -72,6 +79,8 @@ class Deployer {
     if (tenantId) {
       form.append('tenant-id', tenantId);
     }
+
+    form.append('deployment-source', 'Camunda Modeler');
 
     form.append('deploy-changed-only', 'true');
 

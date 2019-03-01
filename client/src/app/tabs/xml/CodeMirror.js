@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import CodeMirror from 'codemirror';
 
 // xml syntax highlighting
@@ -31,6 +38,8 @@ export default function create(options) {
     el = _el;
   }, {
     autoCloseTags: true,
+    dragDrop: true,
+    allowDropFileTypes: ['text/plain'],
     lineWrapping: true,
     lineNumbers: true,
     mode: {

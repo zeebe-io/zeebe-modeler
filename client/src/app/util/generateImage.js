@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import canvg from 'canvg-browser';
 
 // list of defined encodings
@@ -6,6 +13,7 @@ const ENCODINGS = [
   'image/jpeg'
 ];
 
+const SCALE = 3;
 
 export default function generateImage(type, svg) {
   const encoding = 'image/' + type;
@@ -18,6 +26,11 @@ export default function generateImage(type, svg) {
   }
 
   canvas = document.createElement('canvas');
+
+
+  svg = svg.replace(/width="([^"]+)" height="([^"]+)"/, function(_, widthStr, heightStr) {
+    return `width="${parseInt(widthStr, 10) * SCALE}" height="${parseInt(heightStr, 10) * SCALE}"`;
+  });
 
   canvg(canvas, svg);
 

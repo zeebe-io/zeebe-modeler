@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React, { PureComponent } from 'react';
 
 import classNames from 'classnames';
@@ -45,7 +52,7 @@ export default class TabLinks extends PureComponent {
     } = this.props;
 
     if (draggable) {
-      addDragger(this.tabLinksRef.current, TABS_OPTS, this.handleDrag);
+      addDragger(this.tabLinksRef.current, TABS_OPTS, this.handleDrag, this.handleDragStart);
     }
 
     if (scrollable) {
@@ -82,6 +89,17 @@ export default class TabLinks extends PureComponent {
     onSelect(tab);
   }
 
+  handleDragStart = ({ dragTab }) => {
+    const {
+      tabs,
+      onSelect
+    } = this.props;
+
+    const tab = tabs.find(({ id }) => id === dragTab.dataset.tabId);
+
+    onSelect(tab);
+  }
+
   handleDrag = ({ dragTab, newIndex }) => {
     const {
       tabs,
@@ -111,7 +129,7 @@ export default class TabLinks extends PureComponent {
       onSelect,
       onContextMenu,
       onClose,
-      onCreate,
+      placeholder,
       className
     } = this.props;
 
@@ -128,6 +146,7 @@ export default class TabLinks extends PureComponent {
                 <span
                   key={ tab.id }
                   data-tab-id={ tab.id }
+                  title={ tab.title }
                   className={ classNames('tab', {
                     active: tab === activeTab,
                     dirty
@@ -140,6 +159,7 @@ export default class TabLinks extends PureComponent {
                   {
                     onClose && <span
                       className="close"
+                      title="Close Tab"
                       onClick={ e => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -154,14 +174,15 @@ export default class TabLinks extends PureComponent {
           }
 
           {
-            onCreate && <span
-              key="empty-tab"
-              className={ classNames('tab ignore', {
+            placeholder && <span
+              key="__placeholder"
+              className={ classNames('tab placeholder ignore', {
                 active: tabs.length === 0
               }) }
-              onClick={ () => onCreate() }
+              onClick={ placeholder.onClick }
+              title={ placeholder.title }
             >
-              +
+              { placeholder.label }
             </span>
           }
         </div>

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import draggerFactory from '../dragger';
 
 /* global sinon */
@@ -9,6 +16,7 @@ describe('dragger', function() {
     document.dispatchEvent(new DragEvent('dragend'));
   });
 
+
   it('should call provided function on drag event', function() {
 
     // given
@@ -16,32 +24,13 @@ describe('dragger', function() {
     const dragger = draggerFactory(callbackSpy);
 
     // when
-    dragger(new DragEvent('dragstart'));
+    dragger(new DragEvent('dragstart', { clientX: 0, clientY: 0 }));
 
-    // TODO(nikku): this simulates broken drag behavior / drag jumping as
-    // seen on Windows and Linux
-    document.dispatchEvent(new DragEvent('drag', { clientX: 500, clientY: 10000 }));
-
-    document.dispatchEvent(new DragEvent('drag', { clientX: 1, clientY: 1 }));
+    document.dispatchEvent(new DragEvent('dragover', { clientX: 1, clientY: 1 }));
+    document.dispatchEvent(new DragEvent('dragover', { clientX: 150, clientY: 150 }));
 
     // then
-    expect(callbackSpy).to.be.calledOnce;
-  });
-
-
-  it('should not call provided function for last drag event with (0, 0) values', function() {
-
-    // given
-    const callbackSpy = sinon.spy();
-    const dragger = draggerFactory(callbackSpy);
-
-    // when
-    dragger(new DragEvent('dragstart'));
-
-    document.dispatchEvent(new DragEvent('drag', { clientX: 0, clientY: 0 }));
-
-    // then
-    expect(callbackSpy).to.not.be.called;
+    expect(callbackSpy).to.be.calledTwice;
   });
 
 });

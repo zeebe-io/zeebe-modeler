@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React from 'react';
 
 import {
@@ -183,6 +190,12 @@ export class MultiSheetTab extends CachedComponent {
     }
   }
 
+  handleContentUpdated = xml => {
+    this.setCached({
+      lastXML: xml
+    });
+  }
+
   handleContextMenu = (event, context) => {
 
     const {
@@ -305,8 +318,7 @@ export class MultiSheetTab extends CachedComponent {
       id,
       xml,
       layout,
-      onAction,
-      onContentUpdated
+      onAction
     } = this.props;
 
     if (!sheets) {
@@ -332,12 +344,13 @@ export class MultiSheetTab extends CachedComponent {
             onContextMenu={ this.handleContextMenu }
             onAction={ onAction }
             onChanged={ this.handleChanged }
-            onContentUpdated={ onContentUpdated }
+            onContentUpdated={ this.handleContentUpdated }
             onError={ this.handleError }
             onImport={ this.handleImport }
             onLayoutChanged={ this.handleLayoutChanged }
             onModal={ this.props.onModal }
             onLoadConfig={ this.props.onLoadConfig }
+            getPlugins={ this.props.getPlugins }
           />
         </TabContainer>
 

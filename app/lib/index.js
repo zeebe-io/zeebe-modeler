@@ -1,19 +1,22 @@
-'use strict';
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-var electron = require('electron'),
-    app = electron.app,
-    BrowserWindow = electron.BrowserWindow;
+const {
+  app,
+  dialog: electronDialog,
+  session,
+  BrowserWindow
+} = require('electron');
 
-var path = require('path');
+const path = require('path');
 
-var {
-  assign,
-  forEach
-} = require('min-dash');
-
-var fetch = require('node-fetch'),
-    fs = require('fs'),
-    FormData = require('form-data');
+const fetch = require('node-fetch');
+const fs = require('fs');
+const FormData = require('form-data');
 
 /**
  * automatically report crash reports
@@ -23,29 +26,46 @@ var fetch = require('node-fetch'),
 // TODO(nikku): do we want to do this?
 // require('crash-reporter').start();
 
-var Platform = require('./platform'),
-    Config = require('./config'),
-    ClientConfig = require('./client-config'),
-    FileSystem = require('./file-system'),
-    Workspace = require('./workspace'),
-    Dialog = require('./dialog'),
-    Menu = require('./menu'),
-    Cli = require('./cli'),
-    Plugins = require('./plugins'),
-    Deployer = require('./deployer');
+const Platform = require('./platform');
+const Config = require('./config');
+const ClientConfig = require('./client-config');
+const FileSystem = require('./file-system');
+const Workspace = require('./workspace');
+const Dialog = require('./dialog');
+const Menu = require('./menu');
+const Cli = require('./cli');
+const Plugins = require('./plugins');
+const Deployer = require('./deployer');
+const Flags = require('./flags');
+const Log = require('./log');
+const logTransports = require('./log/transports');
 
-var browserOpen = require('./util/browser-open'),
-    renderer = require('./util/renderer');
+const browserOpen = require('./util/browser-open');
+const renderer = require('./util/renderer');
 
-var config = Config.load(path.join(app.getPath('userData'), 'config.json'));
+const log = Log('app:main');
+const bootstrapLog = Log('app:main:bootstrap');
+const clientLog = Log('client');
 
-Platform.create(process.platform, app, config);
-
-// variable for developing (reloading and devtools toggling)
-app.developmentMode = false;
+bootstrapLogging();
 
 app.version = require('../package').version;
 app.name = 'Zeebe Modeler';
+
+bootstrapLog.info('starting %s v%s', app.name, app.version);
+
+const {
+  config,
+  clientConfig,
+  plugins,
+  flags,
+  files
+} = bootstrap();
+
+app.plugins = plugins;
+app.flags = flags;
+
+Platform.create(process.platform, app, config);
 
 // this is shared variable between main and renderer processes
 global.metaData = {
@@ -53,52 +73,48 @@ global.metaData = {
   name: app.name
 };
 
-// get directory of executable
-var appPath = path.dirname(app.getPath('exe'));
+const { platform } = process;
 
-app.plugins = new Plugins({
-  paths: [
-    app.getPath('userData'),
-    appPath
-  ]
+const menu = new Menu({
+  platform
 });
 
-// set global modeler directory
-global.modelerDirectory = appPath;
-
-var menu = new Menu(process.platform);
-
 // bootstrap filesystem
-var fileSystem = new FileSystem();
+const fileSystem = new FileSystem();
 
 // bootstrap workspace behavior
 new Workspace(config, fileSystem);
 
-// bootstrap client config behavior
-var clientConfig = new ClientConfig(app);
-
 // bootstrap dialog
-var dialog = new Dialog({
-  dialog: electron.dialog,
+const dialog = new Dialog({
+  electronDialog,
   config: config,
   userDesktopPath: app.getPath('userDesktop')
 });
 
 
 // bootstrap deployer
-var deployer = new Deployer({ fetch, fs, FormData });
+const deployer = new Deployer({ fetch, fs, FormData });
 
 
 // make app a singleton
-if (config.get('single-instance', true)) {
-
+//
+// may be disabled via --no-single-instance flag
+//
+if (flags.get('single-instance') === false) {
+  log('single instance disabled via flag');
+} else {
   const gotLock = app.requestSingleInstanceLock();
 
   if (gotLock) {
 
-    app.on('second-instance', (event, commandLine, workingDirectory) => {
+    app.on('second-instance', (event, argv, cwd) => {
 
-      app.emit('app:parse-cmd', commandLine, workingDirectory);
+      const {
+        files
+      } = Cli.parse(argv, cwd);
+
+      app.openFiles(files);
 
       // focus existing running instance window
       if (app.mainWindow) {
@@ -117,7 +133,7 @@ if (config.get('single-instance', true)) {
 // external //////////
 
 renderer.on('external:open-url', function(options) {
-  var url = options.url;
+  const url = options.url;
 
   browserOpen(url);
 });
@@ -130,9 +146,10 @@ renderer.on('dialog:open-files', async function(options, done) {
   } = options;
 
   if (activeFile && activeFile.path) {
-    assign(options, {
+    options = {
+      ...options,
       defaultPath: path.dirname(activeFile.path)
-    });
+    };
   }
 
   const filePaths = await dialog.showOpenDialog(options);
@@ -150,9 +167,10 @@ renderer.on('dialog:save-file', async function(options, done) {
   const { file } = options;
 
   if (file.path) {
-    assign(options, {
+    options = {
+      ...options,
       defaultPath: path.dirname(file.path)
-    });
+    };
   }
 
   const filePath = await dialog.showSaveDialog(options);
@@ -203,7 +221,7 @@ renderer.on('file:write', async function(filePath, file, options = {}, done) {
 
 renderer.on('client-config:get', function(...args) {
 
-  var done = args[args.length - 1];
+  const done = args[args.length - 1];
 
   try {
     clientConfig.get(...args);
@@ -216,59 +234,13 @@ renderer.on('client-config:get', function(...args) {
 
 // open file handling //////////
 
-// list of files that should be opened by the editor
-app.openFiles = [];
-
-app.on('app:parse-cmd', function(argv, cwd) {
-  console.log('app:parse-cmd', argv.join(' '), cwd);
-
-  // will result in opening dev.js as file
-  var files = Cli.extractFiles(argv, cwd);
-
-  files.forEach(function(file) {
-    app.emit('app:open-file', file);
-  });
-});
-
-app.on('app:open-file', function(filePath) {
-  var file;
-
-  console.log('app:open-file', filePath);
-
-  if (!app.clientReady) {
-
-    // defer file open
-    return app.openFiles.push(filePath);
-  }
-
-  try {
-    file = fileSystem.readFile(filePath);
-  } catch (e) {
-    dialog.showOpenFileErrorDialog({
-      name: path.basename(filePath)
-    });
-  }
-
-  // open file immediately
-  renderer.send('client:open-files', [ file ]);
-});
-
 app.on('app:client-ready', function() {
-  var files = [];
+  bootstrapLog.info('received client-ready');
 
-  console.log('app:client-ready');
-
-  forEach(app.openFiles, function(filePath) {
-    try {
-      files.push(fileSystem.readFile(filePath));
-    } catch (e) {
-      dialog.showOpenFileErrorDialog({
-        name: path.basename(filePath)
-      });
-    }
-  });
-
-  // renderer.send('client:open-files', files);
+  // open pending files
+  if (files.length) {
+    app.openFiles(files);
+  }
 
   renderer.send('client:started');
 });
@@ -277,6 +249,13 @@ renderer.on('client:ready', function() {
   app.clientReady = true;
 
   app.emit('app:client-ready');
+});
+
+renderer.on('client:error', function(...args) {
+  const done = args.pop();
+
+  clientLog.error(...args);
+  done(null);
 });
 
 app.on('web-contents-created', (event, webContents) => {
@@ -306,13 +285,43 @@ app.on('web-contents-created', (event, webContents) => {
 });
 
 /**
+ * Open the given filePaths in the editor.
+ *
+ * @param {Array<String>} filePaths
+ */
+app.openFiles = function(filePaths) {
+
+  log.info('open files %O', filePaths);
+
+  if (!app.clientReady) {
+
+    // defer file open
+    return files.push(...filePaths);
+  }
+
+  const existingFiles = filePaths.map(path => {
+
+    try {
+      return fileSystem.readFile(path);
+    } catch (e) {
+      dialog.showOpenFileErrorDialog({
+        name: path.basename(path)
+      });
+    }
+  }).filter(f => f);
+
+  // open files
+  renderer.send('client:open-files', existingFiles);
+};
+
+/**
  * Create the main window that represents the editor.
  *
  * @return {BrowserWindow}
  */
 app.createEditorWindow = function() {
 
-  var windowOptions = {
+  const windowOptions = {
     resizable: true,
     show: false,
     title: 'Zeebe Modeler'
@@ -322,23 +331,23 @@ app.createEditorWindow = function() {
     windowOptions.icon = path.join(__dirname + '/../resources/favicon.png');
   }
 
-  var mainWindow = app.mainWindow = new BrowserWindow(windowOptions);
+  const mainWindow = app.mainWindow = new BrowserWindow(windowOptions);
 
   dialog.setActiveWindow(mainWindow);
 
   menu.init();
 
-  var url = 'file://' + path.resolve(__dirname + '/../public/index.html');
+  let url = 'file://' + path.resolve(__dirname + '/../public/index.html');
 
-  if (app.developmentMode) {
-    url = 'http://localhost:3000';
+  if (process.env.NODE_ENV === 'development') {
+    url = 'file://' + path.resolve(__dirname + '/../../client/build/index.html');
   }
 
   mainWindow.loadURL(url);
 
   // handling case when user clicks on window close button
   mainWindow.on('close', function(e) {
-    console.log('Initiating close of main window');
+    log.info('initating close of main window');
 
     if (app.quitAllowed) {
       // dereferencing main window and resetting client state
@@ -347,13 +356,13 @@ app.createEditorWindow = function() {
 
       app.clientReady = false;
 
-      return console.log('Main window closed');
+      return log.info('main window closed');
     }
 
     // preventing window from closing until client allows to do so
     e.preventDefault();
 
-    console.log('Asking client to allow application quit');
+    log.info('asking client to allow quit');
 
     app.emit('app:quit-denied');
 
@@ -361,7 +370,8 @@ app.createEditorWindow = function() {
   });
 
   mainWindow.on('focus', function() {
-    console.log('Window focused');
+    log.info('window focused');
+
     renderer.send('client:window-focused');
   });
 
@@ -386,16 +396,37 @@ app.createEditorWindow = function() {
  */
 app.on('ready', function() {
 
+  bootstrapLog.info('received ready');
+
+  menu.registerMenuProvider('plugins', {
+    plugins: plugins.getAll()
+  });
+
+  session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+
+    const { url } = details;
+
+    const redirectURL = plugins.getAssetPath(url);
+
+    if (redirectURL) {
+      return callback({
+        redirectURL
+      });
+    }
+
+    return callback({});
+  });
+
   // quit command from menu/shortcut
   app.on('app:quit', function() {
-    console.log('Initiating termination of the application');
+    log.info('initiating quit');
 
     renderer.send('menu:action', 'quit');
   });
 
   // client quit verification event
   renderer.on('app:quit-allowed', function() {
-    console.log('Quit allowed');
+    log.info('quit allowed');
 
     app.quitAllowed = true;
 
@@ -403,8 +434,6 @@ app.on('ready', function() {
   });
 
   app.createEditorWindow();
-
-  app.emit('app:parse-cmd', process.argv, process.cwd());
 });
 
 
@@ -414,7 +443,7 @@ function handleDeployment(data, done) {
   deployer.deploy(endpointUrl, data, function(error, result) {
 
     if (error) {
-      console.error('failed to deploy', error);
+      log.error('failed to deploy', error);
 
       return done(error);
     }
@@ -422,6 +451,99 @@ function handleDeployment(data, done) {
     done(null, result);
   });
 }
+
+function bootstrapLogging() {
+
+  let logPath;
+
+  try {
+    logPath = app.getPath('logs');
+  } catch (e) {
+    logPath = app.getPath('userData');
+  }
+
+  Log.addTransports(
+    new logTransports.Console(),
+    new logTransports.File(path.join(logPath, 'log.log'))
+    // TODO(nikku): we're not doing this for now
+    // first we must decide how to separate diagram open warnings from
+    // actual app errors in the client user interface
+    // new logTransports.Client(renderer, () => app.clientReady)
+  );
+}
+
+/**
+ * Bootstrap the application and return
+ *
+ * {
+ *   config,
+ *   clientConfig,
+ *   plugins,
+ *   files
+ * }
+ *
+ * @return {Object} bootstrapped components
+ */
+function bootstrap() {
+  const userPath = app.getPath('userData');
+  const appPath = path.dirname(app.getPath('exe'));
+
+  const cwd = process.cwd();
+
+  const {
+    files,
+    flags: flagOverrides
+  } = Cli.parse(process.argv, cwd);
+
+  const additionalPaths = process.env.NODE_ENV === 'development'
+    ? [ path.join(cwd, 'resources') ]
+    : [ ];
+
+  const resourcePaths = [
+    path.join(userPath, 'resources'),
+    path.join(appPath, 'resources'),
+    ...additionalPaths
+  ];
+
+  const config = new Config({
+    path: userPath
+  });
+
+  const clientConfig = new ClientConfig({
+    paths: resourcePaths
+  });
+
+  const flags = new Flags({
+    paths: resourcePaths,
+    overrides: flagOverrides
+  });
+
+  const pluginsDisabled = flags.get('disable-plugins');
+
+  if (pluginsDisabled) {
+    log.info('plug-ins disabled via feature toggle');
+  }
+
+  // TODO(nikku): remove loading directly from {ROOT}/resources/plugins
+  // we changed it to load plug-ins from {ROOT}/resources/plugins via
+  // https://github.com/camunda/camunda-modeler/issues/597
+  const plugins = new Plugins({
+    paths: pluginsDisabled ? [] : [
+      ...resourcePaths,
+      userPath,
+      appPath
+    ]
+  });
+
+  return {
+    config,
+    clientConfig,
+    plugins,
+    flags,
+    files
+  };
+}
+
 
 // expose app
 module.exports = app;

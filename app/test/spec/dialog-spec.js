@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 'use strict';
 
 const path = require('path');
@@ -23,8 +30,8 @@ describe('Dialog', function() {
     electronDialog = new ElectronDialog();
 
     dialog = new Dialog({
-      dialog: electronDialog,
-      config: config,
+      electronDialog,
+      config,
       userDesktopPath: USER_DESKTOP_PATH
     });
   });

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -12,11 +19,24 @@ import {
   config,
   dialog,
   fileSystem,
+  plugins,
+  flags,
+  log,
   metadata,
   workspace
 } from './remote';
 
 import Metadata from './util/Metadata';
+import Flags from './util/Flags';
+
+import debug from 'debug';
+
+if (process.env.NODE_ENV !== 'production') {
+  debug.enable('*,-sockjs-client:*');
+}
+
+Metadata.init(metadata);
+Flags.init(flags);
 
 
 const isMac = backend.getPlatform() === 'darwin';
@@ -33,16 +53,35 @@ const globals = {
   dialog,
   fileSystem,
   isMac,
+  log,
+  plugins,
   workspace
 };
 
-Metadata.init(metadata);
 
-const rootElement = document.getElementById('root');
-ReactDOM.render(
-  <AppParent
-    keyboardBindings={ keyboardBindings }
-    globals={ globals }
-    tabsProvider={ tabsProvider }
-  />, rootElement
-);
+async function render() {
+
+  // load plugins
+  plugins.bindHelpers(window);
+
+  await plugins.loadAll();
+
+  const rootElement = document.getElementById('root');
+
+  const onStarted = () => {
+    // mark as finished loading
+    document.body.classList.remove('loading');
+  };
+
+  ReactDOM.render(
+    <AppParent
+      keyboardBindings={ keyboardBindings }
+      globals={ globals }
+      tabsProvider={ tabsProvider }
+      onStarted={ onStarted }
+    />, rootElement
+  );
+}
+
+render();
+

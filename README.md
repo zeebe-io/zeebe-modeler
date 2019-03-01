@@ -36,11 +36,14 @@ brew cask install zeebe-modeler
 # checkout a tag
 git checkout v1.1.0
 
-# install
+# install dependencies
 npm install
 
-# run all tests
+# execute all checks (lint, test and build)
 npm run all
+
+# build the application to ./dist
+npm run build
 ```
 
 

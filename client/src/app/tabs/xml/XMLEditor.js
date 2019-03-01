@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React from 'react';
 
 import {
@@ -148,6 +155,11 @@ export class XMLEditor extends CachedComponent {
       redo: !!history.redo,
       undo: !!history.undo
     };
+
+    // ensure backwards compatibility
+    // https://github.com/camunda/camunda-modeler/commit/78357e3ed9e6e0255ac8225fbdf451a90457e8bf#diff-bd5be70c4e5eadf1a316c16085a72f0fL17
+    newState.editable = true;
+    newState.searchable = true;
 
     const windowMenu = getXMLWindowMenu();
 

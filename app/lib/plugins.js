@@ -1,86 +1,167 @@
-'use strict';
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-var path = require('path'),
-    glob = require('glob');
+const path = require('path');
+const glob = require('glob');
+
+const log = require('./log')('app:plugins');
+
+const {
+  globFiles
+} = require('./util/files');
+
+const PLUGINS_PATTERN = 'plugins/*/index.js';
+
+// accept app-plugins:/// for sake of backwards compatibility
+const PLUGINS_PROTOCOL_REGEX = /^app-plugins:\/\/\/?([^/]+)(.*)$/;
 
 /**
- * Searches, validates and stores information about plugin bundles.
+ * Searches, validates and stores information about plugins.
  *
- * @param {Object} options
- * @param {Array}  options.path locations where to search for 'plugins'
- *                              folder and 'camunda-modeler.js' descriptors
+ * @param {Object} [options] - Options
+ * @param {Array}  [options.paths] - Paths to search.
  */
-function Plugins(options) {
-  this.options = options || {};
+class Plugins {
 
-  this.plugins = findPlugins(options.paths)
-    .map(p => {
-      let descriptor = require(p);
-      let pluginPath = path.dirname(p);
+  constructor(options = {}) {
 
-      let plugin = {};
+    const searchPaths = options.paths || [];
 
-      plugin.name = descriptor.name || '<unknown plugin>';
+    if (!searchPaths.length) {
+      this.plugins = [];
 
-      if (descriptor.style) {
-        var stylePath = path.join(pluginPath, descriptor.style);
-        var styleFiles = glob.sync(stylePath);
+      return;
+    }
 
-        if (!styleFiles.length) {
-          plugin.error = true;
-        } else {
-          plugin.style = stylePath;
-        }
-      }
+    log.info('searching for %s in paths %O', PLUGINS_PATTERN, searchPaths);
 
-      if (descriptor.script) {
-        var scriptPath = path.join(pluginPath, descriptor.script);
-        var scriptFiles = glob.sync(scriptPath);
-
-        if (!scriptFiles.length) {
-          plugin.error = true;
-        } else {
-          plugin.script = scriptPath;
-        }
-      }
-
-      if (descriptor.menu) {
-        var menuPath = path.join(pluginPath, descriptor.menu);
-
-        try {
-          plugin.menu = require(menuPath);
-        } catch (e) {
-          console.error(e);
-          plugin.error = true;
-        }
-      }
-
-      return plugin;
+    const pluginPaths = globFiles({
+      searchPaths,
+      pattern: PLUGINS_PATTERN
     });
-}
 
-Plugins.prototype.getPlugins = function() {
-  return this.plugins;
-};
+    log.info('found plug-in entries %O', pluginPaths);
 
-function findPlugins(paths) {
+    this.plugins = this._createPlugins(pluginPaths);
 
-  var plugins = [];
+    log.info('registered %O', Object.keys(this.plugins));
+  }
 
-  paths.forEach(path => {
-    var globOptions = {
-      cwd: path,
-      nodir: true,
-      realpath: true,
-      ignore: 'plugins/**/node_modules/**/index.js'
-    };
+  _createPlugins(pluginPaths) {
+    return pluginPaths.reduce((plugins, pluginPath) => {
 
-    var locationPlugins = glob.sync('plugins/**/index.js', globOptions);
+      // don't let broken plug-ins bring down the modeler
+      // instantiation; skip them and log a respective error
+      try {
+        log.info('loading %s', pluginPath);
 
-    plugins = plugins.concat(locationPlugins);
-  });
+        const base = path.dirname(pluginPath);
 
-  return plugins;
+        const {
+          name,
+          style,
+          script,
+          menu
+        } = require(pluginPath);
+
+        if (!name) {
+          throw new Error('plug-in descriptor is missing <name>');
+        }
+
+        if (name in plugins) {
+          throw new Error(`plug-in with name ${name} already registered via ${plugins[name].pluginPath}`);
+        }
+
+        const plugin = {
+          name,
+          base,
+          pluginPath
+        };
+
+        if (style) {
+          const stylePath = path.join(base, style);
+          const styleFiles = glob.sync(stylePath);
+
+          if (!styleFiles.length) {
+            plugin.error = true;
+          } else {
+            plugin.style = stylePath;
+          }
+        }
+
+        if (script) {
+          const scriptPath = path.join(base, script);
+          const scriptFiles = glob.sync(scriptPath);
+
+          if (!scriptFiles.length) {
+            plugin.error = true;
+          } else {
+            plugin.script = scriptPath;
+          }
+        }
+
+        if (menu) {
+          const menuPath = path.join(base, menu);
+
+          try {
+            plugin.menu = require(menuPath);
+          } catch (error) {
+            log.error('failed to load menu extension %s', menuPath, error);
+
+            plugin.error = true;
+          }
+        }
+
+        return {
+          ...plugins,
+          [name]: plugin
+        };
+      } catch (error) {
+        log.error('failed to load %s', pluginPath, error);
+      }
+
+      return plugins;
+    }, {});
+  }
+
+  getPluginBase(pluginName) {
+    const plugin = this.plugins[pluginName];
+
+    return plugin && plugin.base;
+  }
+
+  /**
+   * Creates an array containing all plugins.
+   *
+   * @returns {Array<Plugin>}
+   */
+  getAll() {
+    return Object.values(this.plugins);
+  }
+
+  getAssetPath(url) {
+    const match = PLUGINS_PROTOCOL_REGEX.exec(url);
+
+    if (match) {
+
+      const pluginName = match[1];
+      // we accept only slash as a separator
+      const assetPath = path.posix.normalize(match[2]);
+
+      const base = this.getPluginBase(pluginName);
+
+      if (base) {
+        return `file://${path.join(base, assetPath)}`;
+      }
+    }
+
+    return null;
+  }
+
 }
 
 module.exports = Plugins;

@@ -1,10 +1,17 @@
-'use strict';
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-var {
+const {
   forEach
 } = require('min-dash');
 
-var renderer = require('./util/renderer');
+const renderer = require('./util/renderer');
+
+const log = require('./log')('app:workspace');
 
 
 function Workspace(config, fileSystem) {
@@ -24,11 +31,12 @@ function Workspace(config, fileSystem) {
       } = diagram;
 
       try {
+        log.info('restoring %s', path);
+
         files.push(fileSystem.readFile(path));
 
-        console.log('[workspace]', 'restore', path);
       } catch (err) {
-        console.error('[workspace]', 'failed to restore file ', path, err);
+        log.error('failed to restore %s', path, err);
       }
     });
 
@@ -41,15 +49,11 @@ function Workspace(config, fileSystem) {
 
   renderer.on('workspace:save', function(workspace, done) {
 
-    config.set('workspace', workspace, function(err) {
-      if (err) {
-        return done(err);
-      }
+    log.info('saving');
 
-      console.log('[workspace]', 'save');
+    config.set('workspace', workspace);
 
-      done(null);
-    });
+    done(null);
   });
 }
 

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 export default function getBpmnWindowMenu(state) {
   return [
     ...getZoomEntries(state),
@@ -17,7 +24,7 @@ function getZoomEntries({ zoom }) {
   }, {
     label: 'Zoom to Actual Size',
     accelerator: 'CommandOrControl+0',
-    action: 'zoom'
+    action: 'resetZoom'
   }, {
     label: 'Zoom to Fit Diagram',
     accelerator: 'CommandOrControl+1',

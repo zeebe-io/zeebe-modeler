@@ -1,12 +1,19 @@
-'use strict';
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-var fs = require('fs');
+const fs = require('fs');
 
-var glob = require('glob');
+const glob = require('glob');
 
-var {
+const {
   isArray
 } = require('min-dash');
+
+const log = require('../../log')('app:client-config:element-templates');
 
 
 /**
@@ -27,7 +34,7 @@ module.exports = function findTemplates(searchPaths) {
     try {
       files = globTemplates(path);
     } catch (err) {
-      console.log('[WARN] templates glob error', err);
+      log.error('glob failed', err);
 
       return templates;
     }
@@ -42,7 +49,7 @@ module.exports = function findTemplates(searchPaths) {
 
         return [].concat(templates, parsedTemplates);
       } catch (err) {
-        console.log('[ERROR] template <' + filePath + '> parse error', err);
+        log.error('failed to parse template %s', filePath, err);
 
         throw new Error('template ' + filePath + ' parse error: ' + err.message);
       }

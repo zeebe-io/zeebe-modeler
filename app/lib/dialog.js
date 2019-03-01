@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 'use strict';
 
 const path = require('path');
@@ -16,16 +23,16 @@ class Dialog {
    * Constructor.
    *
    * @param {Object} options - Options.
-   * @param {Object} options.dialog - Electron dialog.
+   * @param {Object} options.electronDialog - Electron dialog.
    * @param {Object} options.config - Config.
    * @param {Object} options.userDesktopPath - User desktop path.
    */
   constructor(options) {
-    ensureOptions([ 'dialog', 'config', 'userDesktopPath' ], options);
+    ensureOptions([ 'electronDialog', 'config', 'userDesktopPath' ], options);
 
     this.browserWindow = null;
 
-    this.dialog = options.dialog;
+    this.electronDialog = options.electronDialog;
     this.config = options.config;
 
     this.userDesktopPath = options.userDesktopPath;
@@ -72,7 +79,7 @@ class Dialog {
     }
 
     return new Promise(resolve => {
-      this.dialog.showSaveDialog(this.browserWindow, {
+      this.electronDialog.showSaveDialog(this.browserWindow, {
         defaultPath: `${ defaultPath }/${ name }`,
         filters,
         title: title || `Save "${ name }" as...`
@@ -99,7 +106,7 @@ class Dialog {
     }
 
     return new Promise(resolve => {
-      this.dialog.showOpenDialog(this.browserWindow, {
+      this.electronDialog.showOpenDialog(this.browserWindow, {
         defaultPath,
         filters,
         properties: [ 'openFile', 'multiSelections' ],
@@ -138,7 +145,7 @@ class Dialog {
     });
 
     return new Promise((resolve) => {
-      this.dialog.showMessageBox(this.browserWindow, options, (index) => {
+      this.electronDialog.showMessageBox(this.browserWindow, options, (index) => {
         resolve(buttons[ index ].id);
       });
     });

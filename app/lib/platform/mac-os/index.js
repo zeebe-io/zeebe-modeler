@@ -1,4 +1,13 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 'use strict';
+
+const log = require('../../log')('app:mac-os');
 
 function MacOSPlatform(app) {
 
@@ -17,7 +26,7 @@ function MacOSPlatform(app) {
   app.on('open-url', function(e) {
     e.preventDefault();
 
-    console.log('application does not support opening URLs');
+    log.info('application does not support opening URLs');
   });
 
   /**
@@ -29,7 +38,8 @@ function MacOSPlatform(app) {
     if (e) {
       e.preventDefault();
     }
-    app.emit('app:open-file', filePath);
+
+    app.openFiles([ filePath ]);
   });
 
   /**
@@ -63,7 +73,7 @@ function MacOSPlatform(app) {
 
     e.preventDefault();
 
-    console.log('Keeping app in the dock');
+    log.info('Keeping app in the dock');
 
     app.terminating = false;
   });
@@ -74,6 +84,12 @@ function MacOSPlatform(app) {
   function checkAppWindow() {
     if (!app.mainWindow) {
       app.createEditorWindow();
+    } else {
+      if (app.mainWindow.isMinimized()) {
+        app.mainWindow.restore();
+      }
+
+      app.mainWindow.focus();
     }
   }
 
@@ -83,8 +99,7 @@ function MacOSPlatform(app) {
    */
   app.on('ready', function() {
     app.on('activate', checkAppWindow);
-    app.on('app:parse-cmd', checkAppWindow);
-    app.on('app:open-file', checkAppWindow);
+    app.on('open-file', checkAppWindow);
   });
 
 }

@@ -1,6 +1,14 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 export const defaultActiveTab = {
   id: 'tab1',
-  name: 'tab1.tab'
+  name: 'tab1.tab',
+  title: 'tab1'
 };
 
 export const defaultTabs = [

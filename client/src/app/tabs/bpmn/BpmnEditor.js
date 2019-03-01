@@ -1,4 +1,13 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React, { Component } from 'react';
+
+import { isFunction } from 'min-dash';
 
 import { Fill } from '../../slot-fill';
 
@@ -103,8 +112,6 @@ export class BpmnEditor extends CachedComponent {
     propertiesPanel.attachTo(this.propertiesPanelRef.current);
 
     this.checkImport();
-
-    this.handleResize();
   }
 
   componentWillUnmount() {
@@ -122,16 +129,10 @@ export class BpmnEditor extends CachedComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (!isImporting(this.state) && isXMLChange(prevProps.xml, this.props.xml)) {
-      this.checkImport();
-    }
+    this.checkImport(prevProps);
 
-    if (isChachedStateChange(prevProps, this.props)) {
+    if (isCacheStateChanged(prevProps, this.props)) {
       this.handleChanged();
-    }
-
-    if (prevProps.layout.propertiesPanel !== this.props.layout.propertiesPanel) {
-      this.triggerAction('resize');
     }
   }
 
@@ -276,6 +277,13 @@ export class BpmnEditor extends CachedComponent {
       zoom: true
     };
 
+    // ensure backwards compatibility
+    // https://github.com/camunda/camunda-modeler/commit/78357e3ed9e6e0255ac8225fbdf451a90457e8bf#diff-bd5be70c4e5eadf1a316c16085a72f0fL17
+    newState.bpmn = true;
+    newState.editable = true;
+    newState.elementsSelected = !!selectionLength;
+    newState.inactiveInput = !inputActive;
+
     const contextMenu = getBpmnContextMenu(newState);
 
     const editMenu = getBpmnEditMenu(newState);
@@ -305,22 +313,50 @@ export class BpmnEditor extends CachedComponent {
     return commandStack._stackIdx !== stackIdx;
   }
 
-  async checkImport() {
+  async checkImport(prevProps = {}) {
+
+    if (!this.isImportNeeded(prevProps)) {
+      return;
+    }
+
+    await this.importXML();
+  }
+
+  isImportNeeded(prevProps) {
+    const {
+      importing
+    } = this.state;
+
+    if (importing) {
+      return false;
+    }
+
+    const {
+      xml
+    } = this.props;
+
     const {
       lastXML
     } = this.getCached();
 
-    let { xml } = this.props;
+    return (xml !== prevProps.xml) || (xml !== lastXML);
+  }
+
+  async importXML() {
+    const {
+      xml
+    } = this.props;
+
+    this.setState({
+      importing: true
+    });
 
     const modeler = this.getModeler();
 
-    if (isXMLChange(lastXML, xml)) {
-      this.setState({
-        importing: true
-      });
+    const importedXML = await this.handleNamespace(xml);
 
-      modeler.importXML(xml, this.ifMounted(this.handleImport));
-    }
+    // TODO(nikku): apply default element templates to initial diagram
+    modeler.importXML(importedXML, this.ifMounted(this.handleImport));
   }
 
   /**
@@ -406,10 +442,65 @@ export class BpmnEditor extends CachedComponent {
   }
 
   triggerAction = (action, context) => {
+    const { propertiesPanel: propertiesPanelLayout } = this.props.layout;
     const modeler = this.getModeler();
 
     if (action === 'resize') {
       return this.handleResize();
+    }
+
+    if (action === 'toggleProperties') {
+      const newLayout = {
+        propertiesPanel: {
+          ...propertiesPanelLayout,
+          open: !propertiesPanelLayout.open
+        }
+      };
+
+      return this.handleLayoutChange(newLayout);
+    }
+
+    if (action === 'resetProperties') {
+      const newLayout = {
+        propertiesPanel: {
+          width: 250,
+          open: true
+        }
+      };
+
+      return this.handleLayoutChange(newLayout);
+    }
+
+    if (action === 'zoomIn') {
+      action = 'stepZoom';
+
+      context = {
+        value: 1
+      };
+    }
+
+    if (action === 'zoomOut') {
+      action = 'stepZoom';
+
+      context = {
+        value: -1
+      };
+    }
+
+    if (action === 'resetZoom') {
+      action = 'zoom';
+
+      context = {
+        value: 1
+      };
+    }
+
+    if (action === 'zoomFit') {
+      action = 'zoom';
+
+      context = {
+        value: 'fit-viewport'
+      };
     }
 
     // TODO(nikku): handle all editor actions
@@ -575,18 +666,48 @@ export class BpmnEditor extends CachedComponent {
     );
   }
 
-  static createCachedState() {
+  static createCachedState(props) {
     const {
       name,
       version
     } = Metadata;
 
+    const {
+      getPlugins,
+      onError
+    } = props;
+
+    const moddleExtensionPlugins = getPlugins('bpmn.modeler.moddleExtension');
+
+    const moddleExtensions = moddleExtensionPlugins.reduce((extensions, extension) => {
+      let { name } = extension;
+
+      try {
+        name = name.toLowerCase();
+      } catch (error) {
+        if (isFunction(onError)) {
+          onError(new Error('Could not register moddle extension.'));
+        }
+
+        return extensions;
+      }
+
+      return {
+        ...extensions,
+        [ name ]: extension
+      };
+    }, {});
+
+    const additionalModules = getPlugins('bpmn.modeler.additionalModules') || [];
+
     const modeler = new BpmnModeler({
-      position: 'absolute',
+      additionalModules,
       exporter: {
         name,
         version
-      }
+      },
+      moddleExtensions,
+      position: 'absolute'
     });
 
     const commandStack = modeler.get('commandStack');
@@ -636,14 +757,6 @@ class Color extends Component {
 
 // helpers //////////
 
-function isImporting(state) {
-  return state.importing;
-}
-
-function isXMLChange(prevXML, xml) {
-  return prevXML !== xml;
-}
-
-function isChachedStateChange(prevProps, props) {
+function isCacheStateChanged(prevProps, props) {
   return prevProps.cachedState !== props.cachedState;
 }

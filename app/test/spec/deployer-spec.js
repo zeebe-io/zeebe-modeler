@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 'use strict';
 
 const sinon = require('sinon');
@@ -31,9 +38,11 @@ describe('Deployer', function() {
 
     const expectedForm = new FormData();
 
-    expectedForm.append('deployment-name', data.deploymentName);
     expectedForm.append(data.file.name, fs.createReadStream(data.file.path));
+
+    expectedForm.append('deployment-name', data.deploymentName);
     expectedForm.append('deploy-changed-only', 'true');
+    expectedForm.append('deployment-source', 'Camunda Modeler');
     expectedForm.append('tenant-id', data.tenantId);
 
     // when
@@ -68,9 +77,11 @@ describe('Deployer', function() {
 
     const expectedForm = new FormData();
 
+    expectedForm.append(data.file.name, fs.createReadStream(data.file.path));
+
     expectedForm.append('deployment-name', data.deploymentName);
     expectedForm.append('deploy-changed-only', 'true');
-    expectedForm.append(data.file.name, fs.createReadStream(data.file.path));
+    expectedForm.append('deployment-source', 'Camunda Modeler');
 
     // when
     await deployer.deploy(url, data, (err, data) => {

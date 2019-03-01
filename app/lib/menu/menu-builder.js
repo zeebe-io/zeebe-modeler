@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 'use strict';
 
 const {
@@ -6,13 +13,17 @@ const {
   MenuItem
 } = require('electron');
 
-const browserOpen = require('../util/browser-open');
-
 const {
   assign,
+  find,
+  isFunction,
   map,
   merge
 } = require('min-dash');
+
+const browserOpen = require('../util/browser-open');
+
+const log = require('../log')('app:menu');
 
 
 class MenuBuilder {
@@ -22,7 +33,7 @@ class MenuBuilder {
       state: {
         save: false,
         exportAs: false,
-        development: app.developmentMode,
+        development: process.env.NODE_ENV === 'development',
         devtools: false
       },
       providers: {}
@@ -58,6 +69,7 @@ class MenuBuilder {
     }
 
     this.appendWindowMenu();
+    this.appendPluginsMenu();
     this.appendHelpMenu();
 
     return this;
@@ -149,6 +161,7 @@ class MenuBuilder {
   appendReopenLastTab() {
     this.menu.append(new MenuItem({
       label: 'Reopen Last File',
+      enabled: this.options.state.lastTab,
       accelerator: 'CommandOrControl+Shift+T',
       click: function() {
         app.emit('menu:action', 'reopen-last-tab');
@@ -400,6 +413,76 @@ class MenuBuilder {
     return submenuTemplate;
   }
 
+  appendPluginsMenu() {
+    const provider = find(this.options.providers, provider => provider.plugins);
+
+    const plugins = provider && provider.plugins || [];
+
+    // do not append menu, if no plug-ins are installed
+    if (!plugins.length) {
+      return this;
+    }
+
+    // construct sub-menus for each plug-in
+    const submenuTemplate = plugins.map(plugin => {
+      const { name } = plugin;
+
+      const menuItemDescriptor = {
+        label: name,
+        enabled: false
+      };
+
+      if (plugin.menu) {
+
+        try {
+          const menuEntries = plugin.menu(app, this.options.state);
+
+          menuItemDescriptor.enabled = true;
+          menuItemDescriptor.submenu = Menu.buildFromTemplate(
+            menuEntries.map((entry) => {
+
+              const {
+                accelerator,
+                action,
+                enabled,
+                label,
+                submenu
+              } = entry;
+
+              return new MenuItem({
+                label,
+                accelerator,
+                enabled: isFunction(enabled) ? enabled() : enabled,
+                click: action && wrapPluginAction(action, name),
+                submenu
+              });
+            })
+          );
+        } catch (error) {
+          plugin.error = true;
+          menuItemDescriptor.enabled = false;
+
+          log.error('[%s] Failed to build menu: %O', name, error);
+        }
+      }
+
+      if (plugin.error) {
+        menuItemDescriptor.label = menuItemDescriptor.label.concat(' <error>');
+      }
+
+      return new MenuItem(menuItemDescriptor);
+    });
+
+    // create actual menu entry, based on previously
+    // constructed sub-menus
+    this.menu.append(new MenuItem({
+      label: 'Plugins',
+      submenu: Menu.buildFromTemplate(submenuTemplate)
+    }));
+
+    return this;
+  }
+
   appendHelpMenu() {
     const submenuTemplate = this.getHelpSubmenuTemplate();
 
@@ -436,7 +519,6 @@ class MenuBuilder {
       },
       getSeparatorTemplate()
     ];
-
 
     const providedMenus = map(this.options.providers, provider => provider.helpMenu)
       .filter(menu => Boolean(menu.length));
@@ -543,4 +625,14 @@ function canSwitchTab(state) {
 
 function canCloseTab(state) {
   return Boolean(state.tabsCount);
+}
+
+function wrapPluginAction(fn, pluginName) {
+  return async function() {
+    try {
+      await fn();
+    } catch (error) {
+      log.error('[%s] Menu action error: %O', pluginName, error);
+    }
+  };
 }

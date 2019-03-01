@@ -1,24 +1,35 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React, { PureComponent } from 'react';
 
+import debug from 'debug';
+
+import {
+  debounce,
+  forEach,
+  reduce
+} from 'min-dash';
+
+import executeOnce from './util/executeOnce';
+
 import { WithCache } from './cached';
+
+import { DropZone } from './drop-zone';
 
 import {
   Fill,
   SlotFillRoot
 } from './slot-fill';
 
-import {
-  assign,
-  debounce,
-  forEach,
-  reduce
-} from 'min-dash';
-
 import Toolbar from './Toolbar';
 
 import Log from './Log';
 
-import debug from 'debug';
 
 import { ModalConductor } from './modals';
 
@@ -87,8 +98,19 @@ export class App extends PureComponent {
 
     this.tabRef = React.createRef();
 
+    // remember the original App#checkFileChanged version
+    // for testing purposes
+    this.__checkFileChanged = this.checkFileChanged;
+
+    // ensure we do not accidently execute the method recursively
+    // cf. https://github.com/camunda/camunda-modeler/issues/1118
+    this.checkFileChanged = executeOnce(
+      (tab) => this.__checkFileChanged(tab),
+      (tab) => tab.id
+    );
+
     if (process.env.NODE_ENV !== 'test') {
-      this.workspaceChanged = debounce(this.workspaceChanged, 300);
+      this.workspaceChanged = debounce(this.workspaceChanged, 1500);
       this.updateMenu = debounce(this.updateMenu, 50);
       this.resizeTab = debounce(this.resizeTab, 50);
     }
@@ -147,27 +169,6 @@ export class App extends PureComponent {
 
 
   /**
-   * Show the tab.
-   *
-   * @param {Tab} tab
-   */
-  showTab = (tab) => {
-
-    const {
-      activeTab,
-      tabShown
-    } = this.state;
-
-    if (tab === activeTab) {
-      return tabShown.promise;
-    }
-
-    this.navigationHistory.push(tab);
-
-    return this.setActiveTab(tab);
-  }
-
-  /**
    * Navigate shown tabs in given direction.
    */
   navigate(direction) {
@@ -185,9 +186,14 @@ export class App extends PureComponent {
 
     const nextActiveTab = this.navigationHistory.navigate(direction, nextFn);
 
-    return this.setActiveTab(nextActiveTab);
+    return this.showTab(nextActiveTab);
   }
 
+  /**
+   * Check whether file has changed externally and update accordingly.
+   *
+   * @param {Tab} tab
+   */
   checkFileChanged = async (tab) => {
 
     const {
@@ -206,7 +212,7 @@ export class App extends PureComponent {
 
     // skip new file
     if (this.isUnsaved(tab) || typeof tabLastModified === 'undefined') {
-      return;
+      return tab;
     }
 
     const {
@@ -215,7 +221,7 @@ export class App extends PureComponent {
 
     // skip unchanged
     if (!(lastModified > tabLastModified)) {
-      return;
+      return tab;
     }
 
     const answer = await this.showDialog(getContentChangedDialog());
@@ -226,6 +232,13 @@ export class App extends PureComponent {
       return this.updateTab(tab, {
         file: updatedFile
       });
+    } else {
+      return this.updateTab(tab, {
+        file: {
+          ...file,
+          lastModified
+        }
+      }, this.setUnsaved(tab, true));
     }
   }
 
@@ -234,8 +247,9 @@ export class App extends PureComponent {
    *
    * @param {Tab} tab
    * @param {Object} newAttrs
+   * @param {Object} [newState={}]
    */
-  updateTab(tab, newAttrs) {
+  updateTab(tab, newAttrs, newState={}) {
 
     if (newAttrs.id && newAttrs.id !== tab.id) {
       throw new Error('must not change tab.id');
@@ -270,6 +284,7 @@ export class App extends PureComponent {
       }
 
       return {
+        ...newState,
         activeTab: updatedActiveTab,
         tabs: updatedTabs
       };
@@ -281,7 +296,15 @@ export class App extends PureComponent {
     return updatedTab;
   }
 
-  setActiveTab(tab) {
+
+  /**
+   * Show the tab.
+   *
+   * @param {Tab} tab
+   *
+   * @return {Promise<Void>} tab shown promise
+   */
+  showTab(tab) {
 
     const {
       activeTab,
@@ -313,6 +336,13 @@ export class App extends PureComponent {
     return deferred.promise;
   }
 
+  /**
+   * Close tab.
+   *
+   * @param {Tab} tab
+   *
+   * @return {Promise<Boolean>} resolved to true if tab is closed
+   */
   closeTab = async (tab) => {
     const { file } = tab;
 
@@ -324,11 +354,13 @@ export class App extends PureComponent {
       if (response === 'save') {
         await this.saveTab(tab);
       } else if (response === 'cancel') {
-        return;
+        return false;
       }
     }
 
     await this._removeTab(tab);
+
+    return true;
   }
 
   isDirty = (tab) => {
@@ -336,7 +368,10 @@ export class App extends PureComponent {
   }
 
   isUnsaved = (tab) => {
-    return tab.file && !tab.file.path;
+    const { unsavedTabs } = this.state;
+    const { id, file } = tab;
+
+    return unsavedTabs[id] || (file && !file.path);
   }
 
   async _removeTab(tab) {
@@ -378,7 +413,7 @@ export class App extends PureComponent {
         EMPTY_TAB
       );
 
-      await this.setActiveTab(nextActive);
+      await this.showTab(nextActive);
     }
 
     this.setState({
@@ -391,7 +426,7 @@ export class App extends PureComponent {
 
   selectTab = async tab => {
     const updatedTab = await this.checkFileChanged(tab);
-    return this.setActiveTab(updatedTab || tab);
+    return this.showTab(updatedTab || tab);
   }
 
   moveTab = (tab, newIndex) => {
@@ -410,8 +445,7 @@ export class App extends PureComponent {
     newTabs.splice(newIndex, 0, tab);
 
     this.setState({
-      tabs: newTabs,
-      activeTab: tab
+      tabs: newTabs
     });
   }
 
@@ -426,8 +460,7 @@ export class App extends PureComponent {
     } = this.state;
 
     const {
-      dialog,
-      fileSystem
+      dialog
     } = globals;
 
     const providers = tabsProvider.getProviders();
@@ -443,17 +476,7 @@ export class App extends PureComponent {
       return;
     }
 
-    const files = await Promise.all(filePaths.map(async (filePath) => {
-      const fileType = getFileTypeFromExtension(filePath);
-
-      const provider = tabsProvider.getProvider(fileType);
-
-      const encoding = provider.encoding ? provider.encoding : ENCODING_UTF8;
-
-      return await fileSystem.readFile(filePath, {
-        encoding
-      });
-    }));
+    const files = await this.readFileList(filePaths);
 
     await this.openFiles(files);
   }
@@ -537,7 +560,20 @@ export class App extends PureComponent {
     }
   }
 
-  openFiles = async (files) => {
+  /**
+   * Open the given files, optionally passing a file
+   * that should be active after the operation.
+   *
+   * File activation may be disabled by explicitly passing
+   * `false` as the activeFile. Otherwise it will either activate
+   * the tab corresponding to the activeFile or the last opened tab.
+   *
+   * @param {Array<File>} files
+   * @param {File|Boolean} activateFile
+   *
+   * @return {Array<Tab>} all tabs that could be opened from the given files.
+   */
+  openFiles = async (files, activateFile) => {
 
     const {
       tabsProvider
@@ -551,46 +587,99 @@ export class App extends PureComponent {
     files = files.map(file => {
       const { contents } = file;
 
-      return assign(file, {
+      return {
+        ...file,
         contents: contents.replace(/(^\s*|\s*$)/g, '')
-      });
+      };
     });
 
-    // open tabs from last to first to
-    // keep display order in tact
-    const openedTabs = await Promise.all(files.slice().reverse().map(
-      async file => {
-        let tab;
+    // either find existing or create new tab for every given file
+    const openedTabs = await this.findOrCreateTabs(files, tabsProvider);
 
-        if (!file.contents.length) {
-          tab = await this.openEmptyFile(file);
-        } else {
-          tab = this.findOpenTab(file);
+    // unless activation is disabled via activateFile=false,
+    // open the tab for the desired file or, if not found,
+    // the last opened tab
+    if (activateFile !== false) {
+      const activeTab = activateFile && this.findOpenTab(activateFile) || openedTabs[openedTabs.length - 1];
 
-          if (!tab) {
-            const newTab = tabsProvider.createTabForFile(file);
+      if (activeTab) {
+        await this.selectTab(activeTab);
+      }
+    }
 
-            if (newTab) {
-              tab = this.addTab(newTab);
-            }
+    return openedTabs;
+  }
+
+  readFileList = async filePaths => {
+    const readOperations = filePaths.map(this.readFileFromPath);
+
+    const rawFiles = await Promise.all(readOperations);
+
+    const files = rawFiles.filter(Boolean);
+
+    return files;
+  }
+
+  readFileFromPath = async (filePath) => {
+    const {
+      globals,
+      tabsProvider
+    } = this.props;
+
+    const fileType = getFileTypeFromExtension(filePath);
+
+    const provider = tabsProvider.getProvider(fileType);
+
+    const encoding = provider.encoding ? provider.encoding : ENCODING_UTF8;
+
+    let file = null;
+
+    try {
+      file = await globals.fileSystem.readFile(filePath, {
+        encoding
+      });
+    } catch (error) {
+      if (error.code === 'EISDIR') {
+        return this.handleError(new Error(`Cannot open directory: ${filePath}`));
+      }
+
+      this.handleError(error);
+    }
+
+    return file;
+  }
+
+  /**
+   * Find existing tabs for given files. If no tab was found for one tab,
+   * create a new one.
+   * @param {Array<File>} files
+   * @param {TabsProvider} tabsProvider
+   *
+   * @returns {Array<Tab>}
+   */
+  async findOrCreateTabs(files, tabsProvider) {
+    const openedTabs = await Promise.all(files.slice().reverse().map(async (file) => {
+      let tab;
+
+      if (!file.contents.length) {
+        tab = await this.openEmptyFile(file);
+      } else {
+        tab = this.findOpenTab(file);
+        if (!tab) {
+          const newTab = tabsProvider.createTabForFile(file);
+          if (newTab) {
+            tab = this.addTab(newTab);
           }
         }
+      }
 
-        return tab;
-      })
-    ).then(tabs => {
-
+      return tab;
+    })).then(tabs => {
       // filter out empty elements
       return tabs.filter(tab => tab);
     });
 
-    if (openedTabs.length) {
-      await this.selectTab(openedTabs[0]);
-    }
-
-    // open tabs from last to first to
-    // keep display order in tact
-    return openedTabs.reverse();
+    return openedTabs.slice().reverse();
   }
 
   findOpenTab(file) {
@@ -754,24 +843,6 @@ export class App extends PureComponent {
     };
   }
 
-  /**
-   * Handle if tab content is updated.
-   *
-   * @param {String} new tab content
-   */
-  handleTabContentUpdated = (tab) => (newContent) => {
-
-    if (!newContent) {
-      return;
-    }
-
-    this.updateTab(tab, {
-      file: {
-        contents: newContent
-      }
-    });
-  }
-
   tabSaved(tab, newFile) {
 
     const {
@@ -872,6 +943,9 @@ export class App extends PureComponent {
       this.updateMenu(tabState);
     }
 
+    if (layout !== prevState.layout) {
+      this.triggerAction('resize');
+    }
   }
 
   componentDidCatch(error, info) {
@@ -1008,9 +1082,10 @@ export class App extends PureComponent {
 
     const encoding = provider.encoding ? provider.encoding : ENCODING_UTF8;
 
-    const newFile = await fileSystem.writeFile(filePath, assign(file, {
+    const newFile = await fileSystem.writeFile(filePath, {
+      ...file,
       contents
-    }), {
+    }, {
       encoding,
       fileType
     }).catch(async err => {
@@ -1059,7 +1134,10 @@ export class App extends PureComponent {
 
   toggleLog = (open) => {
     this.handleLayoutChanged({
-      log: { open }
+      log: {
+        ...this.state.layout.log,
+        open
+      }
     });
   };
 
@@ -1098,7 +1176,8 @@ export class App extends PureComponent {
 
     onMenuUpdate({
       ...options,
-      tabsCount: this.state.tabs.length
+      tabsCount: this.state.tabs.length,
+      lastTab: !!this.closedTabs.get()
     });
   }
 
@@ -1264,7 +1343,11 @@ export class App extends PureComponent {
     }
 
     if (action === 'open-external-url') {
-      this.openExternalUrl(options);
+      return this.openExternalUrl(options);
+    }
+
+    if (action === 'backend-error') {
+      return this.logEntry(options, 'error');
     }
 
     if (action === 'check-file-changed') {
@@ -1315,12 +1398,34 @@ export class App extends PureComponent {
     this.triggerAction('close-tab', { tabId: tab.id }).catch(console.error);
   }
 
+  handleDrop = async (files) => {
+    const filePaths = Array.from(files).map(({ path }) => path);
+
+    try {
+      const files = await this.readFileList(filePaths);
+
+      await this.openFiles(files);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   loadConfig = (key, ...args) => {
     return this.props.globals.config.get(key, this.state.activeTab, ...args);
   }
 
-  quit() {
-    return true;
+  getPlugins = type => {
+    const { globals } = this.props;
+
+    const { plugins } = globals;
+
+    return plugins.get(type);
+  }
+
+  async quit() {
+    const closeResults = await this.triggerAction('close-all-tabs');
+
+    return closeResults.every(result => result);
   }
 
   composeAction = (...args) => {
@@ -1372,135 +1477,166 @@ export class App extends PureComponent {
 
     const canSave = this.isUnsaved(activeTab) || this.isDirty(activeTab);
 
+    const {
+      tabsProvider
+    } = this.props;
+
     return (
-      <div className={ css.App }>
+      <DropZone
+        onDrop={ this.handleDrop }
+      >
 
-        <SlotFillRoot>
+        <div className={ css.App }>
 
-          <Toolbar />
+          <SlotFillRoot>
 
-          <Fill name="toolbar" group="general">
-            <DropdownButton
-              title="Create diagram"
-              items={ [
-                {
-                  text: 'Create new BPMN diagram',
-                  onClick: this.composeAction('create-bpmn-diagram')
-                }
-              ] }
-            >
-              <Icon name="new" />
-            </DropdownButton>
+            <Toolbar />
 
-            <Button
-              title="Open diagram"
-              onClick={ this.composeAction('open-diagram') }
-            >
-              <Icon name="open" />
-            </Button>
-          </Fill>
-
-          <Fill name="toolbar" group="save">
-            <Button
-              disabled={ !canSave }
-              onClick={ canSave ? this.composeAction('save') : null }
-              title="Save diagram"
-            >
-              <Icon name="save" />
-            </Button>
-            <Button
-              onClick={ this.composeAction('save-as') }
-              title="Save diagram as..."
-            >
-              <Icon name="save-as" />
-            </Button>
-          </Fill>
-
-          <Fill name="toolbar" group="editor">
-            <Button
-              disabled={ !tabState.undo }
-              onClick={ this.composeAction('undo') }
-              title="Undo last action"
-            >
-              <Icon name="undo" />
-            </Button>
-            <Button
-              disabled={ !tabState.redo }
-              onClick={ this.composeAction('redo') }
-              title="Redo last action"
-            >
-              <Icon name="redo" />
-            </Button>
-          </Fill>
-
-          {
-            tabState.exportAs && <Fill name="toolbar" group="export">
-              <Button
-                title="Export as image"
-                onClick={ this.composeAction('export-as') }
+            <Fill name="toolbar" group="general">
+              <DropdownButton
+                title="Create diagram"
+                items={ [
+                  {
+                    text: 'Create new BPMN diagram',
+                    onClick: this.composeAction('create-bpmn-diagram'),
+                    type: 'bpmn'
+                  },
+                  {
+                    text: 'Create new DMN table',
+                    onClick: this.composeAction('create-dmn-table'),
+                    type: 'dmn'
+                  },
+                  {
+                    text: 'Create new DMN diagram (DRD)',
+                    onClick: this.composeAction('create-dmn-diagram'),
+                    type: 'dmn'
+                  },
+                  {
+                    text: 'Create new CMMN diagram',
+                    onClick: this.composeAction('create-cmmn-diagram'),
+                    type: 'cmmn'
+                  }
+                ].filter(entry => tabsProvider.hasProvider(entry.type)) }
               >
-                <Icon name="picture" />
+                <Icon name="new" />
+              </DropdownButton>
+
+              <Button
+                title="Open diagram"
+                onClick={ this.composeAction('open-diagram') }
+              >
+                <Icon name="open" />
               </Button>
             </Fill>
-          }
 
-          <div className="tabs">
-            <TabLinks
-              className="primary"
-              tabs={ tabs }
-              dirtyTabs={ dirtyTabs }
-              unsavedTabs={ unsavedTabs }
-              activeTab={ activeTab }
-              onSelect={ this.selectTab }
-              onMoveTab={ this.moveTab }
-              onContextMenu={ this.openTabLinksMenu }
-              onClose={ this.handleCloseTab }
-              onCreate={ this.composeAction('create-bpmn-diagram') }
-              draggable
-              scrollable
+            <Fill name="toolbar" group="save">
+              <Button
+                disabled={ !canSave }
+                onClick={ canSave ? this.composeAction('save') : null }
+                title="Save diagram"
+              >
+                <Icon name="save" />
+              </Button>
+              <Button
+                onClick={ this.composeAction('save-as') }
+                title="Save diagram as..."
+              >
+                <Icon name="save-as" />
+              </Button>
+            </Fill>
+
+            <Fill name="toolbar" group="editor">
+              <Button
+                disabled={ !tabState.undo }
+                onClick={ this.composeAction('undo') }
+                title="Undo last action"
+              >
+                <Icon name="undo" />
+              </Button>
+              <Button
+                disabled={ !tabState.redo }
+                onClick={ this.composeAction('redo') }
+                title="Redo last action"
+              >
+                <Icon name="redo" />
+              </Button>
+            </Fill>
+
+            {
+              tabState.exportAs && <Fill name="toolbar" group="export">
+                <Button
+                  title="Export as image"
+                  onClick={ this.composeAction('export-as') }
+                >
+                  <Icon name="picture" />
+                </Button>
+              </Fill>
+            }
+
+            <div className="tabs">
+              <TabLinks
+                className="primary"
+                tabs={ tabs }
+                dirtyTabs={ dirtyTabs }
+                unsavedTabs={ unsavedTabs }
+                activeTab={ activeTab }
+                onSelect={ this.selectTab }
+                onMoveTab={ this.moveTab }
+                onContextMenu={ this.openTabLinksMenu }
+                onClose={ this.handleCloseTab }
+                placeholder={ {
+                  label: '+',
+                  title: 'New BPMN diagram',
+                  onClick: this.composeAction('create-bpmn-diagram')
+                } }
+                draggable
+                scrollable
+              />
+
+              <TabContainer className="main">
+                {
+                  <Tab
+                    key={ activeTab.id }
+                    tab={ activeTab }
+                    layout={ layout }
+                    onChanged={ this.handleTabChanged(activeTab) }
+                    onError={ this.handleTabError(activeTab) }
+                    onWarning={ this.handleTabWarning(activeTab) }
+                    onShown={ this.handleTabShown(activeTab) }
+                    onLayoutChanged={ this.handleLayoutChanged }
+                    onContextMenu={ this.openTabMenu }
+                    onAction={ this.triggerAction }
+                    onModal={ this.openModal }
+                    onLoadConfig={ this.loadConfig }
+                    getPlugins={ this.getPlugins }
+                    ref={ this.tabRef }
+                  />
+                }
+              </TabContainer>
+            </div>
+
+            <Log
+              entries={ logEntries }
+              layout={ layout.log }
+              onClear={ this.clearLog }
+              onLayoutChanged={ this.handleLayoutChanged }
             />
+          </SlotFillRoot>
 
-            <TabContainer className="main">
-              {
-                <Tab
-                  key={ activeTab.id }
-                  tab={ activeTab }
-                  layout={ layout }
-                  onChanged={ this.handleTabChanged(activeTab) }
-                  onContentUpdated={ this.handleTabContentUpdated(activeTab) }
-                  onError={ this.handleTabError(activeTab) }
-                  onWarning={ this.handleTabWarning(activeTab) }
-                  onShown={ this.handleTabShown(activeTab) }
-                  onLayoutChanged={ this.handleLayoutChanged }
-                  onContextMenu={ this.openTabMenu }
-                  onAction={ this.triggerAction }
-                  onModal={ this.openModal }
-                  onLoadConfig={ this.loadConfig }
-                  ref={ this.tabRef }
-                />
-              }
-            </TabContainer>
-          </div>
-
-          <Log
-            entries={ logEntries }
-            expanded={ layout.log && layout.log.open }
-            onToggle={ this.toggleLog }
-            onClear={ this.clearLog }
+          <ModalConductor
+            currentModal={ this.state.currentModal }
+            endpoints={ this.state.endpoints }
+            isMac={ this.props.globals.isMac }
+            onClose={ this.closeModal }
+            onDeploy={ this.handleDeploy }
+            onDeployError={ this.handleDeployError }
+            onEndpointsUpdate={ this.setEndpoints }
+            onMenuUpdate={ this.updateMenu }
           />
-        </SlotFillRoot>
 
-        <ModalConductor
-          currentModal={ this.state.currentModal }
-          endpoints={ this.state.endpoints }
-          isMac={ this.props.globals.isMac }
-          onClose={ this.closeModal }
-          onDeploy={ this.handleDeploy }
-          onDeployError={ this.handleDeployError }
-          onEndpointsUpdate={ this.setEndpoints }
-          onMenuUpdate={ this.updateMenu }
-        />
-      </div>
+        </div>
+
+      </DropZone>
     );
   }
 }
@@ -1528,6 +1664,8 @@ function missingProvider(providerType) {
 }
 
 class LoadingTab extends PureComponent {
+
+  triggerAction() {}
 
   render() {
     return (

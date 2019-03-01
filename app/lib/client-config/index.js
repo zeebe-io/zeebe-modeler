@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 'use strict';
 
 var NoneProvider = require('./providers/none-provider');
@@ -6,16 +13,15 @@ var ElementTemplatesProvider = require('./providers/element-templates-provider')
 
 
 /**
- * A way to allow clients to retrieve configuration
- * at run-time.
+ * A way to allow clients to retrieve configuration at run-time.
  *
- * @param {ElectronApplication} app
+ * @param {Object} options
  */
-function ClientConfig(app) {
+function ClientConfig(options) {
 
   this._providers = {
     '_': new NoneProvider(),
-    'bpmn.elementTemplates': new ElementTemplatesProvider(app)
+    'bpmn.elementTemplates': new ElementTemplatesProvider(options)
   };
 
   /**

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React from 'react';
 
 import { mount } from 'enzyme';
@@ -11,7 +18,7 @@ import { XMLEditor } from '../XMLEditor';
 
 import CodeMirror from 'test/mocks/code-mirror/CodeMirror';
 
-import { SlotFillRoot } from 'src/app/slot-fill';
+/* global sinon */
 
 const XML = '<xml></xml>';
 
@@ -92,6 +99,30 @@ describe('<XMLEditor>', function() {
 
       // when
       instance.handleChanged();
+    });
+
+
+    it('should notify about plugin related changes', function() {
+      // given
+      const changedSpy = sinon.spy();
+
+      const { instance } = renderEditor(XML, {
+        id: 'editor',
+        onChanged: changedSpy
+      });
+
+      changedSpy.resetHistory();
+
+      // when
+      instance.handleChanged();
+
+      // then
+      expect(changedSpy).to.be.calledOnce;
+
+      const state = changedSpy.firstCall.args[0];
+
+      expect(state).to.have.property('editable');
+      expect(state).to.have.property('searchable');
     });
 
   });
@@ -182,15 +213,13 @@ function renderEditor(xml, options = {}) {
   } = options;
 
   const slotFillRoot = mount(
-    <SlotFillRoot>
-      <TestEditor
-        id={ id || 'editor' }
-        xml={ xml }
-        activeSheet={ options.activeSheet || { id: 'xml' } }
-        onChanged={ onChanged || noop }
-        cache={ options.cache || new Cache() }
-      />
-    </SlotFillRoot>
+    <TestEditor
+      id={ id || 'editor' }
+      xml={ xml }
+      activeSheet={ options.activeSheet || { id: 'xml' } }
+      onChanged={ onChanged || noop }
+      cache={ options.cache || new Cache() }
+    />
   );
 
   const wrapper = slotFillRoot.find(XMLEditor);

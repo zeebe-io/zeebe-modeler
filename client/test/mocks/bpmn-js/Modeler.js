@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import { assign } from 'min-dash';
 
 
@@ -40,8 +47,10 @@ class PropertiesPanel {
 }
 
 export default class Modeler {
-  constructor(modules = {}) {
-    this.modules = assign(this._getDefaultModules(), modules);
+  constructor(options = {}) {
+    this.options = options;
+
+    this.modules = assign(this._getDefaultModules(), options.modules || {});
 
     this.xml = null;
 

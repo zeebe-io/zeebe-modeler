@@ -1,3 +1,6 @@
+> __Note:__ If possible, execute the integration test on our [released artifacts](https://github.com/camunda/camunda-modeler/releases).
+
+
 # Integration Test
 
 We use a number of pre-defined steps to ensure the stability of our releases through integration tests.
@@ -37,7 +40,7 @@ Manual integration tests:
 
 * [ ] configure service task in properties panel
 * [ ] add `async:before`
-* [ ] add executionn listener
+* [ ] add execution listener
 * [ ] add input mapping
 * [ ] verify results in XML tab
 
@@ -97,6 +100,13 @@ Based on the [test diagram](./test.bpmn.png):
 #### Error Handling
 
 * [ ] Open [`broken.bpmn`](./broken.bpmn) and verify a proper error message is shown (_No diagram to display_)
+
+
+#### Installers (platform specific)
+
+* [ ] MacOS
+    * [ ] [Downloading archive](https://github.com/camunda/camunda-modeler/releases), extracting and starting application works
+    * [ ] [Downloading DMG](https://github.com/camunda/camunda-modeler/releases), installing and starting it works
 
 
 #### Other (platform specific)

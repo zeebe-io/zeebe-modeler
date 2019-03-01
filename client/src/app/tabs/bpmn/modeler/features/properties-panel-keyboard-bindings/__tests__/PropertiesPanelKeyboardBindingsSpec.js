@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 /* global sinon */
 
 import Modeler from 'test/mocks/bpmn-js/Modeler';
@@ -145,10 +152,12 @@ describe('PropertiesPanelKeyboardBindings', function() {
  */
 function createModeler(dependencies) {
   return new Modeler({
-    ...dependencies,
-    propertiesPanelKeyboardBindings: new PropertiesPanelKeyboardBindings(
-      ...PropertiesPanelKeyboardBindings.$inject.map(name => dependencies[ name ] || {})
-    )
+    modules: {
+      ...dependencies,
+      propertiesPanelKeyboardBindings: new PropertiesPanelKeyboardBindings(
+        ...PropertiesPanelKeyboardBindings.$inject.map(name => dependencies[ name ] || {})
+      )
+    }
   });
 }
 

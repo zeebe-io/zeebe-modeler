@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 const argv = require('yargs').argv;
 
 const pkg = require('../app/package');
@@ -50,6 +57,8 @@ const expectedFiles = {
       contents: [
         'Zeebe Modeler.exe',
         'support/register_fileassoc.bat',
+        'LICENSE.camunda-modeler.txt',
+        'THIRD_PARTY_NOTICES.camunda-modeler.txt',
         'VERSION'
       ]
     }

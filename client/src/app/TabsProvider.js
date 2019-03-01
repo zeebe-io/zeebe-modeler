@@ -1,6 +1,15 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import Ids from 'ids';
 
 import bpmnDiagram from './tabs/bpmn/diagram.bpmn';
+
+import replaceIds from '@bpmn-io/replace-ids';
 
 import EmptyTab from './EmptyTab';
 
@@ -8,7 +17,10 @@ import { forEach } from 'min-dash';
 
 import parseDiagramType from './util/parseDiagramType';
 
+import Flags from '../util/Flags';
+
 const ids = new Ids([ 32, 36, 1 ]);
+
 const createdByType = {};
 
 const noopProvider = {
@@ -89,6 +101,15 @@ export default class TabsProvider {
       }
     };
 
+
+    if (Flags.get('disable-cmmn')) {
+      delete this.providers.cmmn;
+    }
+
+    if (Flags.get('disable-dmn')) {
+      delete this.providers.dmn;
+    }
+
   }
 
   getProviderNames() {
@@ -122,7 +143,9 @@ export default class TabsProvider {
   }
 
   getInitialFileContents(type, options) {
-    return this.getProvider(type).getInitialContents(options);
+    const rawContents = this.getProvider(type).getInitialContents(options);
+
+    return rawContents && replaceIds(rawContents, ids);
   }
 
   createFile(type, options) {
@@ -135,9 +158,7 @@ export default class TabsProvider {
 
     const name = `diagram_${counter}.${type}`;
 
-    const rawContents = this.getInitialFileContents(type, options);
-
-    const contents = rawContents && rawContents.replace('{{ ID }}', ids.next());
+    const contents = this.getInitialFileContents(type, options);
 
     return {
       name,

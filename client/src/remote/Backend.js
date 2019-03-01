@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import Ids from 'ids';
 
 const ids = new Ids();
@@ -8,9 +15,9 @@ const ids = new Ids();
  */
 export default class Backend {
 
-  constructor(ipcRenderer, process) {
+  constructor(ipcRenderer, platform) {
     this.ipcRenderer = ipcRenderer;
-    this.process = process;
+    this.platform = platform;
   }
 
   /**
@@ -79,7 +86,6 @@ export default class Backend {
   }
 
   getPlatform() {
-    return this.process.platform;
+    return this.platform;
   }
-
 }

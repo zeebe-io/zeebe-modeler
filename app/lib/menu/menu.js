@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 'use strict';
 
 const { app } = require('electron');
@@ -10,9 +17,12 @@ const requirePlatform = require('../util/require-platform');
 
 class Menu {
   /**
-   * @param {string} platform
+   * @param {Object} options - Options.
+   * @param {String} options.platform - Platform.
    */
-  constructor(platform) {
+  constructor(options = {}) {
+    const { platform } = options;
+
     this.state = {};
     this.providers = {};
 
@@ -41,31 +51,37 @@ class Menu {
 
   /**
    *
-   * @param {string} type
+   * @param {string} providerId
    * @param {Object} options
    * @param {Object[]} options.newFileMenu
    * @param {Object[]} options.helpMenu
    */
-  registerMenuProvider(type, options) {
-    if (!type) {
+  registerMenuProvider(providerId, options) {
+
+    // todo(pinussilvestrus): correct error handling via throwing exceptions
+    if (!providerId) {
       return;
     }
 
-    if (this.providers[type]) {
+    // todo(pinussilvestrus): correct error handling via throwing exceptions to ensure
+    // providers won't registered multiple times
+    if (this.providers[providerId]) {
       return;
     }
 
     const {
       helpMenu,
-      newFileMenu
+      newFileMenu,
+      plugins
     } = options;
 
-    const providerOptions = {};
+    const providerOptions = {
+      helpMenu: helpMenu || [],
+      newFileMenu: newFileMenu || [],
+      plugins: plugins || null
+    };
 
-    providerOptions.helpMenu = helpMenu || [];
-    providerOptions.newFileMenu = newFileMenu || [];
-
-    this.providers[type] = providerOptions;
+    this.providers[providerId] = providerOptions;
 
     this.rebuildMenu();
   }

@@ -1,4 +1,11 @@
-import React, { PureComponent } from 'react';
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import React, { PureComponent, Fragment } from 'react';
 
 import Slot from './slot-fill/Slot';
 
@@ -7,6 +14,8 @@ import css from './EmptyTab.less';
 import {
   Tab
 } from './primitives';
+
+import Flags, { DISABLE_CMMN, DISABLE_DMN } from '../util/Flags';
 
 
 export default class EmptyTab extends PureComponent {

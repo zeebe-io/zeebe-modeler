@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 /* global sinon */
 
 import React from 'react';
@@ -198,17 +205,19 @@ describe('<MultiSheetTab>', function() {
     let instance,
         wrapper;
 
+    const INITIAL_XML = '<foo></foo>';
+
     beforeEach(function() {
       const cache = new Cache();
 
       cache.add('editor', {
         cached: {
-          lastXML: 'foo'
+          lastXML: INITIAL_XML
         }
       });
 
       ({ instance, wrapper } = renderTab({
-        xml: 'foo',
+        xml: INITIAL_XML,
         cache,
         providers: [{
           type: 'foo',
@@ -239,7 +248,7 @@ describe('<MultiSheetTab>', function() {
       const { sheets } = instance.getCached();
 
       // make sure editor returns same XML
-      wrapper.find(DefaultEditor).first().instance().setXML('foo');
+      wrapper.find(DefaultEditor).first().instance().setXML(INITIAL_XML);
 
       // when
       await instance.switchSheet(sheets[1]);
@@ -255,13 +264,33 @@ describe('<MultiSheetTab>', function() {
       const { sheets } = instance.getCached();
 
       // make sure editor returns NOT same XML
-      wrapper.find(DefaultEditor).first().instance().setXML('bar');
+      wrapper.find(DefaultEditor).first().instance().setXML(`${INITIAL_XML}-bar`);
 
       // when
       await instance.switchSheet(sheets[1]);
 
       // then
       expect(instance.isDirty()).to.be.true;
+    });
+
+
+    it('should be dirty after new content is given', async function() {
+
+      // when
+      await instance.handleContentUpdated(`${INITIAL_XML}-bar`);
+
+      // then
+      expect(instance.isDirty()).to.be.true;
+    });
+
+
+    it('should not be dirty after same content is given', async function() {
+
+      // when
+      await instance.handleContentUpdated(INITIAL_XML);
+
+      // then
+      expect(instance.isDirty()).to.be.false;
     });
 
   });

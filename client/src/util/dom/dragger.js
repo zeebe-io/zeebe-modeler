@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import {
   domify
 } from 'min-dom';
@@ -22,15 +29,16 @@ import {
 export default function createDragger(fn) {
 
   var self;
-  var startPosition;
 
-  var active;
+  var startX, startY;
 
   /** drag start */
   function onDragStart(event) {
 
     self = this;
-    startPosition = eventPosition(event);
+
+    startX = event.clientX;
+    startY = event.clientY;
 
     // (1) prevent preview image
     if (event.dataTransfer) {
@@ -40,35 +48,25 @@ export default function createDragger(fn) {
     // (2) setup drag listeners
 
     // attach drag + cleanup event
-    document.addEventListener('drag', onDrag);
-    document.addEventListener('dragend', onEnd, { once: true });
+    document.addEventListener('dragover', onDrag);
+    document.addEventListener('dragend', onEnd);
+    document.addEventListener('drop', preventDefault);
   }
 
   function onDrag(event) {
-
-    // first drag event ships with broken coordinates, skip it
-    if (!active) {
-      active = true;
-
-      return;
-    }
-
-    // suppress drag end event
-    if (event.x === 0 && event.y === 0) {
-      return;
-    }
-
-    var currentPosition = eventPosition(event);
-    var delta = pointDelta(currentPosition, startPosition);
+    var delta = {
+      x: event.clientX - startX,
+      y: event.clientY - startY
+    };
 
     // call provided fn with event, delta
     return fn.call(self, event, delta);
   }
 
   function onEnd() {
-    document.removeEventListener('drag', onDrag);
-
-    active = false;
+    document.removeEventListener('dragover', onDrag);
+    document.removeEventListener('dragend', onEnd);
+    document.removeEventListener('drop', preventDefault);
   }
 
   return onDragStart;
@@ -79,16 +77,7 @@ function emptyCanvas() {
   return domify('<canvas width="0" height="0" />');
 }
 
-function eventPosition(event) {
-  return {
-    x: event.clientX,
-    y: event.clientY
-  };
-}
-
-function pointDelta(a, b) {
-  return {
-    x: a.x - b.x,
-    y: a.y - b.y
-  };
+function preventDefault(event) {
+  event.preventDefault();
+  event.stopPropagation();
 }

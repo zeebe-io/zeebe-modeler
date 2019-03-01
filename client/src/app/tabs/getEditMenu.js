@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import Flags, { DISABLE_ADJUST_ORIGIN } from '../../util/Flags';
+
 export function getCanvasEntries({
   moveCanvas,
   moveToOrigin,
@@ -5,7 +14,7 @@ export function getCanvasEntries({
 }) {
   const menuEntries = [];
 
-  if (isDefined(moveToOrigin)) {
+  if (isDefined(moveToOrigin) && Flags.get(DISABLE_ADJUST_ORIGIN)) {
     menuEntries.push({
       label: 'Move Elements To Origin',
       accelerator: 'CommandOrControl+Shift+O',

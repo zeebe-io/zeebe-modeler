@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 var coverage = process.env.COVERAGE;
 
 if (coverage) {
@@ -92,7 +99,7 @@ module.exports = function(karma) {
             use: 'babel-loader'
           },
           {
-            test: /\.(css|bpmn|cmmn|dmn|less|xml|png)$/,
+            test: /\.(css|bpmn|cmmn|dmn|less|xml|png|svg)$/,
             use: 'raw-loader'
           }
         ]

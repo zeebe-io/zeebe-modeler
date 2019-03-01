@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React, { Component } from 'react';
 
 import {
@@ -29,6 +36,8 @@ import {
 
 /* global sinon */
 const { spy } = sinon;
+
+const noop = () => {};
 
 
 describe('<App>', function() {
@@ -146,12 +155,68 @@ describe('<App>', function() {
         }, mount);
 
         // when
-        await app.setActiveTab(EMPTY_TAB);
+        await app.showTab(EMPTY_TAB);
 
         // then
         expect(updateMenuSpy).not.to.have.been.called;
 
         expect(app.state.tabState).to.eql({});
+      });
+
+    });
+
+
+    describe('should indicate lastTab state', function() {
+
+      it('no last tab', async function() {
+
+        // given
+        const updateMenuSpy = spy();
+
+        const {
+          app
+        } = createApp({
+          onMenuUpdate: updateMenuSpy
+        }, mount);
+
+        // when
+        await app.openFiles([
+          createFile('1.bpmn'),
+          createFile('2.bpmn')
+        ]);
+
+        // then
+        expect(updateMenuSpy).to.have.been.calledWith(sinon.match({
+          lastTab: false
+        }));
+
+      });
+
+
+      it('closed tab', async function() {
+
+        // given
+        const updateMenuSpy = spy();
+
+        const {
+          app
+        } = createApp({
+          onMenuUpdate: updateMenuSpy
+        }, mount);
+
+        // when
+        await app.openFiles([
+          createFile('1.bpmn'),
+          createFile('2.bpmn')
+        ]);
+
+        await app.triggerAction('close-all-tabs');
+
+        // then
+        expect(updateMenuSpy).to.have.been.calledWith(sinon.match({
+          lastTab: true
+        }));
+
       });
 
     });
@@ -187,7 +252,7 @@ describe('<App>', function() {
         tree
       } = createApp(mount);
 
-      await app.setActiveTab(EMPTY_TAB);
+      await app.showTab(EMPTY_TAB);
 
       const createButton = tree.find('button.create-bpmn');
 
@@ -334,6 +399,48 @@ describe('<App>', function() {
       expect(tabs).to.have.length(2);
       expect(openedTabs).to.eql(tabs);
       expect(activeTab).to.eql(app.findOpenTab(file2));
+    });
+
+
+    describe('active file handling', function() {
+
+      const file1 = createFile('1.bpmn');
+      const file2 = createFile('2.bpmn');
+
+
+      it('should open active file tab', async function() {
+
+        // given
+        const { app } = createApp();
+
+        // when
+        await app.openFiles([ file1, file2 ], file1);
+
+        // then
+        const {
+          activeTab
+        } = app.state;
+
+        expect(activeTab).to.eql(app.findOpenTab(file1));
+      });
+
+
+      it('should not open tab', async function() {
+
+        // given
+        const { app } = createApp();
+
+        // when
+        await app.openFiles([ file1, file2 ], false);
+
+        // then
+        const {
+          activeTab
+        } = app.state;
+
+        expect(activeTab).to.eql(EMPTY_TAB);
+      });
+
     });
 
   });
@@ -536,6 +643,40 @@ describe('<App>', function() {
       expect(saveTabSpy).not.to.have.been.called;
     });
 
+
+    it('should resolve to false if saving was canceled', async function() {
+
+      // given
+      const dialog = new Dialog();
+
+      const {
+        app
+      } = createApp({
+        globals: {
+          dialog
+        }
+      });
+
+      const tab = await app.createDiagram();
+
+      app.setState({
+        ...app.setDirty(tab)
+      });
+
+      dialog.setShowCloseFileDialogResponse('cancel');
+
+      // when
+      const closeTabResponse = await app.closeTab(tab);
+
+      // then
+      const {
+        tabs
+      } = app.state;
+
+      expect(tabs).to.contain(tab);
+      expect(closeTabResponse).to.eql(false);
+    });
+
   });
 
 
@@ -604,7 +745,10 @@ describe('<App>', function() {
       // then
       expect(writeFileSpy).to.have.been.calledWith(
         'diagram_2.bpmn',
-        file,
+        {
+          ...file,
+          contents: 'CONTENTS'
+        },
         {
           encoding: 'utf8',
           fileType: 'bpmn'
@@ -857,50 +1001,6 @@ describe('<App>', function() {
   });
 
 
-  describe('#handleTabContentUpdated', function() {
-
-    let app, tab;
-
-    beforeEach(async function() {
-
-      app = createApp().app;
-
-      await app.createDiagram('bpmn');
-
-      tab = app.state.activeTab;
-
-    });
-
-    it('should call #updateTab when new content is given', async function() {
-
-      // given
-      const updateSpy = spy(app, 'updateTab');
-
-      // when
-      app.handleTabContentUpdated(tab)({
-        newContent: '< bar/>'
-      });
-
-      // then
-      expect(updateSpy).to.have.been.called;
-    });
-
-
-    it('should NOT call #updateTab when NO new content given', async function() {
-
-      // given
-      const updateSpy = spy(app, 'updateTab');
-
-      // when
-      app.handleTabContentUpdated(tab)();
-
-      // then
-      expect(updateSpy).to.not.have.been.called;
-    });
-
-  });
-
-
   describe('tab loading', function() {
 
     it('should support life-cycle', async function() {
@@ -1088,7 +1188,10 @@ describe('<App>', function() {
 
         // then
         expect(app.state.tabs).to.eql(expectedTabs);
-        expect(app.state.activeTab).to.equal(openedTabs[2]);
+
+        // we don't implicitly activate tab on move
+        // this happens on drag start instead
+        expect(app.state.activeTab).to.equal(openedTabs[3]);
       });
 
 
@@ -1449,7 +1552,7 @@ describe('<App>', function() {
       const log = tree.find(Log).first();
 
       // then
-      expect(log.props().expanded).to.be.true;
+      expect(log.props().layout.open).to.be.true;
     });
 
 
@@ -1471,7 +1574,7 @@ describe('<App>', function() {
         category: 'bar'
       }]);
 
-      expect(log.props().expanded).to.be.true;
+      expect(log.props().layout.open).to.be.true;
     });
 
   });
@@ -1549,10 +1652,6 @@ describe('<App>', function() {
         show: showSpy
       });
 
-      fileSystem.setReadFileStatsResponse({
-        lastModified: new Date().getMilliseconds()
-      });
-
       const { app } = createApp({
         globals: {
           dialog,
@@ -1564,16 +1663,25 @@ describe('<App>', function() {
 
       const tab = openedTabs[0];
 
-      const oldTabContents = tab.file.contents;
+      const lastModified = new Date().getMilliseconds();
+
+      updateFileStats(tab.file, { lastModified }, fileSystem);
 
       // when
-      await app.checkFileChanged(tab);
+      const updatedTab = await app.checkFileChanged(tab);
 
       // then
       expect(showSpy).to.have.been.called;
       expect(readFileSpy).to.have.been.called;
-      expect(tab.file.contents).to.not.equal(oldTabContents);
-      expect(tab.file.contents).to.equal(NEW_FILE_CONTENTS);
+
+      expect(updatedTab).to.eql(app.findOpenTab(file1));
+
+      expect(updatedTab.file.contents).to.eql(NEW_FILE_CONTENTS);
+
+      // TODO(nikku): fix test suite and properly pass last modified
+      // expect(updatedTab.file.lastModified).to.eql(lastModified);
+
+      expect(app.isUnsaved(updatedTab)).to.be.false;
     });
 
 
@@ -1586,10 +1694,6 @@ describe('<App>', function() {
         show: showSpy
       });
 
-      fileSystem.setReadFileStatsResponse({
-        lastModified: 0
-      });
-
       const { app } = createApp({
         globals: {
           dialog,
@@ -1601,12 +1705,19 @@ describe('<App>', function() {
 
       const tab = openedTabs[0];
 
+      updateFileStats(tab.file, {
+        lastModified: 0
+      }, fileSystem);
+
       // when
-      await app.checkFileChanged(tab);
+      const updatedTab = await app.checkFileChanged(tab);
 
       // then
       expect(showSpy).to.not.have.been.called;
       expect(readFileSpy).to.not.have.been.called;
+
+      expect(app.isUnsaved(updatedTab)).to.be.false;
+
     });
 
 
@@ -1646,10 +1757,6 @@ describe('<App>', function() {
         show: showSpy
       });
 
-      fileSystem.setReadFileStatsResponse({
-        lastModified: new Date().getMilliseconds()
-      });
-
       const { app } = createApp({
         globals: {
           dialog,
@@ -1661,18 +1768,49 @@ describe('<App>', function() {
 
       const tab = openedTabs[0];
 
+      const lastModified = new Date().getMilliseconds();
+
+      updateFileStats(tab.file, { lastModified }, fileSystem);
+
       const oldTabContents = tab.file.contents;
 
       // when
-      await app.checkFileChanged(tab);
+      const updatedTab = await app.checkFileChanged(tab);
 
       // then
       expect(showSpy).to.have.been.called;
       expect(readFileSpy).to.not.have.been.called;
-      expect(tab.file.contents).to.equal(oldTabContents);
+      expect(updatedTab).to.eql(app.findOpenTab(file1));
+
+      expect(updatedTab.file.contents).to.equal(oldTabContents);
+      expect(updatedTab.file.lastModified).to.equal(lastModified);
+
+      expect(app.isUnsaved(updatedTab)).to.be.true;
+    });
+
+
+    it('should execute only once', async function() {
+
+      // given
+      const { app } = createApp();
+
+      const openedTabs = await app.openFiles([ file1 ]);
+
+      const tab = openedTabs[0];
+
+      const checkFileChangedSpy = spy(app, '__checkFileChanged');
+
+      // when
+      await Promise.all([ app.checkFileChanged(tab), app.checkFileChanged(tab) ]);
+
+      // then
+      expect(checkFileChangedSpy).to.have.been.calledOnce;
     });
 
   });
+
+
+  it('tabbing history');
 
 
   describe('#updateTab', function() {
@@ -2093,12 +2231,42 @@ describe('<App>', function() {
   });
 
 
-  describe('window resize', function() {
+  describe('#loadPlugins', function() {
+
+    it('should load plugins', function() {
+
+      // given
+      const { app } = createApp({
+        globals: {
+          plugins: {
+            get(type) {
+              return [{
+                __init__: [ type ],
+                [ type ]: [ 'type', noop ]
+              }];
+            }
+          }
+        }
+      });
+
+      // when
+      const plugins = app.getPlugins('foo');
+
+      // then
+      expect(plugins).to.eql([{
+        __init__: [ 'foo' ],
+        foo: [ 'type', noop ]
+      }]);
+    });
+  });
+
+
+  describe('resize', function() {
 
     afterEach(sinon.restore);
 
 
-    it('should notify tab about window resize', async function() {
+    it('should trigger tab resize when layout changes', async function() {
       // given
       const {
         app,
@@ -2108,7 +2276,12 @@ describe('<App>', function() {
       const resizeTabStub = sinon.stub(app, 'resizeTab').resolves();
 
       // when
-      await app.triggerAction('resize');
+      app.setLayout({
+        log: {
+          open: true,
+          height: 100
+        }
+      });
 
       // then
       expect(resizeTabStub).to.be.calledOnce;
@@ -2174,6 +2347,52 @@ describe('<App>', function() {
 
   });
 
+
+  describe('#handleDrop', function() {
+
+    it('should try to open each dropped file', async function() {
+
+      // given
+      const directoryReadError = new Error();
+      directoryReadError.code = 'EISDIR';
+
+      const files = [
+        {
+          path: '/dev/null/'
+        },
+        {
+          path: './CamundaModeler'
+        },
+        {
+          path: './diagram.bpmn'
+        }
+      ];
+
+      const fileSystem = new FileSystem();
+
+      const readFileStub = sinon.stub(fileSystem, 'readFile')
+        .onFirstCall().rejects(directoryReadError)
+        .onSecondCall().rejects(directoryReadError)
+        .onThirdCall().resolves({ contents: '' });
+
+      const {
+        app
+      } = createApp({
+        globals: {
+          fileSystem
+        }
+      });
+
+      // when
+      await app.handleDrop(files);
+
+      // then
+      expect(readFileStub).to.be.calledThrice;
+
+    });
+
+  });
+
 });
 
 
@@ -2181,6 +2400,9 @@ class Cache {
   destroy() { }
 }
 
+class MockTab {
+  triggerAction() {}
+}
 
 function createApp(options = {}, mountFn=shallow) {
 
@@ -2240,6 +2462,13 @@ function createApp(options = {}, mountFn=shallow) {
 
   app = tree.instance();
 
+  // shallow renderer always returns null on current ref
+  if (mountFn === shallow) {
+    app.tabRef = {
+      current: new MockTab()
+    };
+  }
+
   return {
     tree,
     app
@@ -2258,4 +2487,15 @@ function createFile(name, path, contents = 'foo', lastModified) {
     path,
     lastModified
   };
+}
+
+function updateFileStats(file, newAttrs, fileSystem) {
+
+  const newFileStats = {
+    ...file,
+    ...newAttrs
+  };
+
+  fileSystem.setReadFileStatsResponse(newFileStats);
+
 }

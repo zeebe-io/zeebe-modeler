@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) Camunda Services GmbH.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 'use strict';
 
 const fs = require('fs'),
@@ -7,6 +14,8 @@ const {
   assign,
   pick
 } = require('min-dash');
+
+const log = require('./log')('app:file-system');
 
 const FILE_PROPERTIES = [
   'contents',
@@ -126,7 +135,7 @@ function getLastModifiedTicks(filePath) {
 
     return stats.mtime.getTime() || 0;
   } catch (err) {
-    console.error(`Unable to read lastModified of file "${ filePath }"`);
+    log.error(`Unable to read lastModified of file "${ filePath }"`);
 
     return 0;
   }
