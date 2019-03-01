@@ -353,10 +353,8 @@ export class BpmnEditor extends CachedComponent {
 
     const modeler = this.getModeler();
 
-    const importedXML = await this.handleNamespace(xml);
-
     // TODO(nikku): apply default element templates to initial diagram
-    modeler.importXML(importedXML, this.ifMounted(this.handleImport));
+    modeler.importXML(xml, this.ifMounted(this.handleImport));
   }
 
   /**
