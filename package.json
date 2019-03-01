@@ -23,7 +23,7 @@
     "update-license-book": "node tasks/license-book.js -o THIRD_PARTY_NOTICES -c",
     "release": "lerna publish --force-publish",
     "test": "run-s *:test",
-    "start": "run-s \"dev -- {@}\" --"
+    "start": "run-s \"dev -- {@}\" --",
     "sync": "node tasks/sync-fork.js"
   },
   "author": "Camunda <http://camunda.com>",
