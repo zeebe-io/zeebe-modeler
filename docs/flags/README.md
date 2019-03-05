@@ -16,7 +16,7 @@ Place a `flags.json` file inside the `{APP_HOME}/resources` or `{USER_DATA}/reso
 
 ### Configure via CLI
 
-Pass flags via the command line when starting the application. 
+Pass flags via the command line when starting the application.
 
 ```
 camunda-modeler --disable-plugins
@@ -30,26 +30,6 @@ Flags passed as command line arguments take precedence over those configured via
 ```json
 {
   "disable-plugins": false,
-  "disable-adjust-origin": false,
-  "disable-cmmn": false,
-  "disable-dmn": false
+  "disable-adjust-origin": false
 }
 ```
-
-
-## Examples
-
-### BPMN-only Mode
-
-To disable the CMMN and DMN editing capabilities of the App, configure your `flags.json` like this:
-
-```js
-{
-    "disable-cmmn": true,
-    "disable-dmn": true
-}
-```
-
-As a result, the app will only allow users to model BPMN diagrams.
-
-![BPMN only mode](./bpmn-only.png)
