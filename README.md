@@ -70,7 +70,7 @@ The synchronized upstream branch will be `master` by default. You can specify th
 npm run sync -- -b master
 ```
 
-If no merge conflicts appeared, the synchronization task is done and the changes can be pushed remotely. If there were merge conflicts detected, the task automatically exclude unrelated files from the conflicts (e.g. changes inside `tabs/bpmn/*`). Other merge conflicts must be resolved manually.
+If no merge conflicts appeared, the synchronization task is done and the changes can be pushed remotely. If there were merge conflicts detected, the task automatically exclude unrelated files from the conflicts (e.g. changes inside `tabs/dmn/*`). Other merge conflicts must be resolved manually.
 
 
 ## Code of Conduct
