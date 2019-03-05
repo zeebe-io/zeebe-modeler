@@ -26,10 +26,10 @@
   },
   "author": "Camunda <http://camunda.com>",
   "license": "SEE LICENSE IN LICENSE",
-  "homepage": "https://github.com/camunda/camunda-modeler",
+  "homepage": "https://github.com/zeebe-io/zeebe-modeler",
   "repository": {
     "type": "git",
-    "url": "https://github.com/camunda/camunda-modeler"
+    "url": "https://github.com/zeebe-io/zeebe-modeler"
   },
   "devDependencies": {
     "archiver": "^3.0.0",
