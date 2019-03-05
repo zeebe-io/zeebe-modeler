@@ -6,6 +6,10 @@ All notable changes to the [Zeebe Modeler](https://github.com/zeebe-io/zeebe-mod
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.6.2
+
+_Republish of `v0.6.0` with build error fixed._
+
 ## 0.6.1
 
 _Republish of `v0.6.0` with actual changelog._
