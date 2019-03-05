@@ -19,6 +19,15 @@ import { SlotFillRoot } from 'src/app/slot-fill';
 
 import diagramXML from './diagram.bpmn';
 
+import {
+  getCanvasEntries,
+  getCopyCutPasteEntries,
+  getDiagramFindEntries,
+  getSelectionEntries,
+  getToolEntries,
+  getUndoRedoEntries
+} from '../../getEditMenu';
+
 const { spy } = sinon;
 
 
@@ -83,6 +92,82 @@ describe('<BpmnEditor>', function() {
 
       // then
       expect(createSpy).not.to.have.been.called;
+    });
+
+  });
+
+
+  describe('plugins', function() {
+
+    it('should accept plugins', async function() {
+
+      // given
+      const additionalModule = {
+        __init__: [ 'foo' ],
+        foo: [ 'type', noop ]
+      };
+
+      const moddleExtension = {
+        name: 'bar',
+        uri: 'http://bar',
+        prefix: 'bar',
+        xml: {
+          tagAlias: 'lowerCase'
+        },
+        types: []
+      };
+
+      // when
+      const {
+        instance
+      } = await renderEditor(diagramXML, {
+        getPlugins(type) {
+          switch (type) {
+          case 'bpmn.modeler.additionalModules':
+            return [ additionalModule ];
+          case 'bpmn.modeler.moddleExtension':
+            return [ moddleExtension ];
+          }
+        }
+      });
+
+      // then
+      const { modeler } = instance.getCached();
+
+      expect(modeler.options.additionalModules).to.include(additionalModule);
+
+      expect(modeler.options.moddleExtensions).to.include({
+        bar: moddleExtension
+      });
+    });
+
+
+    it('should properly handle invalid moddle extensions', async function() {
+
+      // given
+      const onErrorSpy = sinon.spy();
+
+      const unnamedModdleExtension = {};
+
+      const circularModdleExtension = {};
+      circularModdleExtension.name = circularModdleExtension;
+
+      const props = {
+        getPlugins(type) {
+          switch (type) {
+          case 'bpmn.modeler.moddleExtension':
+            return [
+              unnamedModdleExtension,
+              circularModdleExtension
+            ];
+          }
+        },
+        onError: onErrorSpy
+      };
+
+      // then
+      expect(() => BpmnEditor.createCachedState(props)).to.not.throw();
+      expect(onErrorSpy).to.be.calledTwice;
     });
 
   });
@@ -250,16 +335,18 @@ describe('<BpmnEditor>', function() {
         cached: {
           lastXML: diagramXML,
           modeler: new BpmnModeler({
-            clipboard: {
-              isEmpty: () => true
-            },
-            commandStack: {
-              canRedo: () => true,
-              canUndo: () => true,
-              _stackIdx: 1
-            },
-            selection: {
-              get: () => []
+            modules: {
+              clipboard: {
+                isEmpty: () => true
+              },
+              commandStack: {
+                canRedo: () => true,
+                canUndo: () => true,
+                _stackIdx: 1
+              },
+              selection: {
+                get: () => []
+              }
             }
           }),
           stackIdx: 2
@@ -275,6 +362,168 @@ describe('<BpmnEditor>', function() {
 
       // when
       instance.handleChanged();
+    });
+
+
+    it('should notify about plugin related changes', async function() {
+      // given
+      const changedSpy = sinon.spy();
+
+      const { instance } = await renderEditor(diagramXML, {
+        id: 'editor',
+        onChanged: changedSpy
+      });
+
+      changedSpy.resetHistory();
+
+      // when
+      instance.handleChanged();
+
+      // then
+      expect(changedSpy).to.be.calledOnce;
+
+      const state = changedSpy.firstCall.args[0];
+
+      expect(state).to.have.property('bpmn');
+      expect(state).to.have.property('editable');
+      expect(state).to.have.property('elementsSelected');
+    });
+
+
+    describe('edit menu', function() {
+
+      const includesEntryDeeply = (editMenu, label) => {
+        return editMenu.filter(entries => {
+          return entries.some(e => e.label === label);
+        }).length > 0;
+      };
+
+      it('should provide und/redo entries', async function() {
+
+        // given
+        const changedSpy = (state) => {
+
+          const editMenuEntries = getUndoRedoEntries(state);
+
+          // then
+          expect(state.editMenu).to.deep.include(editMenuEntries);
+
+        };
+
+        const { instance } = await renderEditor(diagramXML, {
+          onChanged: changedSpy
+        });
+
+        // when
+        instance.handleChanged();
+      });
+
+
+      it('should provide copy/paste entries', async function() {
+
+        // given
+        const changedSpy = (state) => {
+
+          const editMenuEntries = getCopyCutPasteEntries(state);
+
+          // then
+          expect(state.editMenu).to.deep.include(editMenuEntries);
+
+        };
+
+        const { instance } = await renderEditor(diagramXML, {
+          onChanged: changedSpy
+        });
+
+        // when
+        instance.handleChanged();
+      });
+
+
+      it('should provide tool entries', async function() {
+
+        // given
+        const changedSpy = (state) => {
+
+          const editMenuEntries = getToolEntries(state);
+
+          // then
+          expect(state.editMenu).to.deep.include(editMenuEntries);
+
+        };
+
+        const { instance } = await renderEditor(diagramXML, {
+          onChanged: changedSpy
+        });
+
+        // when
+        instance.handleChanged();
+      });
+
+
+      it('should provide find entries', async function() {
+
+        // given
+        const changedSpy = (state) => {
+
+          const editMenuEntries = getDiagramFindEntries(state);
+
+          // then
+          expect(state.editMenu).to.deep.include(editMenuEntries);
+
+        };
+
+        const { instance } = await renderEditor(diagramXML, {
+          onChanged: changedSpy
+        });
+
+        // when
+        instance.handleChanged();
+      });
+
+
+      it('should provide selection + canvas entries', async function() {
+
+        // given
+        const changedSpy = (state) => {
+
+          const editMenuEntries = [
+            ...getCanvasEntries(state),
+            ...getSelectionEntries(state)
+          ];
+
+          // then
+          expect(state.editMenu).to.deep.include(editMenuEntries);
+
+        };
+
+        const { instance } = await renderEditor(diagramXML, {
+          onChanged: changedSpy
+        });
+
+        // when
+        instance.handleChanged();
+      });
+
+
+      it('should provide align/distribute entries', async function() {
+
+        // given
+        const changedSpy = (state) => {
+
+          // then
+          expect(includesEntryDeeply(state.editMenu, 'Align Elements')).to.be.true;
+          expect(includesEntryDeeply(state.editMenu, 'Distribute Elements')).to.be.true;
+        };
+
+        const { instance } = await renderEditor(diagramXML, {
+          onChanged: changedSpy
+        });
+
+        // when
+        instance.handleChanged();
+      });
+
     });
 
   });
@@ -517,8 +766,10 @@ describe('<BpmnEditor>', function() {
       cache.add('editor', {
         cached: {
           modeler: new BpmnModeler({
-            eventBus: eventBusStub,
-            canvas: canvasStub
+            modules: {
+              eventBus: eventBusStub,
+              canvas: canvasStub
+            }
           })
         }
       });
@@ -623,6 +874,132 @@ describe('<BpmnEditor>', function() {
 
   });
 
+
+  describe('properties panel actions', function() {
+
+    it('should toggle properties panel', async function() {
+      // given
+      const onLayoutChangedSpy = sinon.spy();
+      const {
+        instance
+      } = await renderEditor(diagramXML, {
+        layout: {
+          propertiesPanel: {
+            open: false,
+          }
+        },
+        onLayoutChanged: onLayoutChangedSpy
+      });
+
+      // when
+      instance.triggerAction('toggleProperties');
+
+      // then
+      expect(onLayoutChangedSpy).to.be.calledOnceWith({
+        propertiesPanel: {
+          open: true,
+        }
+      });
+    });
+
+
+    it('should reset properties panel', async function() {
+      // given
+      const onLayoutChangedSpy = sinon.spy();
+      const {
+        instance
+      } = await renderEditor(diagramXML, {
+        onLayoutChanged: onLayoutChangedSpy
+      });
+
+      // when
+      instance.triggerAction('resetProperties');
+
+      // then
+      expect(onLayoutChangedSpy).to.be.calledOnceWith({
+        propertiesPanel: {
+          open: true,
+          width: 250
+        }
+      });
+    });
+
+  });
+
+
+  describe('zoom actions', function() {
+
+    let editorActionsStub,
+        instance;
+
+    beforeEach(async function() {
+      // given
+      editorActionsStub = sinon.stub({ trigger() {} });
+
+      const cache = new Cache();
+
+      cache.add('editor', {
+        cached: {
+          modeler: new BpmnModeler({
+            modules: {
+              editorActions: editorActionsStub
+            }
+          })
+        }
+      });
+
+      instance = (await renderEditor(diagramXML, { cache })).instance;
+    });
+
+
+    afterEach(sinon.restore);
+
+
+    it('should zoom in', function() {
+      // when
+      instance.triggerAction('zoomIn');
+
+      // then
+      expect(editorActionsStub.trigger).to.be.calledOnceWith('stepZoom', {
+        value: 1
+      });
+    });
+
+
+    it('should zoom out', function() {
+      // when
+      instance.triggerAction('zoomOut');
+
+      // then
+      expect(editorActionsStub.trigger).to.be.calledOnceWith('stepZoom', {
+        value: -1
+      });
+    });
+
+
+    it('should zoom to fit diagram', function() {
+      // when
+      instance.triggerAction('zoomFit');
+
+      // then
+      expect(editorActionsStub.trigger).to.be.calledOnceWith('zoom', {
+        value: 'fit-viewport'
+      });
+    });
+
+
+    it('should reset zoom', async function() {
+      // when
+      instance.triggerAction('resetZoom');
+
+      // then
+      expect(editorActionsStub.trigger).to.be.calledOnceWith('zoom', {
+        value: 1
+      });
+    });
+
+  });
+
 });
 
 
@@ -643,7 +1020,8 @@ async function renderEditor(xml, options = {}) {
     onImport,
     onLayoutChanged,
     onModal,
-    onLoadConfig
+    onLoadConfig,
+    getPlugins
   } = options;
 
   const slotFillRoot = await mount(
@@ -660,6 +1038,7 @@ async function renderEditor(xml, options = {}) {
         onContentUpdated={ onContentUpdated || noop }
         onModal={ onModal || noop }
         onLoadConfig={ onLoadConfig || noop }
+        getPlugins={ getPlugins || (() => []) }
         cache={ options.cache || new Cache() }
         layout={ layout || {
           minimap: {

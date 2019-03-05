@@ -71,17 +71,9 @@ module.exports = {
     ])
   ],
   // don't bundle shims for node globals
-  node: {
-    dgram: 'empty',
-    fs: 'empty',
-    net: 'empty',
-    tls: 'empty',
-    child_process: 'empty'
-  },
+  node: false,
   devServer: {
-    headers: {
-      'Access-Control-Allow-Origin': '*'
-    }
+    writeToDisk: true
   },
   devtool: DEV ? 'cheap-module-eval-source-map' : 'source-map'
 };

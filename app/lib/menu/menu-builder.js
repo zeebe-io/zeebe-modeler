@@ -6,13 +6,18 @@ const {
   MenuItem
 } = require('electron');
 
-const browserOpen = require('../util/browser-open');
-
 const {
   assign,
+  find,
+  isFunction,
   map,
-  merge
+  merge,
+  reduce
 } = require('min-dash');
+
+const browserOpen = require('../util/browser-open');
+
+const log = require('../log')('app:menu');
 
 
 class MenuBuilder {
@@ -22,7 +27,7 @@ class MenuBuilder {
       state: {
         save: false,
         exportAs: false,
-        development: app.developmentMode,
+        development: process.env.NODE_ENV === 'development',
         devtools: false
       },
       providers: {}
@@ -58,6 +63,7 @@ class MenuBuilder {
     }
 
     this.appendWindowMenu();
+    this.appendPluginsMenu();
     this.appendHelpMenu();
 
     return this;
@@ -400,6 +406,80 @@ class MenuBuilder {
     return submenuTemplate;
   }
 
+  appendPluginsMenu() {
+    const provider = find(this.options.providers, provider => provider.plugins);
+
+    const plugins = provider && provider.plugins;
+
+    let submenuTemplate;
+
+    if (plugins) {
+      submenuTemplate = reduce(plugins, (menuItems, plugin) => {
+        const { name } = plugin;
+
+        const menuItemDescriptor = {
+          label: name,
+          enabled: false
+        };
+
+        if (plugin.menu) {
+
+          try {
+            const menuEntries = plugin.menu(app, this.options.state);
+
+            menuItemDescriptor.enabled = true;
+            menuItemDescriptor.submenu = Menu.buildFromTemplate(
+              menuEntries.map(({
+                accelerator,
+                action,
+                enabled,
+                label,
+                submenu
+              }) => {
+                enabled = isFunction(enabled) ? enabled() : enabled;
+                const click = action && wrapPluginAction(action, name);
+
+                return new MenuItem({
+                  label,
+                  accelerator,
+                  enabled,
+                  click,
+                  submenu
+                });
+              })
+            );
+          } catch (error) {
+            plugin.error = true;
+            menuItemDescriptor.enabled = false;
+
+            log.error('[%s] Failed to build menu: %O', name, error);
+          }
+        }
+
+        if (plugin.error) {
+          menuItemDescriptor.label = menuItemDescriptor.label.concat(' <error>');
+        }
+
+        return [
+          ...menuItems,
+          new MenuItem(menuItemDescriptor)
+        ];
+      }, []);
+    } else {
+      submenuTemplate = [{
+        label: '<no plug-ins found>',
+        enabled: false
+      }];
+    }
+
+    this.menu.append(new MenuItem({
+      label: 'Plugins',
+      submenu: Menu.buildFromTemplate(submenuTemplate)
+    }));
+
+    return this;
+  }
+
   appendHelpMenu() {
     const submenuTemplate = this.getHelpSubmenuTemplate();
 
@@ -436,7 +516,6 @@ class MenuBuilder {
       },
       getSeparatorTemplate()
     ];
-
 
     const providedMenus = map(this.options.providers, provider => provider.helpMenu)
       .filter(menu => Boolean(menu.length));
@@ -543,4 +622,14 @@ function canSwitchTab(state) {
 
 function canCloseTab(state) {
   return Boolean(state.tabsCount);
+}
+
+function wrapPluginAction(fn, pluginName) {
+  return async function() {
+    try {
+      await fn();
+    } catch (error) {
+      log.error('[%s] Menu action error: %O', pluginName, error);
+    }
+  };
 }

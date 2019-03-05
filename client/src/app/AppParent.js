@@ -4,7 +4,9 @@ import debug from 'debug';
 
 import App from './App';
 
-import { forEach } from 'min-dash';
+import {
+  forEach
+} from 'min-dash';
 
 
 const log = debug('AppParent');
@@ -15,44 +17,71 @@ export default class AppParent extends PureComponent {
   constructor(props) {
     super(props);
 
+    this.prereadyState = {
+      files: [],
+      workspace: {}
+    };
+
     this.appRef = React.createRef();
   }
 
   triggerAction = (event, action, options) => {
-    log('trigger action', action, options);
 
-    const {
-      backend
-    } = this.props.globals;
+    // fail-safe trigger given action
+    const exec = async () => {
 
-    let result = Promise.resolve(
-      this.getApp().triggerAction(action, options)
-    );
+      log('trigger action %s, %o', action, options);
 
-    if (action === 'quit') {
-      result = result.then(
-        backend.sendQuitAllowed,
-        backend.sendQuitAborted
-      );
+      const {
+        backend
+      } = this.props.globals;
+
+      const result = await this.getApp().triggerAction(action, options);
+
+      if (action === 'quit') {
+
+        if (result) {
+          backend.sendQuitAllowed();
+        } else {
+          backend.sendQuitAborted();
+        }
+      }
+
+    };
+
+    return exec().catch(this.handleError);
+  }
+
+  handleOpenFiles = (event, newFiles) => {
+
+    const { prereadyState } = this;
+
+    // schedule file opening on ready
+    if (prereadyState) {
+
+      log('scheduling open files', newFiles);
+
+      this.prereadyState = {
+        activeFile: newFiles[newFiles.length - 1],
+        files: mergeFiles(prereadyState.files, newFiles)
+      };
+
+      return;
     }
 
-    result.catch(this.handleError);
+    log('open files', newFiles);
+
+    this.getApp().openFiles(newFiles);
   }
 
-  openFiles = (event, files) => {
-    log('open files', files);
-
-    this.getApp().openFiles(files);
-  }
-
-  handleMenuUpdate = (options = {}) => {
+  handleMenuUpdate = (state = {}) => {
     const { keyboardBindings } = this.props;
 
-    const { editMenu } = options;
+    const { editMenu } = state;
 
     keyboardBindings.update(editMenu);
 
-    this.getBackend().sendMenuUpdate(options);
+    this.getBackend().sendMenuUpdate(state);
   }
 
   handleContextMenu = (type, options) => {
@@ -60,10 +89,6 @@ export default class AppParent extends PureComponent {
   }
 
   handleWorkspaceChanged = async (config) => {
-
-    if (this.restoringWorkspace) {
-      return;
-    }
 
     const workspace = this.getWorkspace();
 
@@ -87,7 +112,11 @@ export default class AppParent extends PureComponent {
       endpoints
     };
 
-    await workspace.save(workspaceConfig);
+    try {
+      await workspace.save(workspaceConfig);
+    } catch (error) {
+      return log('workspace saved error', error);
+    }
 
     log('workspace saved', workspaceConfig);
   }
@@ -96,14 +125,14 @@ export default class AppParent extends PureComponent {
 
     const workspace = this.getWorkspace();
 
+    const { prereadyState } = this;
+
     const defaultConfig = {
-      activeFile: null,
+      activeFile: -1,
       files: [],
       layout: {},
       endpoints: []
     };
-
-    this.restoringWorkspace = true;
 
     const {
       files,
@@ -116,30 +145,30 @@ export default class AppParent extends PureComponent {
 
     app.setLayout(layout);
 
-    await app.openFiles(files);
-
-    if (activeFile) {
-      const activeTab = app.findOpenTab(activeFile);
-
-      if (activeTab) {
-        await app.setActiveTab(activeTab);
-      }
-    }
-
     app.setEndpoints(endpoints);
 
-    log('workspace restored');
+    // remember to-be restored files but postpone opening + activation
+    // until <client:started> batch restore workspace files + files opened
+    // via command line
+    this.prereadyState = {
+      activeFile: prereadyState.activeFile || files[activeFile],
+      files: mergeFiles(prereadyState.files, files)
+    };
 
-    this.restoringWorkspace = false;
+    log('workspace restored');
   }
 
   handleError = (error, tab) => {
 
-    if (tab) {
-      return log('tab ERROR', error, tab);
-    }
+    const errorMessage = `${tab ? 'tab' : 'app'} ERROR`;
 
-    return log('app ERROR', error);
+    this.props.globals.log.error(errorMessage, error, tab);
+
+    return log(errorMessage, error, tab);
+  }
+
+  handleBackendError = (_, message) => {
+    this.triggerAction(null, 'backend-error', message);
   }
 
   handleWarning = (warning, tab) => {
@@ -159,19 +188,41 @@ export default class AppParent extends PureComponent {
     }
 
     this.getBackend().sendReady();
-
-    // setTimeout(() => {
-    //   const app = this.getApp();
-
-    //   app.createDiagram('bpmn');
-    //   app.createDiagram('bpmn');
-    //   app.createDiagram('dmn');
-    //   app.createDiagram('dmn', { table: true });
-    //   app.createDiagram('cmmn');
-    // }, 0);
   }
 
   handleResize = () => this.triggerAction(null, 'resize');
+
+  handleFocus = (event) => {
+    this.triggerAction(event, 'check-file-changed');
+  }
+
+  handleStarted = async () => {
+
+    log('received <started>');
+
+    const {
+      onStarted
+    } = this.props;
+
+    // batch open / restore files
+    const { prereadyState } = this;
+
+    const {
+      files,
+      activeFile
+    } = prereadyState;
+
+    // mark as ready
+    this.prereadyState = null;
+
+    log('restoring / opening files', files, activeFile);
+
+    await this.getApp().openFiles(files, activeFile);
+
+    if (typeof onStarted === 'function') {
+      onStarted();
+    }
+  }
 
   getApp() {
     return this.appRef.current;
@@ -205,15 +256,13 @@ export default class AppParent extends PureComponent {
 
     backend.on('menu:action', this.triggerAction);
 
-    backend.on('client:open-files', this.openFiles);
+    backend.on('client:open-files', this.handleOpenFiles);
 
-    backend.once('client:started', () => {
-      document.body.classList.remove('loading');
-    });
+    backend.once('client:started', this.handleStarted);
 
-    backend.on('client:window-focused', (event) => {
-      this.triggerAction(event, 'check-file-changed');
-    });
+    backend.on('client:window-focused', this.handleFocus);
+
+    backend.on('backend:error', this.handleBackendError);
 
     this.registerMenus();
 
@@ -237,7 +286,11 @@ export default class AppParent extends PureComponent {
 
     backend.off('menu:action', this.triggerAction);
 
-    backend.off('client:open-files', this.openFiles);
+    backend.off('client:open-files', this.handleOpenFiles);
+
+    backend.off('client:window-focused', this.handleFocus);
+
+    backend.off('backend:error', this.handleBackendError);
 
     keyboardBindings.unbind();
 
@@ -265,4 +318,17 @@ export default class AppParent extends PureComponent {
     );
   }
 
+}
+
+
+// helpers /////////////////////////
+
+function mergeFiles(oldFiles, newFiles) {
+
+  const actualNewFiles = newFiles.filter(newFile => !oldFiles.some(oldFile => oldFile.path === newFile.path));
+
+  return [
+    ...oldFiles,
+    ...actualNewFiles
+  ];
 }
