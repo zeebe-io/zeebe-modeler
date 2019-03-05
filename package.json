@@ -21,7 +21,8 @@
     "postinstall": "lerna bootstrap --hoist",
     "release": "lerna publish --force-publish",
     "test": "run-s *:test",
-    "start": "run-s \"dev -- {@}\" --"
+    "start": "run-s \"dev -- {@}\" --",
+    "sync": "node tasks/sync-fork.js"
   },
   "author": "Camunda <http://camunda.com>",
   "license": "SEE LICENSE IN LICENSE",
