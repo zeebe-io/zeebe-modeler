@@ -1,6 +1,6 @@
 {
   "name": "zeebe-modeler",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Zeebe Modeler for BPMN based on bpmn.io",
   "private": true,
   "main": "lib/index.js",
