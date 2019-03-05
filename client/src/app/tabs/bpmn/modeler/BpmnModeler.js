@@ -1,11 +1,17 @@
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 
-import diagramOriginModule from 'diagram-js-origin';
 import minimapModule from 'diagram-js-minimap';
+
+import diagramOriginModule from 'diagram-js-origin';
+
+import alignToOriginModule from '@bpmn-io/align-to-origin';
+import addExporterModule from '@bpmn-io/add-exporter';
 
 import executableFixModule from './features/executable-fix';
 import globalClipboardModule from './features/global-clipboard';
 import propertiesPanelKeyboardBindingsModule from './features/properties-panel-keyboard-bindings';
+
+import Flags, { DISABLE_ADJUST_ORIGIN } from '../../../../util/Flags';
 
 import signavioCompatModule from 'bpmn-js-signavio-compat';
 
@@ -48,9 +54,10 @@ export default class ZeebeBpmnModeler extends BpmnModeler {
 const defaultModules = BpmnModeler.prototype._modules;
 
 const extensionModules = [
-  diagramOriginModule,
   minimapModule,
+  addExporterModule,
   executableFixModule,
+  Flags.get(DISABLE_ADJUST_ORIGIN) ? diagramOriginModule : alignToOriginModule,
   globalClipboardModule,
   signavioCompatModule,
   propertiesPanelModule,

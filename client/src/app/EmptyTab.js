@@ -8,7 +8,6 @@ import {
   Tab
 } from './primitives';
 
-
 export default class EmptyTab extends PureComponent {
 
   componentDidMount() {

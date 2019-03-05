@@ -37,7 +37,7 @@ Manual integration tests:
 
 * [ ] configure service task in properties panel
 * [ ] add `async:before`
-* [ ] add executionn listener
+* [ ] add execution listener
 * [ ] add input mapping
 * [ ] verify results in XML tab
 
@@ -97,6 +97,13 @@ Based on the [test diagram](./test.bpmn.png):
 #### Error Handling
 
 * [ ] Open [`broken.bpmn`](./broken.bpmn) and verify a proper error message is shown (_No diagram to display_)
+
+
+#### Installers (platform specific)
+
+* [ ] MacOS
+    * [ ] Unzipping and starting application works
+    * [ ] Installing application via `dmg` file and starting it works
 
 
 #### Other (platform specific)

@@ -36,11 +36,14 @@ brew cask install zeebe-modeler
 # checkout a tag
 git checkout v1.1.0
 
-# install
+# install dependencies
 npm install
 
-# run all tests
+# execute all checks (lint, test and build)
 npm run all
+
+# build the application to ./dist
+npm run build
 ```
 
 
@@ -61,7 +64,13 @@ We use a `sync` task to keep up with changes in the upstream [Camunda Modeler](h
 npm run sync
 ```
 
-If no merge conflicts appeared, the synchronization task is done and the changes can be pushed remotely. If there were merge conflicts detected, the task automatically exclude unrelated files from the conflicts (e.g. changes inside `tabs/bpmn/*`). Other merge conflicts must be resolved manually.
+The synchronized upstream branch will be `master` by default. You can specify the branch (`--branch` or `-b`) or even the tag (`--tag` or `-t`) by giving the according argument.
+
+```sh
+npm run sync -- -b master
+```
+
+If no merge conflicts appeared, the synchronization task is done and the changes can be pushed remotely. If there were merge conflicts detected, the task automatically exclude unrelated files from the conflicts (e.g. changes inside `tabs/dmn/*`). Other merge conflicts must be resolved manually.
 
 
 ## Code of Conduct

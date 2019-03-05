@@ -5,17 +5,53 @@
  */
 const git = require('simple-git')('');
 
+const mri = require('mri');
+
 const CAMUNDA_MODELER_UPSTREAM = 'camunda';
 const CAMUNDA_MODELER_REPOSITORY = 'https://github.com/camunda/camunda-modeler.git';
 
 const CAMUNDA_MODELER_BRANCH = 'master';
+
+const {
+  help,
+  ...args
+} = mri(process.argv, {
+  alias: {
+    branch: [ 'b' ],
+    help: [ 'h' ],
+    tag: [ 't' ],
+  },
+  default: {
+    branch: CAMUNDA_MODELER_BRANCH,
+    help: false,
+    tag: false
+  }
+});
+
+if (help) {
+  console.log(`usage: node tasks/sync-fork.js [-b BRANCH_NAME] [-t TAG_NAME]
+
+Synchronize with latest Camunda Modeler changes.
+
+Options:
+
+  -b, --branch=BRANCH_NAME      synchronize with upstream branch
+  -t, --tag=TAG_NAME            synchronize with upstream tag
+
+  -h, --help                    print this help
+`);
+
+  process.exit(0);
+}
+
+run(args);
 
 /**
  * $ git remote add @upstream @repository
  * @param {String} options.repository
  * @param {String} options.upstream
  */
-const createUpstream = async (options) => {
+async function createUpstream(options) {
 
   const {
     repository,
@@ -39,14 +75,14 @@ const createUpstream = async (options) => {
         resolve(res);
       });
   });
-};
+}
 
 /**
  * $ git remote -v
  * Fetches all remote and check whether given @upstream is included
  * @param {String} options.upstream
  */
-const hasUpstream = async (options) => {
+async function hasUpstream(options) {
 
   const {
     upstream
@@ -69,24 +105,22 @@ const hasUpstream = async (options) => {
     });
   });
 
-};
+}
 
 /**
- * $ git fetch @upstream @branch
- * @param {String} options.branch
+ * $ git fetch @upstream
  * @param {String} options.upstream
  */
-const fetchUpstream = async (options) => {
+async function fetchUpstream(options) {
 
   const {
-    branch,
     upstream
   } = options;
 
-  console.log(`Sync: Execute 'git fetch ${upstream} ${branch}'.`);
+  console.log(`Sync: Execute 'git fetch ${upstream} ${CAMUNDA_MODELER_BRANCH}'.`);
 
   return new Promise((resolve, reject) => {
-    git.fetch(upstream, branch, (err, res) => {
+    git.fetch(upstream, CAMUNDA_MODELER_BRANCH, (err, res) => {
 
       if (err) {
         reject(err);
@@ -97,14 +131,14 @@ const fetchUpstream = async (options) => {
       resolve();
     });
   });
-};
+}
 
 
 /**
  * $ git commit -m @message
  * @param {String} options.message
  */
-const setCommitMessage = async (options) => {
+async function setCommitMessage(options) {
 
   const {
     message
@@ -126,13 +160,13 @@ const setCommitMessage = async (options) => {
       resolve();
     });
   });
-};
+}
 
 /**
  * $ git clean -@mode
  * @param {String} options.mode
  */
-const cleanUp = async (options) => {
+async function cleanUp(options) {
 
   const {
     mode
@@ -150,7 +184,7 @@ const cleanUp = async (options) => {
       resolve();
     });
   });
-};
+}
 
 /**
  * $ git reset HEAD -- @files
@@ -158,7 +192,7 @@ const cleanUp = async (options) => {
  * @param {Array<String>} options.conflicts
  * @param {Array<String>} options.files
  */
-const excludeFilesFromMerge = async (options) => {
+async function excludeFilesFromMerge(options) {
 
   const {
     conflicts,
@@ -211,22 +245,27 @@ const excludeFilesFromMerge = async (options) => {
     });
   });
 
-};
+}
 
 /**
  * $ git merge @upstream/@branch --no-commit --no-ff
  * Overall syncing procedure
  * @param {String} options.branch
+ * @param {String} options.tag
  * @param {String} options.upstream
  */
-const sync = async (options) => {
+async function sync(options) {
 
   const {
     branch,
+    tag,
     upstream
   } = options;
 
-  console.log(`Sync: Execute 'git merge --no-commit --no-ff ${upstream}/${branch}'.`);
+  // no need do especially declare upstream if tag is selected
+  let syncPath = tag || `${upstream}/${branch}`;
+
+  console.log(`Sync: Execute 'git merge --no-commit --no-ff ${syncPath}'.`);
 
   return new Promise((resolve, reject) => {
 
@@ -248,7 +287,7 @@ const sync = async (options) => {
     git.merge([
       '--no-commit',
       '--no-ff',
-      `${upstream}/${branch}`
+      syncPath
     ], async (err, res) => {
 
       if (!res) {
@@ -289,9 +328,14 @@ const sync = async (options) => {
       await _success(res);
     });
   });
-};
+}
 
-const run = async () => {
+async function run(options) {
+
+  const {
+    branch,
+    tag
+  } = options;
 
   console.log('##### Started syncing #####');
 
@@ -307,13 +351,13 @@ const run = async () => {
   }
 
   await fetchUpstream({
-    branch: CAMUNDA_MODELER_BRANCH,
     upstream: CAMUNDA_MODELER_UPSTREAM
   });
 
   try {
     await sync({
-      branch: CAMUNDA_MODELER_BRANCH,
+      branch,
+      tag,
       upstream: CAMUNDA_MODELER_UPSTREAM
     });
   } catch (e) {
@@ -323,7 +367,4 @@ const run = async () => {
 
   console.log('##### Stoped syncing #####');
 
-};
-
-// todo(pinussilvestrus): make it configurable
-run();
+}

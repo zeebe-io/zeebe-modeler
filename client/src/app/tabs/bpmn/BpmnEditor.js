@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import { isFunction } from 'min-dash';
+
 import { Fill } from '../../slot-fill';
 
 import {
@@ -276,6 +278,12 @@ export class BpmnEditor extends CachedComponent {
       zoom: true
     };
 
+    // ensure backwards compatibility
+    // https://github.com/camunda/camunda-modeler/commit/78357e3ed9e6e0255ac8225fbdf451a90457e8bf#diff-bd5be70c4e5eadf1a316c16085a72f0fL17
+    newState.bpmn = true;
+    newState.editable = true;
+    newState.elementsSelected = !!selectionLength;
+
     const contextMenu = getBpmnContextMenu(newState);
 
     const editMenu = getBpmnEditMenu(newState);
@@ -406,10 +414,65 @@ export class BpmnEditor extends CachedComponent {
   }
 
   triggerAction = (action, context) => {
+    const { propertiesPanel: propertiesPanelLayout } = this.props.layout;
     const modeler = this.getModeler();
 
     if (action === 'resize') {
       return this.handleResize();
+    }
+
+    if (action === 'toggleProperties') {
+      const newLayout = {
+        propertiesPanel: {
+          ...propertiesPanelLayout,
+          open: !propertiesPanelLayout.open
+        }
+      };
+
+      return this.handleLayoutChange(newLayout);
+    }
+
+    if (action === 'resetProperties') {
+      const newLayout = {
+        propertiesPanel: {
+          width: 250,
+          open: true
+        }
+      };
+
+      return this.handleLayoutChange(newLayout);
+    }
+
+    if (action === 'zoomIn') {
+      action = 'stepZoom';
+
+      context = {
+        value: 1
+      };
+    }
+
+    if (action === 'zoomOut') {
+      action = 'stepZoom';
+
+      context = {
+        value: -1
+      };
+    }
+
+    if (action === 'resetZoom') {
+      action = 'zoom';
+
+      context = {
+        value: 1
+      };
+    }
+
+    if (action === 'zoomFit') {
+      action = 'zoom';
+
+      context = {
+        value: 'fit-viewport'
+      };
     }
 
     // TODO(nikku): handle all editor actions
@@ -575,18 +638,48 @@ export class BpmnEditor extends CachedComponent {
     );
   }
 
-  static createCachedState() {
+  static createCachedState(props) {
     const {
       name,
       version
     } = Metadata;
 
+    const {
+      getPlugins,
+      onError
+    } = props;
+
+    const moddleExtensionPlugins = getPlugins('bpmn.modeler.moddleExtension');
+
+    const moddleExtensions = moddleExtensionPlugins.reduce((extensions, extension) => {
+      let { name } = extension;
+
+      try {
+        name = name.toLowerCase();
+      } catch (error) {
+        if (isFunction(onError)) {
+          onError(new Error('Could not register moddle extension.'));
+        }
+
+        return extensions;
+      }
+
+      return {
+        ...extensions,
+        [ name ]: extension
+      };
+    }, {});
+
+    const additionalModules = getPlugins('bpmn.modeler.additionalModules') || [];
+
     const modeler = new BpmnModeler({
-      position: 'absolute',
+      additionalModules,
       exporter: {
         name,
         version
-      }
+      },
+      moddleExtensions,
+      position: 'absolute'
     });
 
     const commandStack = modeler.get('commandStack');
