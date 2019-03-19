@@ -38,11 +38,13 @@ describe('customs - replaceMenu', function() {
     openPopup(startEvent);
 
     const endEventEntry = queryEntry(popupMenu, 'replace-with-none-end'),
-          messageStartEntry = queryEntry(popupMenu, 'replace-with-message-start');
+          messageStartEntry = queryEntry(popupMenu, 'replace-with-message-start'),
+          timerStartEntry = queryEntry(popupMenu, 'replace-with-timer-start');
 
     // then
     expect(endEventEntry).to.exist;
     expect(messageStartEntry).to.exist;
+    expect(timerStartEntry).to.exist;
 
   }));
 
@@ -93,11 +95,13 @@ describe('customs - replaceMenu', function() {
     openPopup(timerEvent);
 
     const startEventEntry = queryEntry(popupMenu, 'replace-with-none-start'),
-          endEventEntry = queryEntry(popupMenu, 'replace-with-none-end');
+          endEventEntry = queryEntry(popupMenu, 'replace-with-none-end'),
+          timerEventEntry = queryEntry(popupMenu, 'replace-with-timer-intermediate-catch');
 
     // then
     expect(startEventEntry).to.exist;
     expect(endEventEntry).to.exist;
+    expect(timerEventEntry).to.exist;
 
   }));
 
