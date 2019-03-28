@@ -60,8 +60,8 @@ const expectedFiles = {
       contents: [
         'Zeebe Modeler.exe',
         'support/register_fileassoc.bat',
-        'LICENSE.camunda-modeler.txt',
-        'THIRD_PARTY_NOTICES.camunda-modeler.txt',
+        'LICENSE.zeebe-modeler.txt',
+        'THIRD_PARTY_NOTICES.zeebe-modeler.txt',
         'VERSION'
       ]
     }

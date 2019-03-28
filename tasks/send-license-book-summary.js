@@ -205,12 +205,12 @@ function getHtmlFromDiff(diff, currentVersion) {
 <html>
 <head>
 <meta charset="utf-8">
-<title>Camunda Modeler ${currentVersion} Third Party Notices Changes Summary</title>
+<title>Zeebe Modeler ${currentVersion} Third Party Notices Changes Summary</title>
 <style>${style}</style>
 </head>
 <body>
   <h1>
-    Camunda Modeler Third Party Notices Changes
+    Zeebe Modeler Third Party Notices Changes
   </h1>
 ${diffHtml}
 </body>
@@ -221,7 +221,7 @@ ${diffHtml}
 }
 
 function getDraftEmail(summary, currentVersion, changesSummary) {
-  const subject = `Camunda Modeler ${currentVersion} Third Party Summary`;
+  const subject = `Zeebe Modeler ${currentVersion} Third Party Summary`;
   const text = getMessageText(summary, currentVersion, changesSummary);
   const attachment = changesSummary;
 
@@ -235,7 +235,7 @@ function getDraftEmail(summary, currentVersion, changesSummary) {
 function getMessageText(summary, version, changesSummary) {
   let message = `${summary}
 
-Third party notices: https://github.com/camunda/camunda-modeler/blob/${version}/THIRD_PARTY_NOTICES
+Third party notices: https://github.com/zeebe-io/zeebe-modeler/blob/${version}/THIRD_PARTY_NOTICES
   `;
 
   if (changesSummary) {
