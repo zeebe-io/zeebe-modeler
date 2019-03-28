@@ -1,6 +1,18 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 import Ids from 'ids';
 
 import bpmnDiagram from './tabs/bpmn/diagram.bpmn';
+
+import replaceIds from '@bpmn-io/replace-ids';
 
 import EmptyTab from './EmptyTab';
 
@@ -9,6 +21,7 @@ import { forEach } from 'min-dash';
 import parseDiagramType from './util/parseDiagramType';
 
 const ids = new Ids([ 32, 36, 1 ]);
+
 const createdByType = {};
 
 const noopProvider = {
@@ -124,7 +137,7 @@ export default class TabsProvider {
   getInitialFileContents(type, options) {
     const rawContents = this.getProvider(type).getInitialContents(options);
 
-    return rawContents && rawContents.replace(/\{\{ ID \}\}/g, () => ids.next());
+    return rawContents && replaceIds(rawContents, ids);
   }
 
   createFile(type, options) {

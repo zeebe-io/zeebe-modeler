@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 import { filter } from 'min-dash';
 
 
@@ -55,7 +65,7 @@ export default class Plugins {
    * @returns {Array}
    */
   get(type) {
-    return this._getAll()
+    return this.getAllRegistered()
       .filter(registration => registration.type === type)
       .map(registration => registration.plugin);
   }
@@ -104,8 +114,12 @@ export default class Plugins {
    *
    * @returns {Array}
    */
-  _getAll() {
+  getAllRegistered() {
     return window.plugins || [];
+  }
+
+  getAll() {
+    return this.app.plugins.getAll();
   }
 
 }

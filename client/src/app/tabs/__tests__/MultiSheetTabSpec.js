@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 /* global sinon */
 
 import React from 'react';
@@ -31,7 +41,63 @@ describe('<MultiSheetTab>', function() {
   });
 
 
+  describe('xml prop', function() {
+
+    it('update lastXML if xml prop changed (mount)', function() {
+
+      // given
+      const xml = 'foo';
+
+      const cache = new Cache();
+
+      cache.add('editor', {
+        cached: {
+          lastXML: 'bar'
+        }
+      });
+
+      // when
+      const { instance } = renderTab({
+        xml,
+        cache
+      });
+
+      // then
+      const { lastXML } = instance.getCached();
+
+      expect(lastXML).to.eql(xml);
+    });
+
+
+    it('update lastXML if xml prop changed (update)', function() {
+
+      // given
+      const {
+        instance,
+        wrapper
+      } = renderTab({
+        xml: 'foo'
+      });
+
+      const xml = 'bar';
+
+      // when
+      wrapper.setProps({
+        xml
+      });
+
+      // then
+      const { lastXML } = instance.getCached();
+
+      expect(lastXML).to.equal(xml);
+    });
+  });
+
+
   describe('#handleImport', function() {
+
+    const error = new Error('error');
+    const warnings = [ 'warning', 'warning' ];
 
     it('should import without errors', function() {
 
@@ -69,14 +135,34 @@ describe('<MultiSheetTab>', function() {
       });
 
       // when
-      const warnings = [ 'warning', 'warning' ];
-
       instance.handleImport(null, warnings);
 
       // then
       expect(errorSpy).not.to.have.been.called;
       expect(warningSpy).to.have.been.calledTwice;
       expect(warningSpy.alwaysCalledWith('warning')).to.be.true;
+    });
+
+
+    it('should open warnings toast', function() {
+
+      // given
+      const {
+        instance
+      } = renderTab();
+
+      // when
+      instance.handleImport(null, warnings);
+
+      const {
+        warnings: stateWarnings,
+        currentToast
+      } = instance.getCached();
+
+      // then
+      expect(stateWarnings).to.eql(warnings);
+      expect(currentToast).to.eql('WARNINGS');
+
     });
 
 
@@ -96,8 +182,6 @@ describe('<MultiSheetTab>', function() {
       const showImportErrorDialogSpy = spy(instance, 'showImportErrorDialog');
 
       // when
-      const error = new Error('error');
-
       instance.handleImport(error);
 
       // then
@@ -190,6 +274,37 @@ describe('<MultiSheetTab>', function() {
     } = instance.getCached();
 
     expect(activeSheet.id).to.equal('fallback');
+  });
+
+
+  describe('#sheetsChanged', function() {
+
+    it('should order sheets', function() {
+
+      // given
+      const {
+        instance
+      } = renderTab();
+
+      const sheets = [
+        { id: '2', order: -1 },
+        { id: '3', order: 0 },
+        { id: '1', order: -2 },
+        { id: '4', order: 1 },
+      ];
+
+      // when
+      instance.sheetsChanged(sheets);
+
+      // then
+      expectSheetOrder(instance.getCached().sheets, [
+        '1',
+        '2',
+        '3',
+        '4'
+      ]);
+    });
+
   });
 
 
@@ -288,6 +403,54 @@ describe('<MultiSheetTab>', function() {
 
   });
 
+
+  describe('toast handling', function() {
+
+    let instance;
+
+    beforeEach(function() {
+      const rendered = renderTab();
+
+      instance = rendered.instance;
+    });
+
+
+    it('should set toast', function() {
+      // given
+      const fakeToastName = 'toast';
+
+      // when
+      instance.setToast(fakeToastName);
+
+      const {
+        currentToast
+      } = instance.getCached();
+
+      // then
+      expect(currentToast).to.eql(fakeToastName);
+    });
+
+
+    it('should close toast', function() {
+      // given
+      const fakeToastName = 'toast';
+
+      instance.setToast(fakeToastName);
+
+      // when
+      instance.closeToast();
+
+      const {
+        currentToast
+      } = instance.getCached();
+
+      // then
+      expect(currentToast).to.eql(null);
+    });
+
+
+  });
+
 });
 
 
@@ -300,6 +463,7 @@ const TestTab = WithCachedState(MultiSheetTab);
 function renderTab(options = {}) {
   const {
     id,
+    cache,
     xml,
     tab,
     layout,
@@ -313,7 +477,7 @@ function renderTab(options = {}) {
     providers
   } = options;
 
-  const withCachedState = mount(
+  const wrapper = mount(
     <TestTab
       id={ id || 'editor' }
       tab={ tab || defaultTab }
@@ -326,7 +490,7 @@ function renderTab(options = {}) {
       onContextMenu={ onContextMenu || noop }
       onAction={ onAction || noop }
       providers={ providers || defaultProviders }
-      cache={ options.cache || new Cache() }
+      cache={ cache || new Cache() }
       layout={ layout || {
         minimap: {
           open: false
@@ -338,12 +502,18 @@ function renderTab(options = {}) {
     />
   );
 
-  const wrapper = withCachedState.find(MultiSheetTab);
+  const multiSheetTab = wrapper.find(MultiSheetTab);
 
-  const instance = wrapper.instance();
+  const instance = multiSheetTab.instance();
 
   return {
     instance,
     wrapper
   };
+}
+
+function expectSheetOrder(sheets, expectedOrder) {
+  sheets.forEach((sheet, index) => {
+    expect(sheet.id === expectedOrder[ index ]);
+  });
 }

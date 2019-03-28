@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 var coverage = process.env.COVERAGE;
 
 if (coverage) {
@@ -92,7 +102,7 @@ module.exports = function(karma) {
             use: 'babel-loader'
           },
           {
-            test: /\.(css|bpmn|cmmn|dmn|less|xml|png)$/,
+            test: /\.(css|bpmn|cmmn|dmn|less|xml|png|svg)$/,
             use: 'raw-loader'
           }
         ]
@@ -118,7 +128,8 @@ module.exports = function(karma) {
         ],
         alias: {
           'bpmn-js/lib/Modeler': 'test/mocks/bpmn-js/Modeler',
-          './CodeMirror': 'test/mocks/code-mirror/CodeMirror'
+          './CodeMirror': 'test/mocks/code-mirror/CodeMirror',
+          'sourcemapped-stacktrace': 'test/mocks/sourcemapped-stacktrace'
         }
       }
     }

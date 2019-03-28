@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 import React from 'react';
 
 import css from './DropZone.less';
@@ -35,8 +45,7 @@ export class DropZone extends React.PureComponent {
   isDragAllowed(event) {
     const { dataTransfer } = event;
 
-    return Array.from(dataTransfer.items)
-      .some(({ kind, type }) => type === '' && kind === 'file');
+    return Array.from(dataTransfer.items).some(isDropableItem);
   }
 
   handleDragLeave = event => {
@@ -88,4 +97,23 @@ function DropOverlay() {
       </div>
     </div>
   );
+}
+
+
+/**
+ * Checks for droppable items e.g. text/foo, text/plain, application/foo+xml,
+ * application/bpmn, application/cmmn, application/dmn.
+ *
+ * @param {Object} item - Item to be dropped.
+ *
+ * @returns {boolean}
+ */
+export function isDropableItem(item) {
+  const { kind, type } = item;
+
+  if (kind !== 'file') {
+    return false;
+  }
+
+  return /^(text\/.*|application\/([^+]*\+)?xml|application\/(cmmn|bpmn|dmn))?$/.test(type);
 }

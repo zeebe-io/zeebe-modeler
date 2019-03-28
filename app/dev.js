@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 const log = require('./lib/log')('app:dev');
 
 const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
@@ -14,6 +24,8 @@ pkg.version = getAppVersion(pkg, {
   nightly: 'dev'
 });
 
+// monkey-patch cli args to not open this file in application
+process.argv = process.argv.filter(arg => !arg.includes('dev.js'));
 
 const app = require('./lib');
 

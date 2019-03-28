@@ -1,13 +1,26 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 'use strict';
 
 const DEV = process.env.NODE_ENV === 'development';
+const LICENSE_CHECK = process.env.LICENSE_CHECK;
 
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+const { LicenseWebpackPlugin } = require('license-webpack-plugin');
+
 
 module.exports = {
-  mode: DEV ? 'development' : 'production',
+  mode: DEV ? 'development' : (LICENSE_CHECK ? 'none' : 'production'),
   target: 'electron-renderer',
   entry: {
     bundle: ['./src/index.js']
@@ -68,7 +81,8 @@ module.exports = {
         from: './public',
         transform: DEV && applyDevCSP
       }
-    ])
+    ]),
+    ...extractDependencies()
   ],
   // don't bundle shims for node globals
   node: false,
@@ -95,6 +109,40 @@ function cssLoader() {
   } else {
     return 'css-loader';
   }
+}
+
+
+function extractDependencies() {
+
+  if (!LICENSE_CHECK) {
+    return [];
+  }
+
+  return [
+    new LicenseWebpackPlugin({
+      outputFilename: 'dependencies.json',
+      perChunkOutput: false,
+      renderLicenses: (modules) => {
+
+        const usedModules = modules.reduce((result, m) => {
+
+          const {
+            name,
+            version
+          } = m.packageJson;
+
+          const id = `${name}@${version}`;
+
+          return {
+            ...result,
+            [id]: true
+          };
+        }, {});
+
+        return JSON.stringify(usedModules);
+      }
+    })
+  ];
 }
 
 /**

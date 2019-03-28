@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 const {
   app,
   dialog: electronDialog,
@@ -225,6 +235,15 @@ renderer.on('client-config:get', function(...args) {
   }
 });
 
+// plugin toggling //////////
+
+renderer.on('toggle-plugins', function() {
+
+  const pluginsDisabled = flags.get('disable-plugins');
+
+  app.emit('restart', [ pluginsDisabled ? '--no-disable-plugins' : '--disable-plugins' ]);
+});
+
 // open file handling //////////
 
 app.on('app:client-ready', function() {
@@ -382,6 +401,18 @@ app.createEditorWindow = function() {
   app.quitAllowed = false;
 };
 
+app.on('restart', function(args) {
+
+  const effectiveArgs = Cli.appendArgs(process.argv.slice(1), [ ...args, '--relaunch' ]);
+
+  log.info('restarting with args %O', effectiveArgs);
+
+  app.relaunch({
+    args: effectiveArgs
+  });
+
+  app.exit(0);
+});
 
 /**
  * Application entry point

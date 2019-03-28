@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 'use strict';
 
 const path = require('path');
@@ -38,18 +48,14 @@ class Dialog {
       name
     } = options;
 
-    return new Promise(resolve => {
-      this.showDialog('error', {
-        type: 'error',
-        title: 'File Open Error',
-        buttons: [
-          { id: 'cancel', label: 'Close' }
-        ],
-        message: message || `Unable to open"${ name }"`,
-        detail
-      }, () => {
-        resolve();
-      });
+    return this.showDialog({
+      type: 'error',
+      title: 'File Open Error',
+      buttons: [
+        { id: 'cancel', label: 'Close' }
+      ],
+      message: message || `Unable to open "${ name }"`,
+      detail
     });
   }
 

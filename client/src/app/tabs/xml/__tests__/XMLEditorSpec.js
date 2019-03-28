@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 import React from 'react';
 
 import { mount } from 'enzyme';
@@ -10,8 +20,6 @@ import {
 import { XMLEditor } from '../XMLEditor';
 
 import CodeMirror from 'test/mocks/code-mirror/CodeMirror';
-
-import { SlotFillRoot } from 'src/app/slot-fill';
 
 /* global sinon */
 
@@ -208,15 +216,13 @@ function renderEditor(xml, options = {}) {
   } = options;
 
   const slotFillRoot = mount(
-    <SlotFillRoot>
-      <TestEditor
-        id={ id || 'editor' }
-        xml={ xml }
-        activeSheet={ options.activeSheet || { id: 'xml' } }
-        onChanged={ onChanged || noop }
-        cache={ options.cache || new Cache() }
-      />
-    </SlotFillRoot>
+    <TestEditor
+      id={ id || 'editor' }
+      xml={ xml }
+      activeSheet={ options.activeSheet || { id: 'xml' } }
+      onChanged={ onChanged || noop }
+      cache={ options.cache || new Cache() }
+    />
   );
 
   const wrapper = slotFillRoot.find(XMLEditor);

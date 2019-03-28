@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 'use strict';
 
 const {
@@ -11,8 +21,7 @@ const {
   find,
   isFunction,
   map,
-  merge,
-  reduce
+  merge
 } = require('min-dash');
 
 const browserOpen = require('../util/browser-open');
@@ -155,6 +164,7 @@ class MenuBuilder {
   appendReopenLastTab() {
     this.menu.append(new MenuItem({
       label: 'Reopen Last File',
+      enabled: this.options.state.lastTab,
       accelerator: 'CommandOrControl+Shift+T',
       click: function() {
         app.emit('menu:action', 'reopen-last-tab');
@@ -409,69 +419,65 @@ class MenuBuilder {
   appendPluginsMenu() {
     const provider = find(this.options.providers, provider => provider.plugins);
 
-    const plugins = provider && provider.plugins;
+    const plugins = provider && provider.plugins || [];
 
-    let submenuTemplate;
+    // do not append menu, if no plug-ins are installed
+    if (!plugins.length) {
+      return this;
+    }
 
-    if (plugins) {
-      submenuTemplate = reduce(plugins, (menuItems, plugin) => {
-        const { name } = plugin;
+    // construct sub-menus for each plug-in
+    const submenuTemplate = plugins.map(plugin => {
+      const { name } = plugin;
 
-        const menuItemDescriptor = {
-          label: name,
-          enabled: false
-        };
+      const menuItemDescriptor = {
+        label: name,
+        enabled: false
+      };
 
-        if (plugin.menu) {
+      if (plugin.menu) {
 
-          try {
-            const menuEntries = plugin.menu(app, this.options.state);
+        try {
+          const menuEntries = plugin.menu(app, this.options.state);
 
-            menuItemDescriptor.enabled = true;
-            menuItemDescriptor.submenu = Menu.buildFromTemplate(
-              menuEntries.map(({
+          menuItemDescriptor.enabled = true;
+          menuItemDescriptor.submenu = Menu.buildFromTemplate(
+            menuEntries.map((entry) => {
+
+              const {
                 accelerator,
                 action,
                 enabled,
                 label,
                 submenu
-              }) => {
-                enabled = isFunction(enabled) ? enabled() : enabled;
-                const click = action && wrapPluginAction(action, name);
+              } = entry;
 
-                return new MenuItem({
-                  label,
-                  accelerator,
-                  enabled,
-                  click,
-                  submenu
-                });
-              })
-            );
-          } catch (error) {
-            plugin.error = true;
-            menuItemDescriptor.enabled = false;
+              return new MenuItem({
+                label,
+                accelerator,
+                enabled: isFunction(enabled) ? Boolean(enabled()) : enabled,
+                click: action && wrapPluginAction(action, name),
+                submenu
+              });
+            })
+          );
+        } catch (error) {
+          plugin.error = true;
+          menuItemDescriptor.enabled = false;
 
-            log.error('[%s] Failed to build menu: %O', name, error);
-          }
+          log.error('[%s] Failed to build menu: %O', name, error);
         }
+      }
 
-        if (plugin.error) {
-          menuItemDescriptor.label = menuItemDescriptor.label.concat(' <error>');
-        }
+      if (plugin.error) {
+        menuItemDescriptor.label = menuItemDescriptor.label.concat(' <error>');
+      }
 
-        return [
-          ...menuItems,
-          new MenuItem(menuItemDescriptor)
-        ];
-      }, []);
-    } else {
-      submenuTemplate = [{
-        label: '<no plug-ins found>',
-        enabled: false
-      }];
-    }
+      return new MenuItem(menuItemDescriptor);
+    });
 
+    // create actual menu entry, based on previously
+    // constructed sub-menus
     this.menu.append(new MenuItem({
       label: 'Plugins',
       submenu: Menu.buildFromTemplate(submenuTemplate)

@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 import React, { Component } from 'react';
 
 import { isFunction } from 'min-dash';
@@ -105,8 +115,6 @@ export class BpmnEditor extends CachedComponent {
     propertiesPanel.attachTo(this.propertiesPanelRef.current);
 
     this.checkImport();
-
-    this.handleResize();
   }
 
   componentWillUnmount() {
@@ -124,16 +132,10 @@ export class BpmnEditor extends CachedComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (!isImporting(this.state) && isXMLChange(prevProps.xml, this.props.xml)) {
-      this.checkImport();
-    }
+    this.checkImport(prevProps);
 
-    if (isChachedStateChange(prevProps, this.props)) {
+    if (isCacheStateChanged(prevProps, this.props)) {
       this.handleChanged();
-    }
-
-    if (prevProps.layout.propertiesPanel !== this.props.layout.propertiesPanel) {
-      this.triggerAction('resize');
     }
   }
 
@@ -156,7 +158,9 @@ export class BpmnEditor extends CachedComponent {
       'attach',
       'elements.copied',
       'propertiesPanel.focusin',
-      'propertiesPanel.focusout'
+      'propertiesPanel.focusout',
+      'directEditing.activate',
+      'directEditing.deactivate'
     ].forEach((event) => {
       modeler[fn](event, this.handleChanged);
     });
@@ -254,6 +258,7 @@ export class BpmnEditor extends CachedComponent {
       copy: !!selectionLength,
       cut: false,
       defaultCopyCutPaste: inputActive,
+      defaultUndoRedo: inputActive,
       dirty,
       distribute: selectionLength > 2,
       editLabel: !inputActive && !!selectionLength,
@@ -283,6 +288,7 @@ export class BpmnEditor extends CachedComponent {
     newState.bpmn = true;
     newState.editable = true;
     newState.elementsSelected = !!selectionLength;
+    newState.inactiveInput = !inputActive;
 
     const contextMenu = getBpmnContextMenu(newState);
 
@@ -313,22 +319,52 @@ export class BpmnEditor extends CachedComponent {
     return commandStack._stackIdx !== stackIdx;
   }
 
-  async checkImport() {
+  checkImport(prevProps) {
+
+    if (!this.isImportNeeded(prevProps)) {
+      return;
+    }
+
+    this.importXML();
+  }
+
+  isImportNeeded(prevProps) {
+    const {
+      importing
+    } = this.state;
+
+    if (importing) {
+      return false;
+    }
+
+    const {
+      xml
+    } = this.props;
+
+    if (prevProps && prevProps.xml === xml) {
+      return false;
+    }
+
     const {
       lastXML
     } = this.getCached();
 
-    let { xml } = this.props;
+    return xml !== lastXML;
+  }
+
+  async importXML() {
+    const {
+      xml
+    } = this.props;
+
+    this.setState({
+      importing: true
+    });
 
     const modeler = this.getModeler();
 
-    if (isXMLChange(lastXML, xml)) {
-      this.setState({
-        importing: true
-      });
-
-      modeler.importXML(xml, this.ifMounted(this.handleImport));
-    }
+    // TODO(nikku): apply default element templates to initial diagram
+    modeler.importXML(xml, this.ifMounted(this.handleImport));
   }
 
   /**
@@ -377,39 +413,27 @@ export class BpmnEditor extends CachedComponent {
     });
   }
 
-  exportAs(type) {
+  async exportAs(type) {
+    const svg = await this.exportSVG();
+
+    if (type === 'svg') {
+      return svg;
+    }
+
+    return generateImage(type, svg);
+  }
+
+  exportSVG() {
     const modeler = this.getModeler();
 
     return new Promise((resolve, reject) => {
-
       modeler.saveSVG((err, svg) => {
-        let contents;
-
         if (err) {
-          this.handleError({
-            error: err
-          });
-
           return reject(err);
         }
 
-        if (type !== 'svg') {
-          try {
-            contents = generateImage(type, svg);
-          } catch (err) {
-            this.handleError({
-              error: err
-            });
-
-            return reject(err);
-          }
-        } else {
-          contents = svg;
-        }
-
-        resolve(contents);
+        return resolve(svg);
       });
-
     });
   }
 
@@ -729,14 +753,6 @@ class Color extends Component {
 
 // helpers //////////
 
-function isImporting(state) {
-  return state.importing;
-}
-
-function isXMLChange(prevXML, xml) {
-  return prevXML !== xml;
-}
-
-function isChachedStateChange(prevProps, props) {
+function isCacheStateChanged(prevProps, props) {
   return prevProps.cachedState !== props.cachedState;
 }

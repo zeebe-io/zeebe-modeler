@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 const Cli = require('../cli');
 
 const path = require('path');
@@ -143,6 +153,23 @@ describe('cli', function() {
       it.skip('parse Windows args, double backslash');
 
     }
+  });
+
+
+  describe('#appendArgs', function() {
+
+    it('should filter negated args', function() {
+
+      // given
+      var args = [ '--no-foo', '--bar', '-xyz', '--hello=1231', '123' ];
+
+      // when
+      var actualArgs = Cli.appendArgs(args, [ '--foo', '--no-bar' ]);
+
+      // then
+      expect(actualArgs).to.eql([ '123', '-xyz', '--hello=1231', '--foo', '--no-bar' ]);
+    });
+
   });
 
 });

@@ -1,9 +1,21 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 import React from 'react';
 
 import {
   TabLinks,
   TabContainer
 } from '../primitives';
+
+import { ToastConductor } from '../toasts';
 
 import {
   WithCache,
@@ -49,7 +61,7 @@ export class MultiSheetTab extends CachedComponent {
       .filter(sheet => sheet.provider !== provider)
       .concat(wiredNewSheets)
       .map(t => ({ ...t, order: t.order || 0 }))
-      .sort((a, b) => a.order > b.order);
+      .sort((a, b) => a.order - b.order);
 
     if (newActiveSheet) {
       activeSheet = sheets.find(s => s.id === newActiveSheet.id);
@@ -149,11 +161,34 @@ export class MultiSheetTab extends CachedComponent {
     }
 
     if (warnings && warnings.length) {
+
+      this.openWarningsToast({
+        warnings
+      });
+
       warnings.forEach(warning => {
         this.handleWarning(warning);
       });
     }
   }
+
+  openWarningsToast = options => {
+    const {
+      warnings
+    } = options;
+
+    this.setCached({
+      warnings
+    });
+
+    this.setToast('WARNINGS');
+  }
+
+  setToast = currentToast => this.setCached({ currentToast })
+
+  closeToast = () => {
+    this.setToast(null);
+  };
 
   /**
    * Open fallback sheet if provided.
@@ -281,10 +316,12 @@ export class MultiSheetTab extends CachedComponent {
 
   componentDidMount() {
     const {
-      setCachedState
+      setCachedState,
+      xml
     } = this.props;
 
     let {
+      lastXML,
       sheets
     } = this.getCached();
 
@@ -297,14 +334,31 @@ export class MultiSheetTab extends CachedComponent {
       });
     }
 
+    if (isXMLChange(lastXML, xml)) {
+      this.setCached({
+        lastXML: xml
+      });
+    }
+
+  }
+
+  componentDidUpdate(prevProps) {
+    const { xml } = this.props;
+
+    if (isXMLChange(prevProps.xml, xml)) {
+      this.setCached({
+        lastXML: xml
+      });
+    }
   }
 
   render() {
-
     let {
       activeSheet,
       sheets,
-      lastXML
+      lastXML,
+      warnings,
+      currentToast
     } = this.getCached();
 
     let {
@@ -352,6 +406,12 @@ export class MultiSheetTab extends CachedComponent {
           tabs={ sheets }
           activeTab={ activeSheet }
           onSelect={ this.switchSheet } />
+
+        <ToastConductor
+          currentToast={ currentToast }
+          warnings={ warnings }
+          onClose={ this.closeToast }
+        />
 
       </div>
     );

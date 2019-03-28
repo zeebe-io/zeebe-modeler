@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 /* global sinon */
 
 import React from 'react';
@@ -6,7 +16,11 @@ import {
   shallow
 } from 'enzyme';
 
-import { DropZone } from '../DropZone';
+import {
+  DropZone,
+  isDropableItem
+} from '../DropZone';
+
 
 describe('<DropZone>', function() {
 
@@ -210,6 +224,58 @@ describe('<DropZone>', function() {
 
 });
 
+
+describe('DropZone - isDropableItem', function() {
+
+  function item(kind, type) {
+    return { kind, type };
+  }
+
+
+  it('should detect droppable file types', function() {
+
+    // given
+    const droppables = [
+      item('file', ''),
+      item('file', 'text/plain'),
+      item('file', 'application/xml'),
+      item('file', 'application/rss+xml'),
+      item('file', 'application/bpmn+xml'),
+      item('file', 'application/cmmn'),
+      item('file', 'application/dmn'),
+      item('file', 'application/bpmn'),
+      item('file', 'text/xml')
+    ];
+
+
+    // then
+    droppables.forEach((item) => {
+      if (!isDropableItem(item)) {
+        throw new Error(`expected ${JSON.stringify(item)} to be droppable`);
+      }
+    });
+
+  });
+
+
+  it('should detect non-droppable file types', function() {
+
+    // given
+    const nonDroppables = [
+      item('foo', 'application/xml'),
+      item('file', 'application/png+image')
+    ];
+
+    // then
+    nonDroppables.forEach((item) => {
+      if (isDropableItem(item)) {
+        throw new Error(`expected ${JSON.stringify(item)} to be non-droppable`);
+      }
+    });
+
+  });
+
+});
 
 
 // helper /////

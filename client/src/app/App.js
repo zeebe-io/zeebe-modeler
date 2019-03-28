@@ -1,8 +1,19 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 import React, { PureComponent } from 'react';
 
 import debug from 'debug';
 
 import {
+  assign,
   debounce,
   forEach,
   reduce
@@ -73,8 +84,8 @@ const INITIAL_STATE = {
 
 export class App extends PureComponent {
 
-  constructor(props, context) {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       ...INITIAL_STATE,
@@ -189,13 +200,7 @@ export class App extends PureComponent {
    */
   checkFileChanged = async (tab) => {
 
-    const {
-      globals
-    } = this.props;
-
-    const {
-      fileSystem
-    } = globals;
+    const fileSystem = this.getGlobal('fileSystem');
 
     const {
       file
@@ -205,7 +210,7 @@ export class App extends PureComponent {
 
     // skip new file
     if (this.isUnsaved(tab) || typeof tabLastModified === 'undefined') {
-      return;
+      return tab;
     }
 
     const {
@@ -214,7 +219,7 @@ export class App extends PureComponent {
 
     // skip unchanged
     if (!(lastModified > tabLastModified)) {
-      return;
+      return tab;
     }
 
     const answer = await this.showDialog(getContentChangedDialog());
@@ -225,6 +230,13 @@ export class App extends PureComponent {
       return this.updateTab(tab, {
         file: updatedFile
       });
+    } else {
+      return this.updateTab(tab, {
+        file: {
+          ...file,
+          lastModified
+        }
+      }, this.setUnsaved(tab, true));
     }
   }
 
@@ -233,8 +245,9 @@ export class App extends PureComponent {
    *
    * @param {Tab} tab
    * @param {Object} newAttrs
+   * @param {Object} [newState={}]
    */
-  updateTab(tab, newAttrs) {
+  updateTab(tab, newAttrs, newState={}) {
 
     if (newAttrs.id && newAttrs.id !== tab.id) {
       throw new Error('must not change tab.id');
@@ -269,6 +282,7 @@ export class App extends PureComponent {
       }
 
       return {
+        ...newState,
         activeTab: updatedActiveTab,
         tabs: updatedTabs
       };
@@ -299,7 +313,7 @@ export class App extends PureComponent {
       return tabShown.promise;
     }
 
-    if (tab !== EMPTY_TAB) {
+    if (!this.isEmptyTab(tab)) {
       const navigationHistory = this.navigationHistory;
 
       if (navigationHistory.get() !== tab) {
@@ -347,12 +361,19 @@ export class App extends PureComponent {
     return true;
   }
 
+  isEmptyTab = (tab) => {
+    return tab === EMPTY_TAB;
+  }
+
   isDirty = (tab) => {
     return !!this.state.dirtyTabs[tab.id];
   }
 
   isUnsaved = (tab) => {
-    return tab.file && !tab.file.path;
+    const { unsavedTabs } = this.state;
+    const { id, file } = tab;
+
+    return unsavedTabs[id] || (file && !file.path);
   }
 
   async _removeTab(tab) {
@@ -431,18 +452,15 @@ export class App extends PureComponent {
   }
 
   showOpenFilesDialog = async () => {
+    const dialog = this.getGlobal('dialog');
+
     const {
-      globals,
       tabsProvider
     } = this.props;
 
     const {
       activeTab
     } = this.state;
-
-    const {
-      dialog
-    } = globals;
 
     const providers = tabsProvider.getProviders();
 
@@ -463,26 +481,18 @@ export class App extends PureComponent {
   }
 
   showCloseFileDialog = (file) => {
-    const { globals } = this.props;
-
-    const { dialog } = globals;
-
     const { name } = file;
 
-    return dialog.showCloseFileDialog({ name });
+    return this.getGlobal('dialog').showCloseFileDialog({ name });
   }
 
   showSaveFileDialog = (file, options = {}) => {
-    const { globals } = this.props;
-
-    const { dialog } = globals;
-
     const {
       filters,
       title
     } = options;
 
-    return dialog.showSaveFileDialog({
+    return this.getGlobal('dialog').showSaveFileDialog({
       file,
       filters,
       title
@@ -490,27 +500,22 @@ export class App extends PureComponent {
   }
 
   showSaveFileErrorDialog(options) {
-    const { globals } = this.props;
-
-    const { dialog } = globals;
-
-    return dialog.showSaveFileErrorDialog(options);
+    return this.getGlobal('dialog').showSaveFileErrorDialog(options);
   }
 
   openEmptyFile = async (file) => {
     const {
-      globals,
       tabsProvider
     } = this.props;
 
-    const { dialog } = globals;
+    const dialog = this.getGlobal('dialog');
 
     const { name } = file;
 
     const fileType = getFileTypeFromExtension(name);
 
     if (!tabsProvider.hasProvider(fileType)) {
-      let providerNames = tabsProvider.getProviderNames();
+      const providerNames = tabsProvider.getProviderNames();
 
       await dialog.showOpenFileErrorDialog(getOpenFileErrorDialog({
         name,
@@ -602,8 +607,10 @@ export class App extends PureComponent {
   }
 
   readFileFromPath = async (filePath) => {
+
+    const fileSystem = this.getGlobal('fileSystem');
+
     const {
-      globals,
       tabsProvider
     } = this.props;
 
@@ -616,7 +623,7 @@ export class App extends PureComponent {
     let file = null;
 
     try {
-      file = await globals.fileSystem.readFile(filePath, {
+      file = await fileSystem.readFile(filePath, {
         encoding
       });
     } catch (error) {
@@ -639,26 +646,41 @@ export class App extends PureComponent {
    * @returns {Array<Tab>}
    */
   async findOrCreateTabs(files, tabsProvider) {
-    const openedTabs = await Promise.all(files.slice().reverse().map(async (file) => {
-      let tab;
+    const dialog = this.getGlobal('dialog');
 
-      if (!file.contents.length) {
-        tab = await this.openEmptyFile(file);
-      } else {
-        tab = this.findOpenTab(file);
-        if (!tab) {
-          const newTab = tabsProvider.createTabForFile(file);
-          if (newTab) {
-            tab = this.addTab(newTab);
+    const openTasks = files.slice().reverse().map((file) => {
+      const { name } = file;
+
+      return async () => {
+        let tab;
+
+        if (!file.contents.length) {
+          tab = await this.openEmptyFile(file);
+        } else {
+          tab = this.findOpenTab(file);
+          if (!tab) {
+            const newTab = tabsProvider.createTabForFile(file);
+            if (newTab) {
+              tab = this.addTab(newTab);
+            } else {
+              const providerNames = tabsProvider.getProviderNames();
+
+              await dialog.showOpenFileErrorDialog(getOpenFileErrorDialog({
+                name,
+                providerNames
+              }));
+            }
           }
         }
-      }
 
-      return tab;
-    })).then(tabs => {
-      // filter out empty elements
-      return tabs.filter(tab => tab);
+        return tab;
+      };
     });
+
+    const openResults = await pSeries(openTasks);
+
+    // filter out empty elements
+    const openedTabs = openResults.filter(openedTab => openedTab);
 
     return openedTabs.slice().reverse();
   }
@@ -924,6 +946,9 @@ export class App extends PureComponent {
       this.updateMenu(tabState);
     }
 
+    if (layout !== prevState.layout) {
+      this.triggerAction('resize');
+    }
   }
 
   componentDidCatch(error, info) {
@@ -955,58 +980,77 @@ export class App extends PureComponent {
     });
   }
 
-  handleError(error, ...args) {
+  /**
+   * Propagates errors to parent.
+   * @param {Error} error
+   * @param {Tab} [tab]
+   */
+  handleError = (error, tab) => {
     const {
       onError
     } = this.props;
 
-    const {
-      message
-    } = error;
-
-    if (typeof onError === 'function') {
-      onError(error, ...args);
-    }
-
-    this.logEntry(message, 'error');
+    return onError(error, tab);
   }
 
-  handleWarning(warning, ...args) {
+  getGlobal(name) {
+    const {
+      globals
+    } = this.props;
+
+    if (name in globals) {
+      return globals[name];
+    }
+
+    throw new Error(`global <${name}> not exposed`);
+  }
+
+  /**
+   * Propagates warnings to parent.
+   * @param {Error} error
+   * @param {Tab} [tab]
+   */
+  handleWarning(warning, tab) {
     const {
       onWarning
     } = this.props;
 
-    const {
-      message
-    } = warning;
-
-    if (typeof onWarning === 'function') {
-      onWarning(warning, ...args);
-    }
-
-    this.logEntry(message, 'warning');
+    return onWarning(warning, tab);
   }
 
   /**
+   * Open log and add entry.
    *
    * @param {String} message - Message to be logged.
    * @param {String} category - Category of message.
+   * @param {String} action - Action to be triggered.
    */
-  logEntry(message, category) {
-    const {
-      logEntries
-    } = this.state;
-
+  logEntry(message, category, action) {
     this.toggleLog(true);
 
-    this.setState({
-      logEntries: [
-        ...logEntries,
-        {
-          category,
-          message
-        }
-      ]
+    const logEntry = {
+      category,
+      message
+    };
+
+    if (action) {
+      assign(logEntry, {
+        action
+      });
+    }
+
+    this.setState((state) => {
+
+      const {
+        logEntries
+      } = state;
+
+      return {
+        logEntries: [
+          ...logEntries,
+          logEntry
+        ]
+      };
     });
   }
 
@@ -1016,76 +1060,143 @@ export class App extends PureComponent {
     });
   }
 
-  async saveTab(tab, options = {}) {
-    await this.showTab(tab);
+  /**
+   * Asks the user whether to retry the save action.
+   * @param {Tab} tab
+   * @param {Error} err
+   * @param {Function} dialogHandler
+   */
+  async askForSaveRetry(tab, err, dialogHandler) {
+    const { message } = err;
 
     const {
-      globals,
-      tabsProvider
-    } = this.props;
-
-    const { fileSystem } = globals;
-
-    const fileType = tab.type;
-
-    const provider = tabsProvider.getProvider(fileType);
-
-    const {
-      file,
       name
     } = tab;
 
+    return await this.showSaveFileErrorDialog(dialogHandler({
+      message,
+      name
+    }));
+  }
+
+  /**
+   * Saves current tab to given location
+   * @param {String} options.encoding
+   * @param {File} options.originalFile
+   * @param {String} options.savePath
+   * @param {String} options.saveType
+   *
+   * @returns {File} saved file.
+   */
+  async saveTabAsFile(options) {
+
+    const {
+      encoding,
+      originalFile,
+      savePath,
+      saveType
+    } = options;
+
+    const fileSystem = this.getGlobal('fileSystem');
+
+
     const contents = await this.tabRef.current.triggerAction('save');
 
-    let filePath, filters;
+    return fileSystem.writeFile(savePath, {
+      ...originalFile,
+      contents
+    }, {
+      encoding,
+      fileType: saveType
+    });
 
-    let { saveAs } = options;
+  }
+
+  /**
+   * Asks the user for file path to save.
+   * @param {Tab} tab
+   */
+  async askForSave(tab, options) {
+    const {
+      tabsProvider
+    } = this.props;
+
+    const {
+      file,
+      name,
+      type: fileType
+    } = tab;
+
+    let {
+      saveAs
+    } = options;
+
+    const provider = tabsProvider.getProvider(fileType);
+
+    let savePath;
 
     saveAs = saveAs || this.isUnsaved(tab);
 
     if (saveAs) {
-      filters = getSaveFileDialogFilters(provider);
+      const filters = getSaveFileDialogFilters(provider);
 
-      filePath = await this.showSaveFileDialog(file, {
+      savePath = await this.showSaveFileDialog(file, {
         filters,
         title: `Save ${ name } as...`
       });
     } else {
-      filePath = tab.file.path;
+      savePath = tab.file.path;
     }
 
-    if (!filePath) {
-      return;
+    if (!savePath) {
+      return false;
     }
 
     const encoding = provider.encoding ? provider.encoding : ENCODING_UTF8;
 
-    const newFile = await fileSystem.writeFile(filePath, {
-      ...file,
-      contents
-    }, {
+    return {
       encoding,
-      fileType
-    }).catch(async err => {
-      let { message } = err;
+      originalFile: file,
+      savePath,
+      saveType: fileType
+    };
 
-      let response = await this.showSaveFileErrorDialog(getSaveFileErrorDialog({
-        message,
-        name
-      }));
+  }
 
-      if (response === 'save-as') {
+  async saveTab(tab, options = {}) {
 
-        // try again
-        await this.saveTab(tab, { saveAs: true });
+    // do as long as it was successful or cancelled
+    const infinite = true;
+
+    while (infinite) {
+
+      try {
+
+        await this.showTab(tab);
+
+        const saveOptions = await this.askForSave(tab, options);
+
+        if (!saveOptions) {
+          return false;
+        }
+
+        const savedFile = await this.saveTabAsFile(saveOptions);
+
+        return this.tabSaved(tab, savedFile);
+      } catch (err) {
+
+        const response = await this.askForSaveRetry(tab, err, getSaveFileErrorDialog);
+
+        if (response !== 'retry') {
+
+          // cancel
+          return;
+        }
+
       }
-    });
 
-    if (!newFile) {
-      return;
     }
 
-    this.tabSaved(tab, newFile);
   }
 
   saveAllTabs = () => {
@@ -1112,7 +1223,10 @@ export class App extends PureComponent {
 
   toggleLog = (open) => {
     this.handleLayoutChanged({
-      log: { open }
+      log: {
+        ...this.state.layout.log,
+        open
+      }
     });
   };
 
@@ -1151,19 +1265,54 @@ export class App extends PureComponent {
 
     onMenuUpdate({
       ...options,
-      tabsCount: this.state.tabs.length
+      tabsCount: this.state.tabs.length,
+      lastTab: !!this.closedTabs.get()
     });
   }
 
-  async exportAs(tab) {
+  /**
+   * Exports file to given export type.
+   *
+   * @param {String} options.encoding
+   * @param {String} options.exportPath
+   * @param {String} options.exportType
+   * @param {File} options.originalFile
+   */
+  async exportAsFile(options) {
     const {
-      globals,
+      encoding,
+      exportType,
+      exportPath,
+      originalFile,
+    } = options;
+
+    const fileSystem = this.getGlobal('fileSystem');
+
+    const contents = await this.tabRef.current.triggerAction('export-as', {
+      fileType: exportType
+    });
+
+    return fileSystem.writeFile(exportPath, {
+      ...originalFile,
+      contents
+    }, {
+      encoding,
+      fileType: exportType
+    });
+
+  }
+
+  /**
+   * Asks the user for file type to export.
+   * @param {Tab} tab
+   */
+  async askForExportType(tab) {
+    const {
       tabsProvider
     } = this.props;
 
-    const { fileSystem } = globals;
-
     const {
+      file: originalFile,
       name,
       type
     } = tab;
@@ -1172,58 +1321,60 @@ export class App extends PureComponent {
 
     const filters = getExportFileDialogFilters(provider);
 
-    const filePath = await this.showSaveFileDialog(tab, {
+    const exportPath = await this.showSaveFileDialog(tab, {
       filters,
       title: `Export ${ name } as...`
     });
 
-    if (!filePath) {
-      return;
+    if (!exportPath) {
+      return false;
     }
 
-    const fileType = getFileTypeFromExtension(filePath);
+    const exportType = getFileTypeFromExtension(exportPath);
 
-    if (!fileType) {
-      return;
-    }
+    const { encoding } = provider.exports ? provider.exports[ exportType ] : ENCODING_UTF8;
 
-    const contents = await this.tabRef.current.triggerAction('export-as', {
-      fileType
-    });
-
-    const { encoding } = provider.exports ? provider.exports[ fileType ] : ENCODING_UTF8;
-
-    await fileSystem.writeFile(filePath, {
-      ...tab.file,
-      contents
-    }, {
+    return {
       encoding,
-      fileType
-    }).catch(async err => {
-      const { message } = err;
+      exportPath,
+      exportType,
+      originalFile
+    };
+  }
 
-      let response = await this.showSaveFileErrorDialog(getExportFileErrorDialog({
-        message,
-        name
-      }));
+  async exportAs(tab) {
 
-      if (response === 'export-as') {
+    // do as long as it was successful or cancelled
+    const infinite = true;
 
-        // try again
-        await this.exportAs(tab);
+    while (infinite) {
+
+      try {
+
+        const exportOptions = await this.askForExportType(tab);
+
+        return exportOptions ? await this.exportAsFile(exportOptions) : false;
+      } catch (err) {
+
+        const response = await this.askForSaveRetry(tab, err, getExportFileErrorDialog);
+
+        if (response !== 'retry') {
+
+          // cancel
+          return;
+        }
+
       }
-    });
+
+    }
+
   }
 
   showDialog(options) {
-    const {
-      globals
-    } = this.props;
-
-    return globals.dialog.show(options);
+    return this.getGlobal('dialog').show(options);
   }
 
-  triggerAction = (action, options) => {
+  triggerAction = failSafe((action, options) => {
 
     const {
       activeTab
@@ -1317,11 +1468,7 @@ export class App extends PureComponent {
     }
 
     if (action === 'open-external-url') {
-      this.openExternalUrl(options);
-    }
-
-    if (action === 'backend-error') {
-      return this.logEntry(options, 'error');
+      return this.openExternalUrl(options);
     }
 
     if (action === 'check-file-changed') {
@@ -1332,13 +1479,23 @@ export class App extends PureComponent {
       return this.resizeTab();
     }
 
+    if (action === 'log') {
+      const {
+        action,
+        category,
+        message
+      } = options;
+
+      return this.logEntry(message, category, action);
+    }
+
     const tab = this.tabRef.current;
 
     return tab.triggerAction(action, options);
-  }
+  }, this.handleError)
 
   openExternalUrl(options) {
-    this.props.globals.backend.send('external:open-url', options);
+    this.getGlobal('backend').send('external:open-url', options);
   }
 
   openModal = modal => this.triggerAction('open-modal', modal);
@@ -1361,7 +1518,7 @@ export class App extends PureComponent {
       return false;
     }
 
-    return this.props.globals.backend.send('deploy', { ...options, file });
+    return this.getGlobal('backend').send('deploy', { ...options, file });
   };
 
   handleDeployError = (error) => {
@@ -1385,15 +1542,11 @@ export class App extends PureComponent {
   }
 
   loadConfig = (key, ...args) => {
-    return this.props.globals.config.get(key, this.state.activeTab, ...args);
+    return this.getGlobal('config').get(key, this.state.activeTab, ...args);
   }
 
   getPlugins = type => {
-    const { globals } = this.props;
-
-    const { plugins } = globals;
-
-    return plugins.get(type);
+    return this.getGlobal('plugins').get(type);
   }
 
   async quit() {
@@ -1450,6 +1603,7 @@ export class App extends PureComponent {
     const Tab = this.getTabComponent(activeTab);
 
     const canSave = this.isUnsaved(activeTab) || this.isDirty(activeTab);
+    const canSaveAs = !this.isEmptyTab(activeTab);
 
     const {
       tabsProvider
@@ -1497,7 +1651,8 @@ export class App extends PureComponent {
                 <Icon name="save" />
               </Button>
               <Button
-                onClick={ this.composeAction('save-as') }
+                disabled={ !canSaveAs }
+                onClick={ canSaveAs ? this.composeAction('save-as') : null }
                 title="Save diagram as..."
               >
                 <Icon name="save-as" />
@@ -1576,16 +1731,16 @@ export class App extends PureComponent {
 
             <Log
               entries={ logEntries }
-              expanded={ layout.log && layout.log.open }
-              onToggle={ this.toggleLog }
+              layout={ layout.log }
               onClear={ this.clearLog }
+              onLayoutChanged={ this.handleLayoutChanged }
             />
           </SlotFillRoot>
 
           <ModalConductor
             currentModal={ this.state.currentModal }
             endpoints={ this.state.endpoints }
-            isMac={ this.props.globals.isMac }
+            getGlobal={ this.getGlobal }
             onClose={ this.closeModal }
             onDeploy={ this.handleDeploy }
             onDeployError={ this.handleDeployError }
@@ -1691,7 +1846,7 @@ function getSaveFileErrorDialog(options) {
   return {
     buttons: [
       { id: 'cancel', label: 'Cancel' },
-      { id: 'save-as', label: `Save ${ name } as...` }
+      { id: 'retry', label: `Save ${ name } as...` }
     ],
     message: [
       `${ name } could not be saved.`,
@@ -1712,7 +1867,7 @@ function getExportFileErrorDialog(options) {
   return {
     buttons: [
       { id: 'cancel', label: 'Cancel' },
-      { id: 'export-as', label: `Export ${ name } as...` }
+      { id: 'retry', label: `Export ${ name } as...` }
     ],
     message: [
       `${ name } could not be exported.`,
@@ -1832,4 +1987,17 @@ function getExportFileDialogFilters(provider) {
   });
 
   return filters;
+}
+
+
+function failSafe(fn, errorHandler) {
+
+  return async (...args) => {
+
+    try {
+      return await fn(...args);
+    } catch (error) {
+      errorHandler(error);
+    }
+  };
 }

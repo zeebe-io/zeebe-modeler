@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 /* global sinon */
 
 import React from 'react';
@@ -14,8 +24,6 @@ import {
 } from '../BpmnEditor';
 
 import BpmnModeler from 'test/mocks/bpmn-js/Modeler';
-
-import { SlotFillRoot } from 'src/app/slot-fill';
 
 import diagramXML from './diagram.bpmn';
 
@@ -297,6 +305,11 @@ describe('<BpmnEditor>', function() {
 
     it('propertiesPanel.focusout', expectHandleChanged('propertiesPanel.focusout'));
 
+
+    it('propertiesPanel.focusout', expectHandleChanged('directEditing.activate'));
+
+
+    it('propertiesPanel.focusout', expectHandleChanged('directEditing.deactivate'));
   });
 
 
@@ -311,12 +324,15 @@ describe('<BpmnEditor>', function() {
         expect(state).to.include({
           align: false,
           copy: false,
+          defaultCopyCutPaste: false,
+          defaultUndoRedo: false,
           dirty: true,
           distribute: false,
           editLabel: false,
           find: true,
           globalConnectTool: true,
           handTool: true,
+          inputActive: false,
           lassoTool: true,
           moveCanvas: true,
           moveToOrigin: true,
@@ -387,6 +403,7 @@ describe('<BpmnEditor>', function() {
       expect(state).to.have.property('bpmn');
       expect(state).to.have.property('editable');
       expect(state).to.have.property('elementsSelected');
+      expect(state).to.have.property('inactiveInput');
     });
 
 
@@ -677,128 +694,115 @@ describe('<BpmnEditor>', function() {
 
   describe('import', function() {
 
-    it('should import without errors and warnings', async function() {
-
-      // given
-      const { instance } = await renderEditor(diagramXML, {
-        onImport
-      });
-
-      function onImport(err, warnings) {
-
-        // then
-        const {
-          lastXML
-        } = instance.getCached();
-
-        expect(lastXML).to.equal(diagramXML);
-
-        expect(err).to.not.exist;
-
-        expect(warnings).to.have.length(0);
-      }
-    });
-
-
-    it('should import with warnings', async function() {
-
-      // given
-      const { instance } = await renderEditor('import-warnings', {
-        onImport
-      });
-
-      function onImport(error, warnings) {
-
-        // then
-        const {
-          lastXML
-        } = instance.getCached();
-
-        expect(lastXML).to.equal('import-warnings');
-
-        expect(error).not.to.exist;
-
-        expect(warnings).to.have.length(1);
-        expect(warnings[0]).to.equal('warning');
-      }
-    });
-
-
-    it('should import with error', async function() {
-
-      // given
-      const { instance } = await renderEditor('import-error', {
-        onImport
-      });
-
-      function onImport(error, warnings) {
-
-        // then
-        const {
-          lastXML
-        } = instance.getCached();
-
-        expect(lastXML).not.to.exist;
-
-        expect(error).to.exist;
-        expect(error.message).to.equal('error');
-
-        expect(warnings).to.have.length(0);
-      }
-    });
-
-  });
-
-
-  describe('editor resize', function() {
-
     afterEach(sinon.restore);
 
 
-    it('should resize editor and properties panel on layout change', async function() {
+    it('should import without errors and warnings', function(done) {
 
+      // when
+      renderEditor(diagramXML, {
+        onImport
+      });
+
+      // then
+      function onImport(error, warnings) {
+        try {
+          expect(error).to.not.exist;
+          expect(warnings).to.have.length(0);
+
+          done();
+        } catch (error) {
+          done(error);
+        }
+      }
+    });
+
+
+    it('should import with warnings', function(done) {
       // given
-      const eventBusStub = sinon.stub({ fire() {} }),
-            canvasStub = sinon.stub({ resized() {} });
+      const warningInducingFakeXML = 'import-warnings';
 
+      // when
+      renderEditor(warningInducingFakeXML, {
+        onImport
+      });
+
+      // then
+      function onImport(error, warnings) {
+        try {
+          expect(error).to.not.exist;
+          expect(warnings).to.have.length(1);
+
+          done();
+        } catch (error) {
+          done(error);
+        }
+      }
+    });
+
+
+    it('should import with error', function(done) {
+      // given
+      const errorInducingFakeXML = 'import-error';
+
+      // when
+      renderEditor(errorInducingFakeXML, {
+        onImport
+      });
+
+      // then
+      function onImport(error, warnings) {
+        try {
+          expect(error).to.exist;
+          expect(warnings).to.have.length(0);
+
+          done();
+        } catch (error) {
+          done(error);
+        }
+      }
+    });
+
+
+    it('should not import when provided xml is the same as the cached one', async function() {
+      // given
+      const isImportNeededSpy = sinon.spy(BpmnEditor.prototype, 'isImportNeeded');
       const cache = new Cache();
 
       cache.add('editor', {
         cached: {
-          modeler: new BpmnModeler({
-            modules: {
-              eventBus: eventBusStub,
-              canvas: canvasStub
-            }
-          })
+          lastXML: diagramXML,
+          modeler: new BpmnModeler()
         }
       });
 
-      const {
-        instance
-      } = await renderEditor(diagramXML, {
+      await renderEditor(diagramXML, {
         cache
       });
 
-      const mockLayout = {
-        propertiesPanel: {
-          open: true,
-          width: 500
-        }
-      };
+      // then
+      expect(isImportNeededSpy).to.be.called;
+      expect(isImportNeededSpy).to.have.always.returned(false);
+    });
 
-      eventBusStub.fire.resetHistory();
-      canvasStub.resized.resetHistory();
+
+    it('should not import when props did not changed', async function() {
+      // given
+      const {
+        instance
+      } = await renderEditor(diagramXML);
+
+      const isImportNeededSpy = sinon.spy(instance, 'isImportNeeded');
 
       // when
-      const prevProps = instance.props;
+      await instance.componentDidUpdate({
+        xml: diagramXML
+      });
 
-      instance.props = { ...prevProps, layout: mockLayout };
-      instance.componentDidUpdate(prevProps);
+      // then
+      expect(isImportNeededSpy).to.be.called;
+      expect(isImportNeededSpy).to.have.always.returned(false);
 
-      // expect
-      expect(canvasStub.resized).to.be.called;
-      expect(eventBusStub.fire).to.be.calledOnceWith('propertiesPanel.resized');
     });
 
   });
@@ -1024,37 +1028,33 @@ async function renderEditor(xml, options = {}) {
     getPlugins
   } = options;
 
-  const slotFillRoot = await mount(
-    <SlotFillRoot>
-      <TestEditor
-        id={ id || 'editor' }
-        xml={ xml }
-        activeSheet={ options.activeSheet || { id: 'bpmn' } }
-        onAction={ onAction || noop }
-        onChanged={ onChanged || noop }
-        onError={ onError || noop }
-        onImport={ onImport || noop }
-        onLayoutChanged={ onLayoutChanged || noop }
-        onContentUpdated={ onContentUpdated || noop }
-        onModal={ onModal || noop }
-        onLoadConfig={ onLoadConfig || noop }
-        getPlugins={ getPlugins || (() => []) }
-        cache={ options.cache || new Cache() }
-        layout={ layout || {
-          minimap: {
-            open: false
-          },
-          propertiesPanel: {
-            open: true
-          }
-        } }
-      />
-    </SlotFillRoot>
+  const wrapper = await mount(
+    <TestEditor
+      id={ id || 'editor' }
+      xml={ xml }
+      activeSheet={ options.activeSheet || { id: 'bpmn' } }
+      onAction={ onAction || noop }
+      onChanged={ onChanged || noop }
+      onError={ onError || noop }
+      onImport={ onImport || noop }
+      onLayoutChanged={ onLayoutChanged || noop }
+      onContentUpdated={ onContentUpdated || noop }
+      onModal={ onModal || noop }
+      onLoadConfig={ onLoadConfig || noop }
+      getPlugins={ getPlugins || (() => []) }
+      cache={ options.cache || new Cache() }
+      layout={ layout || {
+        minimap: {
+          open: false
+        },
+        propertiesPanel: {
+          open: true
+        }
+      } }
+    />
   );
 
-  const wrapper = slotFillRoot.find(BpmnEditor);
-
-  const instance = wrapper.instance();
+  const instance = wrapper.find(BpmnEditor).instance();
 
   return {
     instance,

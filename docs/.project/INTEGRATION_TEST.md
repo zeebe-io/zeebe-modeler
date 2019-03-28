@@ -1,3 +1,6 @@
+> __Note:__ If possible, execute the integration test on our [released artifacts](https://github.com/camunda/camunda-modeler/releases).
+
+
 # Integration Test
 
 We use a number of pre-defined steps to ensure the stability of our releases through integration tests.
@@ -102,8 +105,8 @@ Based on the [test diagram](./test.bpmn.png):
 #### Installers (platform specific)
 
 * [ ] MacOS
-    * [ ] Unzipping and starting application works
-    * [ ] Installing application via `dmg` file and starting it works
+    * [ ] [Downloading archive](https://github.com/camunda/camunda-modeler/releases), extracting and starting application works
+    * [ ] [Downloading DMG](https://github.com/camunda/camunda-modeler/releases), installing and starting it works
 
 
 #### Other (platform specific)

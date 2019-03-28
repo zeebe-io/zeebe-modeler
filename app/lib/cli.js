@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 'use strict';
 
 const fs = require('fs');
@@ -35,6 +45,31 @@ function parse(args, cwd) {
 
 module.exports.parse = parse;
 
+
+function appendArgs(args, additionalArgs) {
+
+  const allArgs = [
+    ...args,
+    ...additionalArgs
+  ];
+
+  const effectiveArgs = allArgs.reduce((effectiveArgs, arg) => {
+
+    if (arg.startsWith('--no-')) {
+      delete effectiveArgs[`--${arg.substring(5)}`];
+    } else if (!arg.includes('=')) {
+      delete effectiveArgs[`--no-${arg.substring(2)}`];
+    }
+
+    effectiveArgs[arg] = true;
+
+    return effectiveArgs;
+  }, {});
+
+  return Object.keys(effectiveArgs);
+}
+
+module.exports.appendArgs = appendArgs;
 
 /**
  * Check a possible filePath represents an existing file.

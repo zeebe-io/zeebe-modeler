@@ -1,3 +1,13 @@
+/**
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
+ * under one or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information regarding copyright
+ * ownership.
+ *
+ * Camunda licenses this file to you under the MIT; you may not use this file
+ * except in compliance with the MIT License.
+ */
+
 import React, { Component } from 'react';
 
 import {
@@ -158,6 +168,62 @@ describe('<App>', function() {
 
     });
 
+
+    describe('should indicate lastTab state', function() {
+
+      it('no last tab', async function() {
+
+        // given
+        const updateMenuSpy = spy();
+
+        const {
+          app
+        } = createApp({
+          onMenuUpdate: updateMenuSpy
+        }, mount);
+
+        // when
+        await app.openFiles([
+          createFile('1.bpmn'),
+          createFile('2.bpmn')
+        ]);
+
+        // then
+        expect(updateMenuSpy).to.have.been.calledWith(sinon.match({
+          lastTab: false
+        }));
+
+      });
+
+
+      it('closed tab', async function() {
+
+        // given
+        const updateMenuSpy = spy();
+
+        const {
+          app
+        } = createApp({
+          onMenuUpdate: updateMenuSpy
+        }, mount);
+
+        // when
+        await app.openFiles([
+          createFile('1.bpmn'),
+          createFile('2.bpmn')
+        ]);
+
+        await app.triggerAction('close-all-tabs');
+
+        // then
+        expect(updateMenuSpy).to.have.been.calledWith(sinon.match({
+          lastTab: true
+        }));
+
+      });
+
+    });
+
   });
 
 
@@ -200,6 +266,32 @@ describe('<App>', function() {
 
       // then
       expect(app.state.tabs).to.have.length(1);
+    });
+
+
+    it('should not allow user to execute save-as', async function() {
+
+      // given
+      const {
+        app,
+        tree
+      } = createApp(mount);
+
+      const actionSpy = sinon.spy(app, 'triggerAction');
+
+      await app.showTab(EMPTY_TAB);
+
+      const saveAsButton = tree.find('Button[title="Save diagram as..."]').first();
+
+      // assure
+      expect(saveAsButton).to.exist;
+
+      // when
+      saveAsButton.simulate('click');
+
+      // then
+      expect(saveAsButton.prop('disabled')).to.be.true;
+      expect(actionSpy).to.have.not.been.calledWith('save-as');
     });
 
   });
@@ -260,20 +352,29 @@ describe('<App>', function() {
     });
 
 
-    it('should ignore unrecognized files', async function() {
+    it('should not open unrecognized files', async function() {
 
       // given
-      const {
-        app
-      } = createApp();
+      const dialog = new Dialog();
 
-      const file = createFile('1.unknown');
+      const showSpy = spy(dialog, 'showOpenFileErrorDialog');
+
+      dialog.setShowOpenFileErrorDialogResponse('cancel');
+
+      const { app } = createApp({
+        globals: {
+          dialog
+        }
+      });
+
+      const file = createFile('1.txt');
 
       // when
       const openedTabs = await app.openFiles([ file ]);
 
       // then
       expect(openedTabs).to.be.empty;
+      expect(showSpy).to.have.been.called;
     });
 
 
@@ -773,13 +874,13 @@ describe('<App>', function() {
     });
 
 
-    it('should handle save error <save-as>', async function() {
+    it('should handle save error <retry>', async function() {
 
       // given
       await app.createDiagram();
 
       dialog.setShowSaveFileDialogResponse('foo.svg');
-      dialog.setShowSaveFileErrorDialogResponse('save-as');
+      dialog.setShowSaveFileErrorDialogResponse('retry');
 
       const err = new Error('foo');
 
@@ -788,7 +889,7 @@ describe('<App>', function() {
         contents: '<contents>'
       }));
 
-      const saveTabSpy = spy(app, 'saveTab');
+      const saveTabSpy = spy(app, 'saveTabAsFile');
 
       // when
       await app.triggerAction('save-as');
@@ -908,13 +1009,13 @@ describe('<App>', function() {
     });
 
 
-    it('should handle export error <export-as>', async function() {
+    it('should handle export error <retry>', async function() {
 
       // given
       await app.createDiagram();
 
       dialog.setShowSaveFileDialogResponse('foo.svg');
-      dialog.setShowSaveFileErrorDialogResponse('export-as');
+      dialog.setShowSaveFileErrorDialogResponse('retry');
 
       const err = new Error('foo');
 
@@ -923,7 +1024,7 @@ describe('<App>', function() {
         contents: '<contents>'
       }));
 
-      const exportAsSpy = spy(app, 'exportAs');
+      const exportAsSpy = spy(app, 'exportAsFile');
 
       // when
       await app.triggerAction('export-as');
@@ -1176,13 +1277,14 @@ describe('<App>', function() {
         await app.closeTab(newTab);
 
         // when
-        try {
-          await app.triggerAction('reopen-last-tab');
+        await app.triggerAction('reopen-last-tab');
 
-          expect.fail('expected exception');
-        } catch (e) {
-          expect(e.message).to.eql('no last tab');
-        }
+        // then
+        const {
+          activeTab
+        } = app.state;
+
+        expect(activeTab.file).not.to.equal(newTab);
       });
 
 
@@ -1255,28 +1357,6 @@ describe('<App>', function() {
 
       // then
       expect(errorSpy).to.have.been.calledWith(error, tab);
-    });
-
-
-    it('should show in log', async function() {
-
-      // given
-      const {
-        app
-      } = createApp(mount);
-
-      await app.createDiagram();
-
-      const tabInstance = app.tabRef.current;
-
-      const error = new Error('YZO!');
-
-      // when
-      tabInstance.triggerAction('error', error);
-
-      // then
-      expect(app.state.layout.log.open).to.be.true;
-      expect(app.state.logEntries).to.have.length(1);
     });
 
 
@@ -1354,30 +1434,6 @@ describe('<App>', function() {
 
       // then
       expect(warningSpy).to.have.been.calledWith(warning, tab);
-    });
-
-
-    it('should show in log', async function() {
-
-      // given
-      const {
-        app
-      } = createApp(mount);
-
-      await app.createDiagram();
-
-      const tabInstance = app.tabRef.current;
-
-      // when
-      const warning = {
-        message: 'warning'
-      };
-
-      tabInstance.triggerAction('warning', warning);
-
-      // then
-      expect(app.state.layout.log.open).to.be.true;
-      expect(app.state.logEntries).to.have.length(1);
     });
 
   });
@@ -1489,11 +1545,11 @@ describe('<App>', function() {
       const log = tree.find(Log).first();
 
       // then
-      expect(log.props().expanded).to.be.true;
+      expect(log.props().layout.open).to.be.true;
     });
 
 
-    it('#logEntry', function() {
+    it('should log entry', async function() {
 
       // given
       const { tree, app } = createApp();
@@ -1501,7 +1557,10 @@ describe('<App>', function() {
       app.setLayout({ log: { open: false } });
 
       // when
-      app.logEntry('foo', 'bar');
+      await app.triggerAction('log', {
+        message: 'foo',
+        category: 'bar'
+      });
 
       // then
       const log = tree.find(Log).first();
@@ -1511,7 +1570,7 @@ describe('<App>', function() {
         category: 'bar'
       }]);
 
-      expect(log.props().expanded).to.be.true;
+      expect(log.props().layout.open).to.be.true;
     });
 
   });
@@ -1600,18 +1659,25 @@ describe('<App>', function() {
 
       const tab = openedTabs[0];
 
-      updateFileStats(tab.file, {
-        lastModified: new Date().getMilliseconds()
-      }, fileSystem);
+      const lastModified = new Date().getMilliseconds();
+
+      updateFileStats(tab.file, { lastModified }, fileSystem);
 
       // when
-      await app.checkFileChanged(tab);
+      const updatedTab = await app.checkFileChanged(tab);
 
       // then
       expect(showSpy).to.have.been.called;
       expect(readFileSpy).to.have.been.called;
 
-      expect(app.findOpenTab(file1).file.contents).to.eql(NEW_FILE_CONTENTS);
+      expect(updatedTab).to.eql(app.findOpenTab(file1));
+
+      expect(updatedTab.file.contents).to.eql(NEW_FILE_CONTENTS);
+
+      // TODO(nikku): fix test suite and properly pass last modified
+      // expect(updatedTab.file.lastModified).to.eql(lastModified);
+
+      expect(app.isUnsaved(updatedTab)).to.be.false;
     });
 
 
@@ -1640,11 +1706,14 @@ describe('<App>', function() {
       }, fileSystem);
 
       // when
-      await app.checkFileChanged(tab);
+      const updatedTab = await app.checkFileChanged(tab);
 
       // then
       expect(showSpy).to.not.have.been.called;
       expect(readFileSpy).to.not.have.been.called;
+
+      expect(app.isUnsaved(updatedTab)).to.be.false;
+
     });
 
 
@@ -1695,19 +1764,24 @@ describe('<App>', function() {
 
       const tab = openedTabs[0];
 
-      updateFileStats(tab.file, {
-        lastModified: new Date().getMilliseconds()
-      }, fileSystem);
+      const lastModified = new Date().getMilliseconds();
+
+      updateFileStats(tab.file, { lastModified }, fileSystem);
 
       const oldTabContents = tab.file.contents;
 
       // when
-      await app.checkFileChanged(tab);
+      const updatedTab = await app.checkFileChanged(tab);
 
       // then
       expect(showSpy).to.have.been.called;
       expect(readFileSpy).to.not.have.been.called;
-      expect(tab.file.contents).to.equal(oldTabContents);
+      expect(updatedTab).to.eql(app.findOpenTab(file1));
+
+      expect(updatedTab.file.contents).to.equal(oldTabContents);
+      expect(updatedTab.file.lastModified).to.equal(lastModified);
+
+      expect(app.isUnsaved(updatedTab)).to.be.true;
     });
 
 
@@ -2183,12 +2257,12 @@ describe('<App>', function() {
   });
 
 
-  describe('window resize', function() {
+  describe('resize', function() {
 
     afterEach(sinon.restore);
 
 
-    it('should notify tab about window resize', async function() {
+    it('should trigger tab resize when layout changes', async function() {
       // given
       const {
         app,
@@ -2198,7 +2272,12 @@ describe('<App>', function() {
       const resizeTabStub = sinon.stub(app, 'resizeTab').resolves();
 
       // when
-      await app.triggerAction('resize');
+      app.setLayout({
+        log: {
+          open: true,
+          height: 100
+        }
+      });
 
       // then
       expect(resizeTabStub).to.be.calledOnce;
@@ -2313,10 +2392,14 @@ describe('<App>', function() {
 });
 
 
+// helper ///////
 class Cache {
   destroy() { }
 }
 
+class MockTab {
+  triggerAction() {}
+}
 
 function createApp(options = {}, mountFn=shallow) {
 
@@ -2354,10 +2437,10 @@ function createApp(options = {}, mountFn=shallow) {
     tree.update();
   };
 
-  const onMenuUpdate = options.onMenuUpdate || function() {};
-  const onReady = options.onReady;
-  const onError = options.onError;
-  const onWarning = options.onWarning;
+  const onMenuUpdate = options.onMenuUpdate || noop;
+  const onReady = options.onReady || noop;
+  const onError = options.onError || noop;
+  const onWarning = options.onWarning || noop;
 
   const tree = mountFn(
     <App
@@ -2375,6 +2458,13 @@ function createApp(options = {}, mountFn=shallow) {
   );
 
   app = tree.instance();
+
+  // shallow renderer always returns null on current ref
+  if (mountFn === shallow) {
+    app.tabRef = {
+      current: new MockTab()
+    };
+  }
 
   return {
     tree,
