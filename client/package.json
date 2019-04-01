@@ -12,7 +12,6 @@
     "bpmn-js": "^3.2.3",
     "bpmn-js-properties-panel": "^0.29.0",
     "bpmn-js-signavio-compat": "^1.1.0",
-    "camunda-bpmn-moddle": "^3.2.0",
     "canvg-browser": "^1.0.0",
     "classnames": "^2.2.6",
     "codemirror": "^5.39.0",
