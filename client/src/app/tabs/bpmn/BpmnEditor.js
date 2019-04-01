@@ -716,7 +716,6 @@ export class BpmnEditor extends CachedComponent {
       },
       lastXML: null,
       modeler,
-      namespaceDialogShown: false,
       stackIdx,
       templatesLoaded: false
     };
