@@ -25,7 +25,7 @@ cd "${oldpwd}"
 
 ICON_NAME=zeebe-modeler
 TMP_DIR=`mktemp --directory`
-DESKTOP_FILE=$TMP_DIR/zeeber-modeler.desktop
+DESKTOP_FILE=$TMP_DIR/zeebe-modeler.desktop
 cat << EOF > $DESKTOP_FILE
 [Desktop Entry]
 Version=1.0
