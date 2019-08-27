@@ -15,6 +15,10 @@
  */
 const git = require('simple-git')('');
 
+const exec = require('execa').sync;
+
+const parseMerge = require('simple-git/src/responses/MergeSummary').parse;
+
 const mri = require('mri');
 
 const CAMUNDA_MODELER_UPSTREAM = 'camunda';
@@ -277,67 +281,65 @@ async function sync(options) {
 
   console.log(`Sync: Execute 'git merge --no-commit --no-ff ${syncPath}'.`);
 
-  return new Promise((resolve, reject) => {
+  const _success = async function(response) {
 
-    const _success = async function(response) {
+    if ((response.files || []).length || (response.merges || []).length) {
+      await setCommitMessage({
+        message: 'chore(project): synchronize with base modeler'
+      });
 
-      if ((response.files || []).length || (response.merges || []).length) {
-        await setCommitMessage({
-          message: 'chore(project): synchronize with base modeler'
-        });
+      console.log('Sync: Syncing is done locally! Changes needs to be pushed remotely.');
+    } else {
+      console.log('Sync: No changes to be adopted. Stopped syncing!');
+    }
 
-        console.log('Sync: Syncing is done locally! Changes needs to be pushed remotely.');
-      } else {
-        console.log('Sync: No changes to be adopted. Stopped syncing!');
-      }
+  };
 
-      resolve();
-    };
+  const mergeCmd = [
+    'merge',
+    '--no-commit',
+    '--no-ff',
+    syncPath
+  ];
 
-    git.merge([
-      '--no-commit',
-      '--no-ff',
-      syncPath
-    ], async (err, res) => {
+  let mergeResult;
+  try {
+    mergeResult = await exec('git', mergeCmd).stdout;
+  } catch (e) {
 
-      if (!res) {
+    console.log(e.stderr);
 
-        if ((err.conflicts || []).length) {
+    mergeResult = parseMerge(e.stdout);
+  }
 
-          console.log('Sync: Syncing was not successful! There might be some merge' +
+  if ((mergeResult.conflicts || []).length) {
+
+    console.log('Sync: Syncing was not successful! There might be some merge' +
           'conflicts which have to be fixed before.');
 
-          // exclude files that should not be synced
-          const result = await excludeFilesFromMerge({
-            conflicts: err.conflicts,
-            files: [
-              'client/src/app/tabs/dmn/',
-              'client/src/app/tabs/cmmn/',
-              'client/test/mocks/cmmn-js/',
-              'client/test/mocks/dmn-js/',
-              'client/src/app/tabs/bpmn/modeler/features/apply-default-templates/',
-              'client/src/app/tabs/bpmn/util/**/*namespace*'
-            ]
-          });
-
-          if (result.conflicts && result.conflicts.length == 0) {
-            await _success(err);
-          }
-
-          // todo(pinussilvestrus): offer auto-merge tool for left merge conflicts?
-
-          reject(new Error('merge conflicts'));
-        } else {
-          reject(err);
-        }
-
-        return;
-
-      }
-
-      await _success(res);
+    // exclude files that should not be synced
+    const result = await excludeFilesFromMerge({
+      conflicts: mergeResult.conflicts,
+      files: [
+        'client/src/app/tabs/dmn/',
+        'client/src/app/tabs/cmmn/',
+        'client/test/mocks/cmmn-js/',
+        'client/test/mocks/dmn-js/',
+        'client/src/app/tabs/bpmn/modeler/features/apply-default-templates/',
+        'client/src/app/tabs/bpmn/util/**/*namespace*'
+      ]
     });
-  });
+
+    if (result.conflicts && result.conflicts.length == 0) {
+      await _success(mergeResult);
+    }
+
+    // todo(pinussilvestrus): offer auto-merge tool for left merge conflicts?
+    return;
+  }
+
+  await _success(mergeResult);
+
 }
 
 async function run(options) {
