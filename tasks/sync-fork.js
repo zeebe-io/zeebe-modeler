@@ -375,6 +375,6 @@ async function run(options) {
     // todo(pinussilvestrus): catch errors properly
   }
 
-  console.log('##### Stoped syncing #####');
+  console.log('##### Stopped syncing #####');
 
 }
