@@ -1,4 +1,4 @@
-> __Note:__ If possible, execute the integration test on our [released artifacts](https://github.com/camunda/camunda-modeler/releases).
+> __Note:__ If possible, execute the integration test on our [released artifacts](https://github.com/zeebe-io/zeebe-modeler/releases).
 
 
 # Integration Test
@@ -10,7 +10,7 @@ __Target:__ Perform tests on nightly builds on supported platforms.
 
 ### Test Procedure
 
-* [ ] fetch [latest release/nightly](https://camunda.org/release/camunda-modeler/)
+* [ ] fetch [latest release/nightly](https://github.com/zeebe-io/zeebe-modeler/releases)
 * [ ] click like crazy (see [below](#test-checklist))
 
 
@@ -105,8 +105,8 @@ Based on the [test diagram](./test.bpmn.png):
 #### Installers (platform specific)
 
 * [ ] MacOS
-    * [ ] [Downloading archive](https://github.com/camunda/camunda-modeler/releases), extracting and starting application works
-    * [ ] [Downloading DMG](https://github.com/camunda/camunda-modeler/releases), installing and starting it works
+    * [ ] [Downloading archive](https://github.com/zeebe-io/zeebe-modeler/releases), extracting and starting application works
+    * [ ] [Downloading DMG](https://github.com/zeebe-io/zeebe-modeler/releases), installing and starting it works
 
 
 #### Other (platform specific)
