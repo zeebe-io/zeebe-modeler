@@ -19,12 +19,12 @@ import message from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/implementa
 
 import referenceExtensionElementProperty from './implementation/ElementReferenceExtensionElementProperty';
 
-export default function(group, element, bpmnFactory, elementRegistry, translate) {
+export default function(group, element, bpmnFactory, translate) {
 
   const messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(element);
 
   if (is(element, 'bpmn:ReceiveTask')) {
-    message(group, element, bpmnFactory, getBusinessObject(element));
+    message(group, element, bpmnFactory, getBusinessObject(element), translate);
     group.entries = group.entries.concat(referenceExtensionElementProperty(element, getBusinessObject(element), bpmnFactory, {
       id: 'message-element-subscription',
       label: 'Subscription Correlation Key',
@@ -34,7 +34,7 @@ export default function(group, element, bpmnFactory, elementRegistry, translate)
       shouldValidate: true
     }));
   } else if (messageEventDefinition) {
-    message(group, element, bpmnFactory, messageEventDefinition);
+    message(group, element, bpmnFactory, messageEventDefinition, translate);
     if (!is(element, 'bpmn:StartEvent')) {
       group.entries = group.entries.concat(referenceExtensionElementProperty(element, messageEventDefinition, bpmnFactory, {
         id: 'message-element-subscription',

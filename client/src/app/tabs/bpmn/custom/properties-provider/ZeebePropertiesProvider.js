@@ -61,14 +61,14 @@ const getMappingLabel = param => {
 };
 
 
-function createGeneralTabGroups(element, bpmnFactory, elementRegistry, translate) {
+function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   const generalGroup = {
     id: 'general',
     label: 'General',
     entries: []
   };
   idProps(generalGroup, element, translate);
-  nameProps(generalGroup, element, translate);
+  nameProps(generalGroup, element, bpmnFactory, canvas, translate);
   executableProps(generalGroup, element, translate);
   taskDefinition(generalGroup, element, bpmnFactory);
   sequenceFlowProps(generalGroup, element, bpmnFactory, translate);
@@ -80,7 +80,7 @@ function createGeneralTabGroups(element, bpmnFactory, elementRegistry, translate
   ];
 }
 
-function createHeadersGroups(element, bpmnFactory, elementRegistry) {
+function createHeadersGroups(element, bpmnFactory) {
 
   const headersGroup = {
     id: 'headers-properties',
@@ -95,7 +95,7 @@ function createHeadersGroups(element, bpmnFactory, elementRegistry) {
 }
 
 
-function createPayloadMappingsTabGroups(element, bpmnFactory, elementRegistry) {
+function createPayloadMappingsTabGroups(element, bpmnFactory) {
 
   const payloadMappingsGroup = {
     id: 'payload-mappings',
@@ -126,7 +126,7 @@ function createPayloadMappingsTabGroups(element, bpmnFactory, elementRegistry) {
 
 }
 
-function createInputOutputTabGroups(element, bpmnFactory, elementRegistry) {
+function createInputOutputTabGroups(element, bpmnFactory) {
 
   const inputOutputGroup = {
     id: 'input-output',
@@ -157,12 +157,12 @@ function createInputOutputTabGroups(element, bpmnFactory, elementRegistry) {
 }
 
 export default class ZeebePropertiesProvider extends PropertiesActivator {
-  constructor(eventBus, bpmnFactory, elementRegistry, translate) {
+  constructor(eventBus, bpmnFactory, canvas, translate) {
 
     super(eventBus);
 
     this._bpmnFactory = bpmnFactory;
-    this._elementRegistry = elementRegistry;
+    this._canvas = canvas;
     this._translate = translate;
 
   }
@@ -172,28 +172,28 @@ export default class ZeebePropertiesProvider extends PropertiesActivator {
       id: 'general',
       label: 'General',
       groups: createGeneralTabGroups(
-        element, this._bpmnFactory, this._elementRegistry, this._translate)
+        element, this._bpmnFactory, this._canvas, this._translate)
     };
 
     const inputOutputTab = {
       id: 'input-output',
       label: 'Input/Output',
       groups: createInputOutputTabGroups(
-        element, this._bpmnFactory, this._elementRegistry)
+        element, this._bpmnFactory)
     };
 
     const payloadMappingsTab = {
       id: 'payload-mappings',
       label: 'Payload Mappings',
       groups: createPayloadMappingsTabGroups(
-        element, this._bpmnFactory, this._elementRegistry)
+        element, this._bpmnFactory)
     };
 
     const headersTab = {
       id: 'headers',
       label: 'Headers',
       groups: createHeadersGroups(
-        element, this._bpmnFactory, this._elementRegistry)
+        element, this._bpmnFactory)
     };
 
     return [
@@ -209,6 +209,6 @@ export default class ZeebePropertiesProvider extends PropertiesActivator {
 ZeebePropertiesProvider.$inject = [
   'eventBus',
   'bpmnFactory',
-  'elementRegistry',
+  'canvas',
   'translate'
 ];
