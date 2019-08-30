@@ -18,6 +18,7 @@ import {
   Tab
 } from './primitives';
 
+
 export default class EmptyTab extends PureComponent {
 
   componentDidMount() {
@@ -36,9 +37,7 @@ export default class EmptyTab extends PureComponent {
       <Tab className={ css.EmptyTab }>
         <p className="create-buttons">
           <span>Create a </span>
-          <button className="create-bpmn" onClick={
-            () => onAction('create-bpmn-diagram') }
-          >BPMN diagram</button>
+          <button className="create-bpmn" onClick={ () => onAction('create-bpmn-diagram') }>BPMN diagram</button>
         </p>
 
         <Slot name="empty-tab-buttons" />

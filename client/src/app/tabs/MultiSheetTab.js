@@ -315,31 +315,16 @@ export class MultiSheetTab extends CachedComponent {
   }
 
   componentDidMount() {
-    const {
-      setCachedState,
-      xml
-    } = this.props;
-
-    let {
-      lastXML,
-      sheets
-    } = this.getCached();
+    let { sheets } = this.getCached();
 
     if (!sheets) {
       sheets = this.getDefaultSheets();
 
-      setCachedState({
+      this.setCached({
         sheets,
         activeSheet: sheets[0]
       });
     }
-
-    if (isXMLChange(lastXML, xml)) {
-      this.setCached({
-        lastXML: xml
-      });
-    }
-
   }
 
   componentDidUpdate(prevProps) {
@@ -350,6 +335,12 @@ export class MultiSheetTab extends CachedComponent {
         lastXML: xml
       });
     }
+  }
+
+  isUnsaved = (tab) => {
+    const { file } = tab;
+
+    return file && !file.path;
   }
 
   render() {
@@ -365,7 +356,8 @@ export class MultiSheetTab extends CachedComponent {
       id,
       xml,
       layout,
-      onAction
+      onAction,
+      tab
     } = this.props;
 
     if (!sheets) {
@@ -378,6 +370,8 @@ export class MultiSheetTab extends CachedComponent {
 
     const Editor = activeSheet.provider.editor;
 
+    const isNew = this.isUnsaved(tab);
+
     return (
       <div className={ css.MultiSheetTab }>
         <TabContainer className="content tab">
@@ -385,6 +379,7 @@ export class MultiSheetTab extends CachedComponent {
             ref={ this.editorRef }
             id={ `${id}-${activeSheet.provider.type}` }
             xml={ lastXML || xml }
+            isNew={ isNew }
             layout={ layout }
             activeSheet={ activeSheet }
             onSheetsChanged={ this.sheetsChanged }

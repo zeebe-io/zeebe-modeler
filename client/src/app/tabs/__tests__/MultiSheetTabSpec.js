@@ -43,32 +43,6 @@ describe('<MultiSheetTab>', function() {
 
   describe('xml prop', function() {
 
-    it('update lastXML if xml prop changed (mount)', function() {
-
-      // given
-      const xml = 'foo';
-
-      const cache = new Cache();
-
-      cache.add('editor', {
-        cached: {
-          lastXML: 'bar'
-        }
-      });
-
-      // when
-      const { instance } = renderTab({
-        xml,
-        cache
-      });
-
-      // then
-      const { lastXML } = instance.getCached();
-
-      expect(lastXML).to.eql(xml);
-    });
-
-
     it('update lastXML if xml prop changed (update)', function() {
 
       // given
@@ -91,6 +65,7 @@ describe('<MultiSheetTab>', function() {
 
       expect(lastXML).to.equal(xml);
     });
+
   });
 
 
@@ -308,6 +283,25 @@ describe('<MultiSheetTab>', function() {
   });
 
 
+  describe('#isUnsaved', function() {
+
+    it('should be unsaved', function() {
+
+      // given
+      const {
+        instance
+      } = renderTab();
+
+      // when
+      const isUnSaved = instance.isUnsaved(defaultTab);
+
+      // then
+      expect(isUnSaved).to.be.true;
+    });
+
+  });
+
+
   describe('dirty state', function() {
 
     let instance,
@@ -416,6 +410,7 @@ describe('<MultiSheetTab>', function() {
 
 
     it('should set toast', function() {
+
       // given
       const fakeToastName = 'toast';
 
@@ -432,6 +427,7 @@ describe('<MultiSheetTab>', function() {
 
 
     it('should close toast', function() {
+
       // given
       const fakeToastName = 'toast';
 

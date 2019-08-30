@@ -993,7 +993,7 @@ export class App extends PureComponent {
     return onError(error, tab);
   }
 
-  getGlobal(name) {
+  getGlobal = (name) => {
     const {
       globals
     } = this.props;
@@ -1740,6 +1740,7 @@ export class App extends PureComponent {
           <ModalConductor
             currentModal={ this.state.currentModal }
             endpoints={ this.state.endpoints }
+            tab={ activeTab }
             getGlobal={ this.getGlobal }
             onClose={ this.closeModal }
             onDeploy={ this.handleDeploy }

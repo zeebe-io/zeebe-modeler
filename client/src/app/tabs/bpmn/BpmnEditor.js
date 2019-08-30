@@ -47,6 +47,8 @@ import css from './BpmnEditor.less';
 
 import generateImage from '../../util/generateImage';
 
+import configureModeler from './util/configure';
+
 import Metadata from '../../../util/Metadata';
 
 const EXPORT_AS = [ 'png', 'jpeg', 'svg' ];
@@ -160,7 +162,9 @@ export class BpmnEditor extends CachedComponent {
       'propertiesPanel.focusin',
       'propertiesPanel.focusout',
       'directEditing.activate',
-      'directEditing.deactivate'
+      'directEditing.deactivate',
+      'searchPad.closed',
+      'searchPad.opened'
     ].forEach((event) => {
       modeler[fn](event, this.handleChanged);
     });
@@ -222,9 +226,8 @@ export class BpmnEditor extends CachedComponent {
 
     const stackIdx = commandStack._stackIdx;
 
-    onImport(error, warnings);
-
     if (!error) {
+
       this.setCached({
         lastXML: xml,
         stackIdx
@@ -234,6 +237,8 @@ export class BpmnEditor extends CachedComponent {
         importing: false
       });
     }
+
+    onImport(error, warnings);
   }
 
   handleChanged = () => {
@@ -296,7 +301,7 @@ export class BpmnEditor extends CachedComponent {
 
     const windowMenu = getBpmnWindowMenu(newState);
 
-    if (typeof onChanged === 'function') {
+    if (isFunction(onChanged)) {
       onChanged({
         ...newState,
         contextMenu,
@@ -522,7 +527,7 @@ export class BpmnEditor extends CachedComponent {
       onContextMenu
     } = this.props;
 
-    if (typeof onContextMenu === 'function') {
+    if (isFunction(onContextMenu)) {
       onContextMenu(event);
     }
   }
@@ -532,7 +537,7 @@ export class BpmnEditor extends CachedComponent {
       onLayoutChanged
     } = this.props;
 
-    if (typeof onLayoutChanged === 'function') {
+    if (isFunction(onLayoutChanged)) {
       onLayoutChanged(newLayout);
     }
   }
@@ -663,6 +668,7 @@ export class BpmnEditor extends CachedComponent {
   }
 
   static createCachedState(props) {
+
     const {
       name,
       version
@@ -673,36 +679,26 @@ export class BpmnEditor extends CachedComponent {
       onError
     } = props;
 
-    const moddleExtensionPlugins = getPlugins('bpmn.modeler.moddleExtension');
-
-    const moddleExtensions = moddleExtensionPlugins.reduce((extensions, extension) => {
-      let { name } = extension;
-
-      try {
-        name = name.toLowerCase();
-      } catch (error) {
-        if (isFunction(onError)) {
-          onError(new Error('Could not register moddle extension.'));
-        }
-
-        return extensions;
-      }
-
-      return {
-        ...extensions,
-        [ name ]: extension
-      };
-    }, {});
-
-    const additionalModules = getPlugins('bpmn.modeler.additionalModules') || [];
-
-    const modeler = new BpmnModeler({
-      additionalModules,
+    const {
+      options,
+      warnings
+    } = configureModeler(getPlugins, {
       exporter: {
         name,
         version
-      },
-      moddleExtensions,
+      }
+    });
+
+    if (warnings.length && isFunction(onError)) {
+      onError(
+        'Problem(s) configuring BPMN editor: \n\t' +
+        warnings.map(error => error.message).join('\n\t') +
+        '\n'
+      );
+    }
+
+    const modeler = new BpmnModeler({
+      ...options,
       position: 'absolute'
     });
 
@@ -716,8 +712,7 @@ export class BpmnEditor extends CachedComponent {
       },
       lastXML: null,
       modeler,
-      stackIdx,
-      templatesLoaded: false
+      stackIdx
     };
   }
 

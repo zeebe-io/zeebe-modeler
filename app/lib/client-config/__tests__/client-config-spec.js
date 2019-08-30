@@ -21,7 +21,9 @@ describe('ClientConfig', function() {
 
       // given
       var fakeDiagram = {
-        path: absPath('fixtures/project/bar.bpmn')
+        file: {
+          path: absPath('fixtures/project/bar.bpmn')
+        }
       };
 
       const clientConfig = new ClientConfig({
@@ -43,6 +45,43 @@ describe('ClientConfig', function() {
         // local templates loaded first
         expect(templates).to.eql([
           { id: 'com.foo.Bar' }, // local (!!!)
+          { id: 'com.foo.Bar', FOO: 'BAR' },
+          { id: 'single', FOO: 'BAR' }
+        ]);
+
+        done();
+      });
+
+    });
+
+
+    it('should not throw for a new file', function(done) {
+
+      // given
+      var fakeDiagram = {
+        file: {
+          path: null
+        }
+      };
+
+      const clientConfig = new ClientConfig({
+        paths: [
+          absPath('fixtures/ok')
+        ]
+      });
+
+      // when
+      clientConfig.get('bpmn.elementTemplates', fakeDiagram, function(err, templates) {
+
+        if (err) {
+          return done(err);
+        }
+
+        // then
+        expect(err).not.to.exist;
+
+        // local templates loaded first
+        expect(templates).to.eql([
           { id: 'com.foo.Bar', FOO: 'BAR' },
           { id: 'single', FOO: 'BAR' }
         ]);

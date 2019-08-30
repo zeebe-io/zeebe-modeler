@@ -136,6 +136,8 @@ describe('<BpmnEditor>', function() {
           case 'bpmn.modeler.moddleExtension':
             return [ moddleExtension ];
           }
+
+          return [];
         }
       });
 
@@ -150,7 +152,7 @@ describe('<BpmnEditor>', function() {
     });
 
 
-    it('should properly handle invalid moddle extensions', async function() {
+    it('should handle invalid moddle extensions', async function() {
 
       // given
       const onErrorSpy = sinon.spy();
@@ -169,13 +171,15 @@ describe('<BpmnEditor>', function() {
               circularModdleExtension
             ];
           }
+
+          return [];
         },
         onError: onErrorSpy
       };
 
       // then
       expect(() => BpmnEditor.createCachedState(props)).to.not.throw();
-      expect(onErrorSpy).to.be.calledTwice;
+      expect(onErrorSpy).to.be.calledOnce;
     });
 
   });
@@ -306,10 +310,16 @@ describe('<BpmnEditor>', function() {
     it('propertiesPanel.focusout', expectHandleChanged('propertiesPanel.focusout'));
 
 
-    it('propertiesPanel.focusout', expectHandleChanged('directEditing.activate'));
+    it('directEditing.activate', expectHandleChanged('directEditing.activate'));
 
 
-    it('propertiesPanel.focusout', expectHandleChanged('directEditing.deactivate'));
+    it('directEditing.deactivate', expectHandleChanged('directEditing.deactivate'));
+
+
+    it('searchPad.opened', expectHandleChanged('searchPad.opened'));
+
+
+    it('searchPad.closed', expectHandleChanged('searchPad.closed'));
   });
 
 
@@ -382,6 +392,7 @@ describe('<BpmnEditor>', function() {
 
 
     it('should notify about plugin related changes', async function() {
+
       // given
       const changedSpy = sinon.spy();
 
@@ -719,6 +730,7 @@ describe('<BpmnEditor>', function() {
 
 
     it('should import with warnings', function(done) {
+
       // given
       const warningInducingFakeXML = 'import-warnings';
 
@@ -742,6 +754,7 @@ describe('<BpmnEditor>', function() {
 
 
     it('should import with error', function(done) {
+
       // given
       const errorInducingFakeXML = 'import-error';
 
@@ -765,6 +778,7 @@ describe('<BpmnEditor>', function() {
 
 
     it('should not import when provided xml is the same as the cached one', async function() {
+
       // given
       const isImportNeededSpy = sinon.spy(BpmnEditor.prototype, 'isImportNeeded');
       const cache = new Cache();
@@ -787,6 +801,7 @@ describe('<BpmnEditor>', function() {
 
 
     it('should not import when props did not changed', async function() {
+
       // given
       const {
         instance
@@ -882,6 +897,7 @@ describe('<BpmnEditor>', function() {
   describe('properties panel actions', function() {
 
     it('should toggle properties panel', async function() {
+
       // given
       const onLayoutChangedSpy = sinon.spy();
       const {
@@ -908,6 +924,7 @@ describe('<BpmnEditor>', function() {
 
 
     it('should reset properties panel', async function() {
+
       // given
       const onLayoutChangedSpy = sinon.spy();
       const {
@@ -937,6 +954,7 @@ describe('<BpmnEditor>', function() {
         instance;
 
     beforeEach(async function() {
+
       // given
       editorActionsStub = sinon.stub({ trigger() {} });
 
@@ -960,6 +978,7 @@ describe('<BpmnEditor>', function() {
 
 
     it('should zoom in', function() {
+
       // when
       instance.triggerAction('zoomIn');
 
@@ -971,6 +990,7 @@ describe('<BpmnEditor>', function() {
 
 
     it('should zoom out', function() {
+
       // when
       instance.triggerAction('zoomOut');
 
@@ -982,6 +1002,7 @@ describe('<BpmnEditor>', function() {
 
 
     it('should zoom to fit diagram', function() {
+
       // when
       instance.triggerAction('zoomFit');
 
@@ -993,6 +1014,7 @@ describe('<BpmnEditor>', function() {
 
 
     it('should reset zoom', async function() {
+
       // when
       instance.triggerAction('resetZoom');
 
@@ -1025,13 +1047,15 @@ async function renderEditor(xml, options = {}) {
     onLayoutChanged,
     onModal,
     onLoadConfig,
-    getPlugins
+    getPlugins,
+    isNew
   } = options;
 
   const wrapper = await mount(
     <TestEditor
       id={ id || 'editor' }
       xml={ xml }
+      isNew={ isNew !== false }
       activeSheet={ options.activeSheet || { id: 'bpmn' } }
       onAction={ onAction || noop }
       onChanged={ onChanged || noop }

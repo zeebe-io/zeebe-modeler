@@ -24,6 +24,7 @@ import Log from '../Log';
 
 import {
   Backend,
+  Cache,
   Config,
   Dialog,
   FileSystem,
@@ -300,6 +301,7 @@ describe('<App>', function() {
   describe('diagram creation', function() {
 
     it('should create + open as tabs', async function() {
+
       // given
       const {
         app
@@ -1365,6 +1367,7 @@ describe('<App>', function() {
       const errorHandler = window.onerror;
 
       before(function() {
+
         // disable mocha implicit error handling
         window.onerror = () => {};
       });
@@ -1867,6 +1870,7 @@ describe('<App>', function() {
 
 
     it('should update navigation history', async function() {
+
       // given
       const newAttrs = {
         name: 'foo.bpmn'
@@ -2064,6 +2068,7 @@ describe('<App>', function() {
 
 
     it('should open modal', function() {
+
       // given
       const fakeModalName = 'modal';
 
@@ -2076,6 +2081,7 @@ describe('<App>', function() {
 
 
     it('should close modal', function() {
+
       // given
       const fakeModalName = 'modal';
       app.setState({ currentModal: fakeModalName });
@@ -2089,6 +2095,7 @@ describe('<App>', function() {
 
 
     it('should update menu when modal is closed', function() {
+
       // given
       const updateMenuSpy = sinon.spy(app, 'updateMenu');
       const fakeModalName = 'modal';
@@ -2110,6 +2117,7 @@ describe('<App>', function() {
 
 
     it('should handle deployment', async function() {
+
       // given
       const sendSpy = spy();
 
@@ -2138,6 +2146,7 @@ describe('<App>', function() {
 
 
     it('should save tab before deployment', async function() {
+
       // given
       const fakeFile = createFile('saved.bpmn');
       const sendSpy = spy();
@@ -2169,6 +2178,7 @@ describe('<App>', function() {
 
 
     it('should throw error when tab is not saved before deployment', async function() {
+
       // given
       const sendSpy = spy();
 
@@ -2203,6 +2213,7 @@ describe('<App>', function() {
 
 
     it('should load requested config', async function() {
+
       // given
       const CONFIG_KEY = 'CONFIG_KEY';
       const getConfigSpy = spy();
@@ -2263,6 +2274,7 @@ describe('<App>', function() {
 
 
     it('should trigger tab resize when layout changes', async function() {
+
       // given
       const {
         app,
@@ -2392,11 +2404,7 @@ describe('<App>', function() {
 });
 
 
-// helper ///////
-class Cache {
-  destroy() { }
-}
-
+// helpers //////////
 class MockTab {
   triggerAction() {}
 }
