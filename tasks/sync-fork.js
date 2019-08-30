@@ -137,7 +137,7 @@ async function fetchUpstream(options) {
     '--tags'
   ];
 
-  console.log(`Sync: Execute 'git fetch ${upstream} ${CAMUNDA_MODELER_BRANCH}' --tags.`);
+  console.log(`Sync: Execute 'git fetch ${upstream} ${CAMUNDA_MODELER_BRANCH} --tags' .`);
 
   return new Promise((resolve, reject) => {
     git.fetch(fetchCmd, (err, res) => {
