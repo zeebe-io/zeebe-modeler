@@ -45,7 +45,7 @@ ${licenseText}
 END OF ${name} NOTICES AND INFORMATION`;
   }
 
-  return `camunda-modeler
+  return `zeebe-modeler
 
 THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 Do Not Translate or Localize
@@ -91,7 +91,7 @@ ${
 <html>
 <head>
 <meta charset="utf-8">
-<title>Camunda Modeler Credits</title>
+<title>Zeebe Modeler Credits</title>
 <style>
 body {
   background-color: white;
