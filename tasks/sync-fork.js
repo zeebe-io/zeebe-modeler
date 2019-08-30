@@ -131,10 +131,16 @@ async function fetchUpstream(options) {
     upstream
   } = options;
 
-  console.log(`Sync: Execute 'git fetch ${upstream} ${CAMUNDA_MODELER_BRANCH}'.`);
+  const fetchCmd = [
+    upstream,
+    CAMUNDA_MODELER_BRANCH,
+    '--tags'
+  ];
+
+  console.log(`Sync: Execute 'git fetch ${upstream} ${CAMUNDA_MODELER_BRANCH}' --tags.`);
 
   return new Promise((resolve, reject) => {
-    git.fetch(upstream, CAMUNDA_MODELER_BRANCH, (err, res) => {
+    git.fetch(fetchCmd, (err, res) => {
 
       if (err) {
         reject(err);
