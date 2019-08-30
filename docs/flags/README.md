@@ -19,7 +19,7 @@ Place a `flags.json` file inside the `resources` folder of your local [`{USER_DA
 Pass flags via the command line when starting the application.
 
 ```
-camunda-modeler --disable-plugins
+zeebe-modeler --disable-plugins
 ```
 
 Flags passed as command line arguments take precedence over those configured via a configuration file.

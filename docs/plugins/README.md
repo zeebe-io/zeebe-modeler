@@ -81,13 +81,13 @@ module.exports = {
 
 You can use a Node.js module here since the modeler is built with [Electron](https://electron.atom.io/) which uses [Node.js](https://nodejs.org/en/).
 
-For more information on how the modeler's menu works, have a look at its implementation [here](https://github.com/camunda/camunda-modeler/blob/master/app/lib/menu/menu-builder.js).
+For more information on how the modeler's menu works, have a look at its implementation [here](https://github.com/zeebe-io/zeebe-modeler/blob/master/app/lib/menu/menu-builder.js).
 
-### Extend the modeling tools for BPMN, CMMN, and DMN
+### Extend the modeling tools for BPMN
 
 > Currently you can only extend bpmn-js
 
-You can extend the modeling tools for [BPMN](https://github.com/bpmn-io/bpmn-js), [CMMN](https://github.com/bpmn-io/cmmn-js) and [DMN](https://github.com/bpmn-io/dmn-js) with your own modules.
+You can extend the modeling tools for [BPMN](https://github.com/bpmn-io/bpmn-js).
 
 Since the client of the modeler uses [Chromium](https://www.chromium.org/Home) you can't use Node.js modules to extend the modeling tools. You need to bundle your plugin first. The easiest way to get started with client-side plugins is through [this](https://github.com/camunda/camunda-modeler-plugin-example) example project.
 

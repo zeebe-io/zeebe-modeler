@@ -10,9 +10,9 @@ This is the installation directory of the application executable. Inside this do
 
 This is the per-user application data directory which differs across operating systems:
 
-* **Windows**: `%APPDATA%/camunda-modeler`
-* **Linux**: `$XDG_CONFIG_HOME/camunda-modeler` or `~/.config/camunda-modeler`
-* **macOS**: `~/Library/Application Support/camunda-modeler`
+* **Windows**: `%APPDATA%/zeebe-modeler`
+* **Linux**: `$XDG_CONFIG_HOME/zeebe-modeler` or `~/.config/zeebe-modeler`
+* **macOS**: `~/Library/Application Support/zeebe-modeler`
 
 If you don't know where to find these paths, learn more about Windows [`%APPDATA%`](https://www.howtogeek.com/318177/what-is-the-appdata-folder-in-windows/) and Linux [`$XDG_CONFIG_HOME`](https://wiki.archlinux.org/index.php/XDG_Base_Directory) directories.
 
