@@ -174,12 +174,14 @@ export default function(element, bpmnFactory, options) {
       return cmdHelper.updateBusinessObject(element, property, value);
     },
     validate: function(element, value, node, idx) {
+
       // validate id if necessary
       if (modelProperties.indexOf('id') >= 0) {
 
         const parent = getParent(element, node, bo), properties = getPropertyValues(parent), property = properties[idx];
 
         if (property) {
+
           // check if id is valid
           const validationError = utils.isIdValid(property, value.id);
 
@@ -195,6 +197,7 @@ export default function(element, bpmnFactory, options) {
       commands.push(cmdHelper.removeElementsFromList(element, properties, 'values', null, [ currentProperty ]));
 
       if (propertyValues.length === 1) {
+
         // remove camunda:properties if the last existing property has been removed
         if (!isExtensionElements(parent)) {
           commands.push(cmdHelper.updateBusinessObject(element, parent, { headers: undefined }));

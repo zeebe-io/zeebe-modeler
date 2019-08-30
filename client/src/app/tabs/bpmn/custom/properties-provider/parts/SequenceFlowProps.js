@@ -42,6 +42,7 @@ export default function(group, element, bpmnFactory, translate) {
             `<div class="bpp-row"><label for="zeebe-condition">${translate('Condition expression')}</label><div class="bpp-field-wrapper"><input id="zeebe-condition" type="text" name="condition" /><button class="clear" data-action="clear" data-show="canClear"><span>X</span></button></div></div>`,
 
     get: function(element, propertyName) {
+
       // read values from xml:
       const conditionExpression = bo.conditionExpression;
 
@@ -112,6 +113,7 @@ export default function(group, element, bpmnFactory, translate) {
     },
 
     clear: function(element, inputNode) {
+
       // clear text input
       domQuery('input[name=condition]', inputNode).value = '';
 

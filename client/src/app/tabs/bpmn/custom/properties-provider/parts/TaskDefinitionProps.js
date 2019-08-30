@@ -58,6 +58,7 @@ export default function(group, element, bpmnFactory) {
         extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
         commands.push(cmdHelper.updateProperties(element, { extensionElements: extensionElements }));
       }
+
       // create taskDefinition
       let taskDefinition = getTaskDefinition(element);
 
@@ -115,6 +116,7 @@ export default function(group, element, bpmnFactory) {
         extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
         commands.push(cmdHelper.updateProperties(element, { extensionElements: extensionElements }));
       }
+
       // create taskDefinition
       let taskDefinition = getTaskDefinition(element);
 

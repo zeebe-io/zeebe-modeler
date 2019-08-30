@@ -76,6 +76,7 @@ export function triggerEvent(element, eventType) {
 
   if (document.createEvent) {
     try {
+
       // Chrome, Safari, Firefox
       evt = new MouseEvent((eventType), {
         view: window,
@@ -83,6 +84,7 @@ export function triggerEvent(element, eventType) {
         cancelable: true
       });
     } catch (e) {
+
       // IE 11, PhantomJS (wat!)
       evt = document.createEvent('MouseEvent');
 
@@ -90,6 +92,7 @@ export function triggerEvent(element, eventType) {
     }
     return element.dispatchEvent(evt);
   } else {
+
     // Welcome IE
     evt = document.createEventObject();
 

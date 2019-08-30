@@ -158,12 +158,14 @@ describe('customs - headers property tab', function() {
     describe('in the DOM', function() {
 
       it('should execute', function() {
+
         // then
         expect(input.value).to.equal('foo');
       });
 
 
       it('should undo', inject(function(commandStack) {
+
         // when
         commandStack.undo();
 
@@ -173,6 +175,7 @@ describe('customs - headers property tab', function() {
 
 
       it('should redo', inject(function(commandStack) {
+
         // when
         commandStack.undo();
         commandStack.redo();
@@ -185,6 +188,7 @@ describe('customs - headers property tab', function() {
       describe('on the business object', function() {
 
         it('should execute', function() {
+
           // then
 
           expect(header.key).to.equal('foo');
@@ -192,6 +196,7 @@ describe('customs - headers property tab', function() {
 
 
         it('should undo', inject(function(commandStack) {
+
           // when
           commandStack.undo();
 
@@ -201,6 +206,7 @@ describe('customs - headers property tab', function() {
 
 
         it('should redo', inject(function(commandStack) {
+
           // when
           commandStack.undo();
           commandStack.redo();

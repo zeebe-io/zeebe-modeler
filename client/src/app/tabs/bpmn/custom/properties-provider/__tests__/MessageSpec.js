@@ -105,12 +105,14 @@ describe('customs - message properties', function() {
       describe('in the DOM', function() {
 
         it('should execute', function() {
+
           // then
           expect(input.value).to.equal('foo');
         });
 
 
         it('should undo', inject(function(commandStack) {
+
           // when
           commandStack.undo();
 
@@ -120,6 +122,7 @@ describe('customs - message properties', function() {
 
 
         it('should redo', inject(function(commandStack) {
+
           // when
           commandStack.undo();
           commandStack.redo();
@@ -132,6 +135,7 @@ describe('customs - message properties', function() {
         describe('on the business object', function() {
 
           it('should execute', function() {
+
             // then
 
             expect(subscriptionDefinition.correlationKey).to.equal('foo');
@@ -139,6 +143,7 @@ describe('customs - message properties', function() {
 
 
           it('should undo', inject(function(commandStack) {
+
             // when
             commandStack.undo();
 
@@ -148,6 +153,7 @@ describe('customs - message properties', function() {
 
 
           it('should redo', inject(function(commandStack) {
+
             // when
             commandStack.undo();
             commandStack.redo();
@@ -196,12 +202,14 @@ describe('customs - message properties', function() {
       describe('in the DOM', function() {
 
         it('should execute', function() {
+
           // then
           expect(input.value).to.equal('foo');
         });
 
 
         it('should undo', inject(function(commandStack) {
+
           // when
           commandStack.undo();
 
@@ -211,6 +219,7 @@ describe('customs - message properties', function() {
 
 
         it('should redo', inject(function(commandStack) {
+
           // when
           commandStack.undo();
           commandStack.redo();
@@ -223,6 +232,7 @@ describe('customs - message properties', function() {
         describe('on the business object', function() {
 
           it('should execute', function() {
+
             // then
 
             expect(subscriptionDefinition.correlationKey).to.equal('foo');
@@ -230,6 +240,7 @@ describe('customs - message properties', function() {
 
 
           it('should undo', inject(function(commandStack) {
+
             // when
             commandStack.undo();
 
@@ -239,6 +250,7 @@ describe('customs - message properties', function() {
 
 
           it('should redo', inject(function(commandStack) {
+
             // when
             commandStack.undo();
             commandStack.redo();

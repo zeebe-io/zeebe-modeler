@@ -76,6 +76,7 @@ describe('customs - condition expression properties', function() {
       let bo;
 
       beforeEach(inject(function(elementRegistry, selection) {
+
         // given
         const shape = elementRegistry.get('SequenceFlow_1');
         selection.select(shape);
@@ -144,12 +145,14 @@ describe('customs - condition expression properties', function() {
       describe('in the DOM', function() {
 
         it('should execute', function() {
+
           // then
           expect(input.value).to.equal('foo');
         });
 
 
         it('should undo', inject(function(commandStack) {
+
           // when
           commandStack.undo();
 
@@ -159,6 +162,7 @@ describe('customs - condition expression properties', function() {
 
 
         it('should redo', inject(function(commandStack) {
+
           // when
           commandStack.undo();
           commandStack.redo();
@@ -171,12 +175,14 @@ describe('customs - condition expression properties', function() {
         describe('on the business object', function() {
 
           it('should execute', function() {
+
             // then
             expect(getConditionExpression(bo).body).to.equal('foo');
           });
 
 
           it('should undo', inject(function(commandStack) {
+
             // when
             commandStack.undo();
 
@@ -186,6 +192,7 @@ describe('customs - condition expression properties', function() {
 
 
           it('should redo', inject(function(commandStack) {
+
             // when
             commandStack.undo();
             commandStack.redo();

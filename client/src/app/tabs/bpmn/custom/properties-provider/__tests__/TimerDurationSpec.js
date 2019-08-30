@@ -95,12 +95,14 @@ describe('customs - timer-event duration property', function() {
     describe('in the DOM', function() {
 
       it('should execute', function() {
+
         // then
         expect(input.value).to.equal('foo');
       });
 
 
       it('should undo', inject(function(commandStack) {
+
         // when
         commandStack.undo();
 
@@ -110,6 +112,7 @@ describe('customs - timer-event duration property', function() {
 
 
       it('should redo', inject(function(commandStack) {
+
         // when
         commandStack.undo();
         commandStack.redo();
@@ -122,12 +125,14 @@ describe('customs - timer-event duration property', function() {
       describe('on the business object', function() {
 
         it('should execute', function() {
+
           // then
           expect(timeDuration.body).to.equal('foo');
         });
 
 
         it('should undo', inject(function(commandStack) {
+
           // when
           commandStack.undo();
 
@@ -137,6 +142,7 @@ describe('customs - timer-event duration property', function() {
 
 
         it('should redo', inject(function(commandStack) {
+
           // when
           commandStack.undo();
           commandStack.redo();
