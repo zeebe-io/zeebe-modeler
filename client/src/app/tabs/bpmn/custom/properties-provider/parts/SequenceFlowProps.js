@@ -17,6 +17,10 @@ import {
 } from 'bpmn-js/lib/util/ModelUtil';
 
 import {
+  escapeHTML
+} from 'bpmn-js-properties-panel/lib/Utils';
+
+import {
   query as domQuery
 } from 'min-dom';
 
@@ -39,7 +43,17 @@ export default function(group, element, bpmnFactory, translate) {
     id: 'condition',
     label: translate('Condition expression'),
     html:  // expression
-            `<div class="bpp-row"><label for="zeebe-condition">${translate('Condition expression')}</label><div class="bpp-field-wrapper"><input id="zeebe-condition" type="text" name="condition" /><button class="clear" data-action="clear" data-show="canClear"><span>X</span></button></div></div>`,
+            `<div class="bpp-row">
+              <label for="zeebe-condition">
+                ${escapeHTML(translate('Condition expression'))}
+              </label>
+              <div class="bpp-field-wrapper">
+                <input id="zeebe-condition" type="text" name="condition" />
+                <button class="clear" data-action="clear" data-show="canClear">
+                 <span>X</span>
+                </button>
+              </div>
+            </div>`,
 
     get: function(element, propertyName) {
 
