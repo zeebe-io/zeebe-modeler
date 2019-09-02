@@ -38,3 +38,8 @@ export const AVAILABLE_CONTEXTPAD_ENTRIES = [
   'connect',
   'replace'
 ];
+
+export const AVAILABLE_LOOP_ENTRIES = [
+  'toggle-parallel-mi',
+  'toggle-sequential-mi'
+];

@@ -11,7 +11,16 @@
 import ReplaceMenuProvider from 'bpmn-js/lib/features/popup-menu/ReplaceMenuProvider';
 
 import {
-  AVAILABLE_REPLACE_ELEMENTS as availableElements
+  isEventSubProcess
+} from 'bpmn-js/lib/util/DiUtil';
+
+import {
+  isAny
+} from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
+
+import {
+  AVAILABLE_REPLACE_ELEMENTS as availableElements,
+  AVAILABLE_LOOP_ENTRIES as availableLoopEntries
 } from './modeler-options/Options';
 
 export default class CustomReplaceMenuProvider extends ReplaceMenuProvider {
@@ -26,12 +35,23 @@ export default class CustomReplaceMenuProvider extends ReplaceMenuProvider {
     return options.filter(option => availableElements.indexOf(option.id) != -1);
   }
 
-  _getLoopEntries(element) {
-    return [];
-  }
-
   getHeaderEntries(element) {
-    return [];
+
+    let headerEntries = [];
+
+    if (
+      isAny(element, [ 'bpmn:ReceiveTask', 'bpmn:ServiceTask', 'bpmn:SubProcess' ]) &&
+      !isEventSubProcess(element)
+    ) {
+
+      const loopEntries = this._getLoopEntries(element);
+
+      headerEntries = loopEntries.filter(
+        entry => availableLoopEntries.indexOf(entry.id) != -1
+      );
+    }
+
+    return headerEntries;
   }
 }
 
