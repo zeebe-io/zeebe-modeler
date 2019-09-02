@@ -16,12 +16,12 @@ import {
 
 import {
   isLabel
-} from 'bpmn-js/lib//util/LabelUtil';
+} from 'bpmn-js/lib/util/LabelUtil';
 
 import {
   is,
   getBusinessObject
-} from 'bpmn-js/lib//util/ModelUtil';
+} from 'bpmn-js/lib/util/ModelUtil';
 
 
 import {
@@ -69,8 +69,12 @@ export default class CustomRules extends BpmnRules {
    * this must be reflected in the rules.
    */
     function isBoundaryCandidate(element) {
-      return isBoundaryEvent(element) ||
-          ((is(element, 'bpmn:IntermediateCatchEvent') ||is(element, 'bpmn:IntermediateThrowEvent')) && !element.parent);
+      return isBoundaryEvent(element) || (
+        (
+          is(element, 'bpmn:IntermediateCatchEvent') ||
+          is(element, 'bpmn:IntermediateThrowEvent')
+        ) && !element.parent
+      );
     }
 
     function isForCompensation(e) {
@@ -80,9 +84,9 @@ export default class CustomRules extends BpmnRules {
     function isReceiveTaskAfterEventBasedGateway(element) {
       return (
         is(element, 'bpmn:ReceiveTask') &&
-      find(element.incoming, function(incoming) {
-        return is(incoming.source, 'bpmn:EventBasedGateway');
-      })
+        find(element.incoming, function(incoming) {
+          return is(incoming.source, 'bpmn:EventBasedGateway');
+        })
       );
     }
 
