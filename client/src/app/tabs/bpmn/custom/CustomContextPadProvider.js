@@ -106,9 +106,6 @@ export default class CustomContextPadProvider extends ContextPadProvider {
     availableActions.forEach(availableAction => {
       if (actions[availableAction]) {
 
-        // if (availableAction == 'replace' && !is(businessObject, 'bpmn:SequenceFlow')) {
-        //  continue;
-        // }
         filteredActions[availableAction] = actions[availableAction];
       }
     });
