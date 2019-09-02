@@ -126,12 +126,16 @@ describe('customs - replaceMenu', function() {
 
     const serviceTaskEntry = queryEntry(popupMenu, 'replace-with-service-task'),
           collapsedSubProcessEntry = queryEntry(popupMenu, 'replace-with-collapsed-subprocess'),
-          expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess');
+          expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess'),
+          sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
+          parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
 
     // then
     expect(serviceTaskEntry).to.exist;
     expect(collapsedSubProcessEntry).to.exist;
     expect(expandedSubProcessEntry).to.exist;
+    expect(sequentialMultiInstanceEntry).to.exist;
+    expect(parallelMultiInstanceEntry).to.exist;
 
   }));
 
@@ -146,12 +150,16 @@ describe('customs - replaceMenu', function() {
 
     const receiveTaskEntry = queryEntry(popupMenu, 'replace-with-receive-task'),
           collapsedSubProcessEntry = queryEntry(popupMenu, 'replace-with-collapsed-subprocess'),
-          expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess');
+          expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess'),
+          sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
+          parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
 
     // then
     expect(collapsedSubProcessEntry).to.exist;
     expect(expandedSubProcessEntry).to.exist;
     expect(receiveTaskEntry).to.exist;
+    expect(sequentialMultiInstanceEntry).to.exist;
+    expect(parallelMultiInstanceEntry).to.exist;
 
   }));
 
@@ -220,12 +228,16 @@ describe('customs - replaceMenu', function() {
 
     const receiveTaskEntry = queryEntry(popupMenu, 'replace-with-receive-task'),
           serviceTaskEntry = queryEntry(popupMenu, 'replace-with-service-task'),
-          expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess');
+          expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess'),
+          sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
+          parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
 
     // then
     expect(serviceTaskEntry).to.exist;
     expect(expandedSubProcessEntry).to.exist;
     expect(receiveTaskEntry).to.exist;
+    expect(sequentialMultiInstanceEntry).to.exist;
+    expect(parallelMultiInstanceEntry).to.exist;
 
   }));
 
@@ -238,10 +250,14 @@ describe('customs - replaceMenu', function() {
 
     openPopup(subProcess);
 
-    const collapsedSubProcessEntry = queryEntry(popupMenu, 'replace-with-collapsed-subprocess');
+    const collapsedSubProcessEntry = queryEntry(popupMenu, 'replace-with-collapsed-subprocess'),
+          sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
+          parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
 
     // then
     expect(collapsedSubProcessEntry).to.exist;
+    expect(sequentialMultiInstanceEntry).to.exist;
+    expect(parallelMultiInstanceEntry).to.exist;
 
   }));
 
