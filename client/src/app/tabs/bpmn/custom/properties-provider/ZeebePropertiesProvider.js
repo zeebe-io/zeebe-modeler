@@ -38,6 +38,8 @@ import timerProps from './parts/TimerEventProps';
 
 import payloadMappingsProps from './parts/PayloadMappingsProps';
 
+import multiInstanceProps from './parts/MultiInstanceProps';
+
 const getInputOutputParameterLabel = param => {
 
   if (is(param, 'zeebe:InputParameter')) {
@@ -75,8 +77,16 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   messageProps(generalGroup, element, bpmnFactory, translate);
   timerProps(generalGroup, element, bpmnFactory, translate);
 
+  var multiInstanceGroup = {
+    id: 'multiInstance',
+    label: translate('Multi Instance'),
+    entries: []
+  };
+  multiInstanceProps(multiInstanceGroup, element, bpmnFactory, translate);
+
   return [
-    generalGroup
+    generalGroup,
+    multiInstanceGroup
   ];
 }
 
