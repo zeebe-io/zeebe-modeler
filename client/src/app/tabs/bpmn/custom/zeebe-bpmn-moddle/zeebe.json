@@ -162,6 +162,41 @@
           "isAttr": true
         }
       ]
+    },
+    {
+      "name": "LoopCharacteristics",
+      "superClass": [
+        "Element"
+      ],
+      "meta": {
+        "allowedIn": [
+          "bpmn:ServiceTask",
+          "bpmn:ReceiveTask",
+          "bpmn:SubProcess"
+        ]
+      },
+      "properties": [
+        {
+          "name": "inputCollection",
+          "type": "string",
+          "isAttr": true
+        },
+        {
+          "name": "inputElement",
+          "type": "string",
+          "isAttr": true
+        },
+        {
+          "name": "outputCollection",
+          "type": "string",
+          "isAttr": true
+        },
+        {
+          "name": "outputElement",
+          "type": "string",
+          "isAttr": true
+        }
+      ]
     }
   ]
 }
