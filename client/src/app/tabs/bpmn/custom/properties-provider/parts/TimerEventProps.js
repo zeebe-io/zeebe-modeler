@@ -37,7 +37,7 @@ export default function(group, element, bpmnFactory, options) {
 }
 
 function cancelActivity(element) {
-  var bo = getBusinessObject(element);
+  const bo = getBusinessObject(element);
   return bo.cancelActivity;
 }
 

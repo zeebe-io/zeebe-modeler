@@ -47,7 +47,7 @@ function getGeneralTab(container) {
 }
 
 function getDetailsGroup(container) {
-  var tab = getGeneralTab(container);
+  const tab = getGeneralTab(container);
   return domQuery('div[data-group="details"]', tab);
 }
 
@@ -56,12 +56,12 @@ function getEntry(container, entryId) {
 }
 
 function getInputField(container, entryId, inputName) {
-  var selector = 'input' + (inputName ? '[name="' + inputName + '"]' : '');
+  const selector = 'input' + (inputName ? '[name="' + inputName + '"]' : '');
   return domQuery(selector, getEntry(container, entryId));
 }
 
 function getSelectField(container, entryId, selectName) {
-  var selector = 'select' + (selectName ? '[name="' + selectName + '"]' : '');
+  const selector = 'select' + (selectName ? '[name="' + selectName + '"]' : '');
   return domQuery(selector, getEntry(container, entryId));
 }
 
@@ -70,8 +70,8 @@ function getTimerDefinitionTypeField(container) {
 }
 
 function selectTimerDefinitionType(type, container) {
-  var selectBox = getTimerDefinitionTypeField(container);
-  var option = find(selectBox.options, function(o) {
+  const selectBox = getTimerDefinitionTypeField(container);
+  let option = find(selectBox.options, function(o) {
     return o.value === type;
   });
   option.selected = 'selected';
@@ -96,15 +96,15 @@ function isInputHidden(node) {
 
 describe('boundary-event-timer-event-properties', function() {
 
-  var diagramXML = require('./BoundaryEventTimerEventDefinition.bpmn');
+  const diagramXML = require('./BoundaryEventTimerEventDefinition.bpmn');
 
-  var testModules = [
+  const testModules = [
     coreModule, selectionModule, modelingModule,
     propertiesPanelModule,
     propertiesProviderModule
   ];
 
-  var container;
+  let container;
 
   beforeEach(function() {
     container = TestContainer.get(this);
@@ -117,7 +117,7 @@ describe('boundary-event-timer-event-properties', function() {
 
   beforeEach(inject(function(commandStack, propertiesPanel) {
 
-    var undoButton = document.createElement('button');
+    let undoButton = document.createElement('button');
     undoButton.textContent = 'UNDO';
 
     undoButton.addEventListener('click', function() {
@@ -132,7 +132,7 @@ describe('boundary-event-timer-event-properties', function() {
 
   describe('property controls', function() {
 
-    var container;
+    let container;
 
     beforeEach(inject(function(propertiesPanel) {
       container = propertiesPanel._container;
@@ -142,7 +142,7 @@ describe('boundary-event-timer-event-properties', function() {
     it('should fetch no timer definition type', inject(function(elementRegistry, selection) {
 
       // given
-      var shape = elementRegistry.get('WITHOUT_TYPE');
+      const shape = elementRegistry.get('WITHOUT_TYPE');
 
       // when
       selection.select(shape);
@@ -156,7 +156,7 @@ describe('boundary-event-timer-event-properties', function() {
     it('should fetch timeDuration as timer definition type', inject(function(elementRegistry, selection) {
 
       // given
-      var shape = elementRegistry.get('TIME_DURATION');
+      const shape = elementRegistry.get('TIME_DURATION');
 
       // when
       selection.select(shape);
@@ -170,7 +170,7 @@ describe('boundary-event-timer-event-properties', function() {
     it('should fetch timeCycle as timer definition type', inject(function(elementRegistry, selection) {
 
       // given
-      var shape = elementRegistry.get('TIME_CYCLE');
+      const shape = elementRegistry.get('TIME_CYCLE');
 
       // when
       selection.select(shape);
@@ -185,7 +185,7 @@ describe('boundary-event-timer-event-properties', function() {
 
   describe('change timer definition type', function() {
 
-    var container;
+    let container;
 
     beforeEach(inject(function(propertiesPanel) {
       container = propertiesPanel._container;
@@ -193,15 +193,15 @@ describe('boundary-event-timer-event-properties', function() {
 
     describe('from undefined', function() {
 
-      var timerDefinition;
+      let timerDefinition;
 
       beforeEach(inject(function(elementRegistry, selection) {
 
         // when
-        var shape = elementRegistry.get('WITHOUT_TYPE');
+        const shape = elementRegistry.get('WITHOUT_TYPE');
         selection.select(shape);
 
-        var bo = getBusinessObject(shape);
+        const bo = getBusinessObject(shape);
         timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
       }));
 
@@ -359,15 +359,15 @@ describe('boundary-event-timer-event-properties', function() {
 
     describe('from timeCycle', function() {
 
-      var timerDefinition;
+      let timerDefinition;
 
       beforeEach(inject(function(elementRegistry, selection) {
 
         // when
-        var shape = elementRegistry.get('TIME_CYCLE');
+        const shape = elementRegistry.get('TIME_CYCLE');
         selection.select(shape);
 
-        var bo = getBusinessObject(shape);
+        const bo = getBusinessObject(shape);
         timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
       }));
 
@@ -534,15 +534,15 @@ describe('boundary-event-timer-event-properties', function() {
 
     describe('from timeDuration', function() {
 
-      var timerDefinition;
+      let timerDefinition;
 
       beforeEach(inject(function(elementRegistry, selection) {
 
         // when
-        var shape = elementRegistry.get('TIME_DURATION');
+        const shape = elementRegistry.get('TIME_DURATION');
         selection.select(shape);
 
-        var bo = getBusinessObject(shape);
+        const bo = getBusinessObject(shape);
         timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
       }));
 
@@ -710,7 +710,7 @@ describe('boundary-event-timer-event-properties', function() {
 
   describe('change timer definition', function() {
 
-    var container;
+    let container;
 
     beforeEach(inject(function(propertiesPanel) {
       container = propertiesPanel._container;
@@ -718,16 +718,16 @@ describe('boundary-event-timer-event-properties', function() {
 
     describe('of time duration', function() {
 
-      var input, timeDuration;
+      let input, timeDuration;
 
       beforeEach(inject(function(elementRegistry, selection) {
 
         // given
-        var shape = elementRegistry.get('TIME_DURATION');
+        const shape = elementRegistry.get('TIME_DURATION');
         selection.select(shape);
 
-        var bo = getBusinessObject(shape);
-        var timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
+        const bo = getBusinessObject(shape);
+        const timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
         timeDuration = timerDefinition.timeDuration;
 
         input = getTimerDefinitionField(container);
@@ -803,16 +803,16 @@ describe('boundary-event-timer-event-properties', function() {
 
     describe('of time cycle', function() {
 
-      var input, timeCycle;
+      let input, timeCycle;
 
       beforeEach(inject(function(elementRegistry, selection) {
 
         // given
-        var shape = elementRegistry.get('TIME_CYCLE');
+        const shape = elementRegistry.get('TIME_CYCLE');
         selection.select(shape);
 
-        var bo = getBusinessObject(shape);
-        var timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
+        const bo = getBusinessObject(shape);
+        const timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
         timeCycle = timerDefinition.timeCycle;
 
         input = getTimerDefinitionField(container);
@@ -892,11 +892,11 @@ describe('boundary-event-timer-event-properties', function() {
     it('should set timer event definition field as invalid', inject(function(propertiesPanel, elementRegistry, selection) {
 
       // given
-      var shape = elementRegistry.get('TIME_CYCLE');
+      const shape = elementRegistry.get('TIME_CYCLE');
       selection.select(shape);
 
-      var container = propertiesPanel._container;
-      var input = getTimerDefinitionField(container);
+      const container = propertiesPanel._container;
+      const input = getTimerDefinitionField(container);
 
       // when
       triggerValue(input, '', 'change');
