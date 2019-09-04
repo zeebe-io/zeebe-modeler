@@ -36,7 +36,7 @@ Manual integration tests:
 * [ ] remove start event in empty diagram
 * [ ] `CTRL + V` in empty diagram pastes all contents
 
-##### BPMN properties panel
+##### properties panel
 
 * [ ] configure service task in properties panel
 * [ ] add `async:before`
@@ -59,32 +59,6 @@ Based on the [test diagram](./test.bpmn.png):
     * [ ] Change task to UserTask; implementation property is gone from XML (except Retry Time Cycle, Input/output Mapping and `asyncBefore`)
 
 
-####  CMMN modeling
-
-* [ ] create a new CMMN diagram
-* [ ] save diagram on disk
-* [ ] save as SVG, PNG and JPG
-* [ ] SVG, PNG and JPG open in browser (i.e. Chrome)
-
-
-#### DMN modeling
-
-* [ ] create a new DMN diagram
-* [ ] build [this diagram](./test.dmn.png) from scratch
-* [ ] morph `Go on Holidays` to a decision table
-* [ ] morph `Which Season` to a decision table
-* [ ] moprh `Which Region` to a literal expression
-* [ ] click onto green overlay on `Go on Holidays` jumps into table editing mode
-* [ ] changing name reflects in DRD
-* [ ] save file on disk as `test.dmn` from table editing mode
-* [ ] save file on disk as `test2.dmn` from diagram mode
-* [ ] both import correctly after save
-* [ ] export DRD as SVG
-* [ ] export DRD as PNG
-* [ ] export DRD as JPG
-* [ ] SVG, PNG and JPG exports open in browser
-
-
 #### FS integration (platform specific)
 
 * [ ] external change detection works
@@ -93,8 +67,6 @@ Based on the [test diagram](./test.bpmn.png):
     * [ ] message to reload displays
 * [ ] double click in FS opens file in editor (existing instance _?_)
     * [ ] `.bpmn`
-    * [ ] `.cmmn`
-    * [ ] `.dmn`
 
 
 #### Error Handling
