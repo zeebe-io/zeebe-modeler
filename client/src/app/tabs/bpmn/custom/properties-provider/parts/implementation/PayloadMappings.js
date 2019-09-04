@@ -46,6 +46,8 @@ function ensurePayloadMappingsSupported(element) {
 export default function(element, bpmnFactory, options = {}) {
   const idPrefix = options.idPrefix || '';
 
+  let inputEntry;
+
   const getSelected = (element, node) => {
     const selection = (inputEntry && inputEntry.getSelected(element, node)) || { idx: -1 };
     const parameter = getMapping(element, selection.idx);
@@ -121,7 +123,7 @@ export default function(element, bpmnFactory, options = {}) {
 
   // input parameters ///////////////////////////////////////////////////////////////
 
-  var inputEntry = extensionElementsEntry(element, bpmnFactory, {
+  inputEntry = extensionElementsEntry(element, bpmnFactory, {
     id: `${idPrefix}inputs`,
     label: 'Input Parameters',
     modelProperty: 'source',

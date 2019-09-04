@@ -77,7 +77,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   messageProps(generalGroup, element, bpmnFactory, translate);
   timerProps(generalGroup, element, bpmnFactory, translate);
 
-  var multiInstanceGroup = {
+  const multiInstanceGroup = {
     id: 'multiInstance',
     label: translate('Multi Instance'),
     entries: []

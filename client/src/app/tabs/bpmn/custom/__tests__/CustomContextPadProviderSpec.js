@@ -46,11 +46,11 @@ describe('customs - context-pad', function() {
 
       getBpmnJS().invoke(function(elementRegistry, contextPad) {
 
-        var element = typeof elementOrId === 'string' ? elementRegistry.get(elementOrId) : elementOrId;
+        const element = typeof elementOrId === 'string' ? elementRegistry.get(elementOrId) : elementOrId;
 
         contextPad.open(element, true);
 
-        var entries = contextPad._current.entries;
+        const entries = contextPad._current.entries;
 
         expectedEntries.forEach(function(name) {
 

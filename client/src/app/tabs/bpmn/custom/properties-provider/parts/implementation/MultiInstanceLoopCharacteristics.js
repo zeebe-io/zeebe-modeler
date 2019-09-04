@@ -165,6 +165,6 @@ function getZeebeLoopCharacteristics(loopCharacteristics) {
 }
 
 function getLoopCharacteristics(element) {
-  var bo = getBusinessObject(element);
+  const bo = getBusinessObject(element);
   return bo.loopCharacteristics;
 }

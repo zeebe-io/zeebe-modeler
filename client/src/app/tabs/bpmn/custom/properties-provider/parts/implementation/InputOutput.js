@@ -58,6 +58,8 @@ function ensureInputparameterSupported(element) {
 export default function(element, bpmnFactory, options = {}) {
   const idPrefix = options.idPrefix || '';
 
+  let inputEntry, outputEntry;
+
   const getSelected = (element, node) => {
     let selection = (inputEntry && inputEntry.getSelected(element, node)) || { idx: -1 };
 
@@ -140,7 +142,7 @@ export default function(element, bpmnFactory, options = {}) {
 
   // input parameters ///////////////////////////////////////////////////////////////
   if (ensureInputparameterSupported(element)) {
-    var inputEntry = extensionElementsEntry(element, bpmnFactory, {
+    inputEntry = extensionElementsEntry(element, bpmnFactory, {
       id: `${idPrefix}inputs`,
       label: 'Input Parameters',
       modelProperty: 'source',
@@ -168,7 +170,7 @@ export default function(element, bpmnFactory, options = {}) {
   // output parameters ///////////////////////////////////////////////////////
 
   if (ensureOutparameterSupported(element)) {
-    var outputEntry = extensionElementsEntry(element, bpmnFactory, {
+    outputEntry = extensionElementsEntry(element, bpmnFactory, {
       id: `${idPrefix}outputs`,
       label: 'Output Parameters',
       modelProperty: 'source',
