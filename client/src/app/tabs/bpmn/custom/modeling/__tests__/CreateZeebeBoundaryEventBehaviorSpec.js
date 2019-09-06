@@ -62,8 +62,34 @@ describe('features/modeling/behavior - create boundary events', function() {
     expect(newEvent.type).to.equal('bpmn:BoundaryEvent');
     expect(newEvent.businessObject.attachedToRef).to.equal(task.businessObject);
     expect(newEvent.businessObject.eventDefinitions[0]).to.not.be.null;
-
   }));
+
+
+  it('should execute on attach (without event definition)', inject(
+    function(canvas, elementFactory, modeling, bpmnFactory) {
+
+      // given
+      const messageIntermediateCatchEvent = bpmnFactory.create('bpmn:IntermediateCatchEvent');
+
+      const intermediateEvent = elementFactory.create('shape', {
+        id: messageIntermediateCatchEvent.id,
+        businessObject: messageIntermediateCatchEvent
+      });
+
+      const rootElement = canvas.getRootElement(),
+            task = elementFactory.createShape({ type: 'bpmn:Task' });
+
+      modeling.createShape(task, { x: 100, y: 100 }, rootElement);
+
+      // when
+      const newEvent = modeling.createShape(intermediateEvent, { x: 50 + 15, y: 100 }, task, { attach: true });
+
+      // then
+      expect(newEvent.type).to.equal('bpmn:BoundaryEvent');
+      expect(newEvent.businessObject.attachedToRef).to.equal(task.businessObject);
+      expect(newEvent.businessObject.eventDefinitions).to.be.undefined;
+    }
+  ));
 
 
   it('should NOT execute on drop', inject(function(canvas, elementFactory, modeling) {
@@ -72,7 +98,6 @@ describe('features/modeling/behavior - create boundary events', function() {
     const rootElement = canvas.getRootElement(),
           subProcess = elementFactory.createShape({ type: 'bpmn:SubProcess', isExpanded: true }),
           intermediateEvent = elementFactory.createShape({ type: 'bpmn:IntermediateCatchEvent' });
-
 
     modeling.createShape(subProcess, { x: 300, y: 200 }, rootElement);
 
