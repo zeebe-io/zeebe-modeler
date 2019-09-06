@@ -8,36 +8,67 @@
  * except in compliance with the MIT License.
  */
 
-import TimerDurationDefinition from './implementation/TimerDurationDefinition';
-
 import eventDefinitionHelper from 'bpmn-js-properties-panel/lib/helper/EventDefinitionHelper';
-import { is, getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
-import TimerEventDefinition from './implementation/TimerEventDefinition';
 
-export default function(group, element, bpmnFactory, options) {
+import {
+  getBusinessObject,
+  is
+} from 'bpmn-js/lib/util/ModelUtil';
+
+import timerEventDefinitionImpl from './implementation/TimerEventDefinition';
+
+import timerDurationDefinitionImpl from './implementation/TimerDurationDefinition';
+
+export default function(group, element, bpmnFactory) {
 
   const timerEventDefinition = eventDefinitionHelper.getTimerEventDefinition(element);
-  if (is(element, 'bpmn:StartEvent') && timerEventDefinition) {
-    new TimerEventDefinition(group,element,bpmnFactory,timerEventDefinition, [
-      { value: 'timeDate', name: 'Date' },
-      { value: 'timeCycle', name: 'Cycle' }
-    ]);
-  } else if (timerEventDefinition && is(element, 'bpmn:BoundaryEvent') && !cancelActivity(element)) {
-    new TimerEventDefinition(group,element,bpmnFactory,timerEventDefinition, [
-      { value: 'timeDuration', name: 'Duration' },
-      { value: 'timeCycle', name: 'Cycle' }
-    ]);
-  } else if (timerEventDefinition && is(element, 'bpmn:BoundaryEvent') && cancelActivity(element)) {
-    new TimerEventDefinition(group,element,bpmnFactory,timerEventDefinition, [
-      { value: 'timeDuration', name: 'Duration' }
-    ]);
-  } else if (timerEventDefinition) {
-    new TimerDurationDefinition(group,element,bpmnFactory,timerEventDefinition);
+
+  const timerOptions = getTimerOptions(element);
+
+  if (!timerEventDefinition) {
+    return;
   }
+
+  if (!timerOptions.length) {
+    return timerDurationDefinitionImpl(group, bpmnFactory, timerEventDefinition);
+  }
+
+  timerEventDefinitionImpl(group, bpmnFactory, timerEventDefinition, timerOptions);
 }
 
-function cancelActivity(element) {
+// helper //////////
+
+const cancelActivity = (element) => {
   const bo = getBusinessObject(element);
   return bo.cancelActivity;
-}
+};
+
+const getTimerOptions = (element) => {
+  let timerOptions = [];
+
+  if (is(element, 'bpmn:BoundaryEvent')) {
+
+    timerOptions = [
+      ...timerOptions,
+      { value: 'timeDuration', name: 'Duration' }
+    ];
+
+    if (!cancelActivity(element)) {
+      timerOptions = [
+        ...timerOptions,
+        { value: 'timeCycle', name: 'Cycle' }
+      ];
+    }
+  }
+
+  if (is(element, 'bpmn:StartEvent')) {
+    timerOptions = [
+      ...timerOptions,
+      { value: 'timeDate', name: 'Date' },
+      { value: 'timeCycle', name: 'Cycle' }
+    ];
+  }
+
+  return timerOptions;
+};
 
