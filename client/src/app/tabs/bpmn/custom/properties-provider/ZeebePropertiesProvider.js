@@ -40,6 +40,9 @@ import payloadMappingsProps from './parts/PayloadMappingsProps';
 
 import multiInstanceProps from './parts/MultiInstanceProps';
 
+import errorProps from './parts/ErrorProps';
+
+
 const getInputOutputParameterLabel = param => {
 
   if (is(param, 'zeebe:InputParameter')) {
@@ -76,6 +79,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   sequenceFlowProps(generalGroup, element, bpmnFactory, translate);
   messageProps(generalGroup, element, bpmnFactory, translate);
   timerProps(generalGroup, element, bpmnFactory, translate);
+  errorProps(generalGroup, element, bpmnFactory, translate);
 
   const multiInstanceGroup = {
     id: 'multiInstance',
