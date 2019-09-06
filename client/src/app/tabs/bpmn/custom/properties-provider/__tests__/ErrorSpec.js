@@ -83,64 +83,136 @@ describe('customs - error properties', function() {
 
   describe('get', function() {
 
-    beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
+    describe('Error boundary event', function() {
 
-      container = propertiesPanel._container;
+      beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
 
-      let shape = elementRegistry.get('BoundaryErrorEvent');
-      selection.select(shape);
+        container = propertiesPanel._container;
 
-      let bo = getBusinessObject(shape);
-      errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(bo);
+        let shape = elementRegistry.get('BoundaryErrorEvent');
+        selection.select(shape);
 
-    }));
+        let bo = getBusinessObject(shape);
+        errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(bo);
 
-    describe('should get the Error Name', function() {
+      }));
 
-      let field;
+      describe('should get the Error Name', function() {
 
-      beforeEach(function() {
+        let field;
 
-        field = getInputField(container, 'camunda-error-element-name', 'name');
+        beforeEach(function() {
+
+          field = getInputField(container, 'camunda-error-element-name', 'name');
+
+        });
+
+        it('in the DOM', function() {
+
+          expect(field.value).to.equal('Error2');
+
+        });
+
+
+        it('on the business object', function() {
+
+          expect(errorEventDefinition.errorRef.name).to.equal('Error2');
+
+        });
 
       });
 
-      it('in the DOM', function() {
 
-        expect(field.value).to.equal('Error2');
+      describe('should get the Error Code', function() {
 
-      });
+        let field;
+
+        beforeEach(function() {
+
+          field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+
+        });
+
+        it('in the DOM', function() {
+
+          expect(field.value).to.equal('code2');
+
+        });
 
 
-      it('on the business object', function() {
+        it('on the business object', function() {
 
-        expect(errorEventDefinition.errorRef.name).to.equal('Error2');
+          expect(errorEventDefinition.errorRef.errorCode).to.equal('code2');
+
+        });
 
       });
 
     });
 
 
-    describe('should get the Error Code', function() {
+    describe('Error start event', function() {
 
-      let field;
+      beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
 
-      beforeEach(function() {
+        container = propertiesPanel._container;
 
-        field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+        let shape = elementRegistry.get('StartErrorEvent');
+        selection.select(shape);
+
+        let bo = getBusinessObject(shape);
+        errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(bo);
+
+      }));
+
+      describe('should get the Error Name', function() {
+
+        let field;
+
+        beforeEach(function() {
+
+          field = getInputField(container, 'camunda-error-element-name', 'name');
+
+        });
+
+        it('in the DOM', function() {
+
+          expect(field.value).to.equal('Error1');
+
+        });
+
+
+        it('on the business object', function() {
+
+          expect(errorEventDefinition.errorRef.name).to.equal('Error1');
+
+        });
 
       });
 
-      it('in the DOM', function() {
 
-        expect(field.value).to.equal('code2');
+      describe('should get the Error Code', function() {
 
-      });
+        let field;
+
+        beforeEach(function() {
+
+          field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+
+        });
+
+        it('in the DOM', function() {
+
+          expect(field.value).to.equal('code1');
+
+        });
 
 
-      it('on the business object', function() {
+        it('on the business object', function() {
 
-        expect(errorEventDefinition.errorRef.errorCode).to.equal('code2');
+          expect(errorEventDefinition.errorRef.errorCode).to.equal('code1');
+
+        });
 
       });
 
@@ -151,154 +223,316 @@ describe('customs - error properties', function() {
 
   describe('set', function() {
 
-    describe('should set the Error Name', function() {
+    describe('Error boundary event', function() {
 
-      let field;
+      describe('should set the Error Name', function() {
 
-      beforeEach(inject(function(elementRegistry, selection) {
+        let field;
 
-        let item = elementRegistry.get('BoundaryErrorEvent');
-        selection.select(item);
+        beforeEach(inject(function(elementRegistry, selection) {
 
-        let businessObject = item.businessObject;
-        errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
+          let item = elementRegistry.get('BoundaryErrorEvent');
+          selection.select(item);
 
-        field = getInputField(container, 'camunda-error-element-name', 'name');
+          let businessObject = item.businessObject;
+          errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
 
-        triggerValue(field, 'FOO', 'change');
+          field = getInputField(container, 'camunda-error-element-name', 'name');
 
-      }));
+          triggerValue(field, 'FOO', 'change');
 
-      describe('in the DOM', function() {
+        }));
 
-        it('should execute', function() {
+        describe('in the DOM', function() {
 
-          expect(field.value).to.equal('FOO');
+          it('should execute', function() {
+
+            expect(field.value).to.equal('FOO');
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('Error2');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+
+            expect(field.value).to.equal('FOO');
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(field.value).to.equal('Error2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.name).to.equal('FOO');
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.name).to.equal('Error2');
 
-          expect(field.value).to.equal('FOO');
+          }));
 
-        }));
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+
+            expect(errorEventDefinition.errorRef.name).to.equal('FOO');
+
+          }));
+
+        });
 
       });
 
 
-      describe('on the business object', function() {
+      describe('should set the Error Code', function() {
 
-        it('should execute', function() {
+        let errorEventDefinition, field;
 
-          expect(errorEventDefinition.errorRef.name).to.equal('FOO');
+        beforeEach(inject(function(elementRegistry, selection) {
+
+          let item = elementRegistry.get('BoundaryErrorEvent');
+          selection.select(item);
+
+          let businessObject = item.businessObject;
+          errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
+
+          field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+
+          triggerValue(field, 'FOO', 'change');
+
+        }));
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+
+            expect(field.value).to.equal('FOO');
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('code2');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(field.value).to.equal('FOO');
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(errorEventDefinition.errorRef.name).to.equal('Error2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('FOO');
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('code2');
 
-          expect(errorEventDefinition.errorRef.name).to.equal('FOO');
+          }));
 
-        }));
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('FOO');
+
+          }));
+
+        });
 
       });
 
     });
 
 
-    describe('should set the Error Code', function() {
+    describe('Error start event', function() {
 
-      let errorEventDefinition, field;
+      describe('should set the Error Name', function() {
 
-      beforeEach(inject(function(elementRegistry, selection) {
+        let field;
 
-        let item = elementRegistry.get('BoundaryErrorEvent');
-        selection.select(item);
+        beforeEach(inject(function(elementRegistry, selection) {
 
-        let businessObject = item.businessObject;
-        errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
+          let item = elementRegistry.get('StartErrorEvent');
+          selection.select(item);
 
-        field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+          let businessObject = item.businessObject;
+          errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
 
-        triggerValue(field, 'FOO', 'change');
+          field = getInputField(container, 'camunda-error-element-name', 'name');
 
-      }));
+          triggerValue(field, 'FOO', 'change');
 
-      describe('in the DOM', function() {
+        }));
 
-        it('should execute', function() {
+        describe('in the DOM', function() {
 
-          expect(field.value).to.equal('FOO');
+          it('should execute', function() {
+
+            expect(field.value).to.equal('FOO');
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('Error1');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+
+            expect(field.value).to.equal('FOO');
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(field.value).to.equal('code2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.name).to.equal('FOO');
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
-          expect(field.value).to.equal('FOO');
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.name).to.equal('Error1');
 
-        }));
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+
+            expect(errorEventDefinition.errorRef.name).to.equal('FOO');
+
+          }));
+
+        });
 
       });
 
 
-      describe('on the business object', function() {
+      describe('should set the Error Code', function() {
 
-        it('should execute', function() {
+        let errorEventDefinition, field;
 
-          expect(errorEventDefinition.errorRef.errorCode).to.equal('FOO');
+        beforeEach(inject(function(elementRegistry, selection) {
+
+          let item = elementRegistry.get('StartErrorEvent');
+          selection.select(item);
+
+          let businessObject = item.businessObject;
+          errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
+
+          field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+
+          triggerValue(field, 'FOO', 'change');
+
+        }));
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+
+            expect(field.value).to.equal('FOO');
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('code1');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(field.value).to.equal('FOO');
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(errorEventDefinition.errorRef.errorCode).to.equal('code2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('FOO');
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
-          expect(errorEventDefinition.errorRef.errorCode).to.equal('FOO');
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('code1');
 
-        }));
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('FOO');
+
+          }));
+
+        });
 
       });
 
@@ -309,154 +543,316 @@ describe('customs - error properties', function() {
 
   describe('remove', function() {
 
-    beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
+    describe('Error boundary event', function() {
 
-      container = propertiesPanel._container;
+      beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
 
-      let shape = elementRegistry.get('BoundaryErrorEvent');
-      selection.select(shape);
+        container = propertiesPanel._container;
 
-      let businessObject = getBusinessObject(shape);
-      errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
+        let shape = elementRegistry.get('BoundaryErrorEvent');
+        selection.select(shape);
 
-    }));
+        let businessObject = getBusinessObject(shape);
+        errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
 
-    describe('should remove the Error Name', function() {
+      }));
 
-      let field, button;
+      describe('should remove the Error Name', function() {
 
-      beforeEach(function() {
+        let field, button;
 
-        field = getInputField(container, 'camunda-error-element-name', 'name');
-        button = getClearButton(container, 'error-element-name');
+        beforeEach(function() {
 
-        triggerEvent(button, 'click');
+          field = getInputField(container, 'camunda-error-element-name', 'name');
+          button = getClearButton(container, 'error-element-name');
 
-      });
+          triggerEvent(button, 'click');
 
-      describe('in the DOM', function() {
+        });
 
-        it('should execute', function() {
+        describe('in the DOM', function() {
 
-          expect(field.value).is.empty;
+          it('should execute', function() {
+
+            expect(field.value).is.empty;
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('Error2');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(field.value).is.empty;
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(field.value).to.equal('Error2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.name).to.be.undefined;
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
-          expect(field.value).is.empty;
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.name).to.equal('Error2');
 
-        }));
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(errorEventDefinition.errorRef.name).to.be.undefined;
+
+          }));
+
+        });
 
       });
 
 
-      describe('on the business object', function() {
+      describe('should remove the Error Code', function() {
 
-        it('should execute', function() {
+        let field, button;
 
-          expect(errorEventDefinition.errorRef.name).to.be.undefined;
+        beforeEach(function() {
+
+          field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+          button = getClearButton(container, 'error-element-code');
+
+          triggerEvent(button, 'click');
+
+        });
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+
+            expect(field.value).is.empty;
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('code2');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(field.value).is.empty;
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(errorEventDefinition.errorRef.name).to.equal('Error2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.errorCode).to.be.undefined;
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
-          expect(errorEventDefinition.errorRef.name).to.be.undefined;
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('code2');
 
-        }));
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(errorEventDefinition.errorRef.errorCode).to.be.undefined;
+
+          }));
+
+        });
 
       });
 
     });
 
 
-    describe('should remove the Error Code', function() {
+    describe('Error start event', function() {
 
-      let field, button;
+      beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
 
-      beforeEach(function() {
+        container = propertiesPanel._container;
 
-        field = getInputField(container, 'camunda-error-element-code', 'errorCode');
-        button = getClearButton(container, 'error-element-code');
+        let shape = elementRegistry.get('StartErrorEvent');
+        selection.select(shape);
 
-        triggerEvent(button, 'click');
+        let businessObject = getBusinessObject(shape);
+        errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
 
-      });
+      }));
 
-      describe('in the DOM', function() {
+      describe('should remove the Error Name', function() {
 
-        it('should execute', function() {
+        let field, button;
 
-          expect(field.value).is.empty;
+        beforeEach(function() {
+
+          field = getInputField(container, 'camunda-error-element-name', 'name');
+          button = getClearButton(container, 'error-element-name');
+
+          triggerEvent(button, 'click');
+
+        });
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+
+            expect(field.value).is.empty;
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('Error1');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(field.value).is.empty;
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(field.value).to.equal('code2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.name).to.be.undefined;
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
-          expect(field.value).is.empty;
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.name).to.equal('Error1');
 
-        }));
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(errorEventDefinition.errorRef.name).to.be.undefined;
+
+          }));
+
+        });
 
       });
 
 
-      describe('on the business object', function() {
+      describe('should remove the Error Code', function() {
 
-        it('should execute', function() {
+        let field, button;
 
-          expect(errorEventDefinition.errorRef.errorCode).to.be.undefined;
+        beforeEach(function() {
+
+          field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+          button = getClearButton(container, 'error-element-code');
+
+          triggerEvent(button, 'click');
+
+        });
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+
+            expect(field.value).is.empty;
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('code1');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(field.value).is.empty;
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(errorEventDefinition.errorRef.errorCode).to.equal('code2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.errorCode).to.be.undefined;
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
-          expect(errorEventDefinition.errorRef.errorCode).to.be.undefined;
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('code1');
 
-        }));
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(errorEventDefinition.errorRef.errorCode).to.be.undefined;
+
+          }));
+
+        });
 
       });
 
@@ -467,152 +863,312 @@ describe('customs - error properties', function() {
 
   describe('switch', function() {
 
-    beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
-
-      container = propertiesPanel._container;
-
-      let shape = elementRegistry.get('BoundaryErrorEvent');
-      selection.select(shape);
-
-      let businessObject = getBusinessObject(shape);
-      errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
-
-      let selectField = getSelectField(container, 'event-definitions-error', 'selectedElement');
-      selectedByOption(selectField, 'Error_1scwdln');
-      triggerEvent(selectField, 'change');
-
-    }));
-
-    describe('should switch the Error Name', function() {
-
-      let field;
+    describe('Error boundary event', function() {
 
       beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
 
-        field = getInputField(container, 'camunda-error-element-name', 'name');
+        container = propertiesPanel._container;
+
+        let shape = elementRegistry.get('BoundaryErrorEvent');
+        selection.select(shape);
+
+        let businessObject = getBusinessObject(shape);
+        errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
+
+        let selectField = getSelectField(container, 'event-definitions-error', 'selectedElement');
+        selectedByOption(selectField, 'Error_1scwdln');
+        triggerEvent(selectField, 'change');
 
       }));
 
-      describe('in the DOM', function() {
+      describe('should switch the Error Name', function() {
 
-        it('should execute', function() {
+        let field;
 
-          expect(field.value).to.equal('Error1');
+        beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
+
+          field = getInputField(container, 'camunda-error-element-name', 'name');
+
+        }));
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+
+            expect(field.value).to.equal('Error1');
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('Error2');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(field.value).to.equal('Error1');
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(field.value).to.equal('Error2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.name).to.equal('Error1');
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
-          expect(field.value).to.equal('Error1');
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.name).to.equal('Error2');
 
-        }));
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(errorEventDefinition.errorRef.name).to.equal('Error1');
+
+          }));
+
+        });
 
       });
 
 
-      describe('on the business object', function() {
+      describe('should switch the Error Code', function() {
 
-        it('should execute', function() {
+        let field;
 
-          expect(errorEventDefinition.errorRef.name).to.equal('Error1');
+        beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
+
+          field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+
+        }));
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+
+            expect(field.value).to.equal('code1');
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('code2');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(field.value).to.equal('code1');
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(errorEventDefinition.errorRef.name).to.equal('Error2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('code1');
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
-          expect(errorEventDefinition.errorRef.name).to.equal('Error1');
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('code2');
 
-        }));
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('code1');
+
+          }));
+
+        });
 
       });
 
     });
 
 
-    describe('should switch the Error Code', function() {
-
-      let field;
+    describe('Error start event', function() {
 
       beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
 
-        field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+        container = propertiesPanel._container;
+
+        let shape = elementRegistry.get('StartErrorEvent');
+        selection.select(shape);
+
+        let businessObject = getBusinessObject(shape);
+        errorEventDefinition = eventDefinitionHelper.getErrorEventDefinition(businessObject);
+
+        let selectField = getSelectField(container, 'event-definitions-error', 'selectedElement');
+        selectedByOption(selectField, 'Error_0slq64n');
+        triggerEvent(selectField, 'change');
 
       }));
 
-      describe('in the DOM', function() {
+      describe('should switch the Error Name', function() {
 
-        it('should execute', function() {
+        let field;
 
-          expect(field.value).to.equal('code1');
+        beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
+
+          field = getInputField(container, 'camunda-error-element-name', 'name');
+
+        }));
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+
+            expect(field.value).to.equal('Error2');
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('Error1');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(field.value).to.equal('Error2');
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(field.value).to.equal('code2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.name).to.equal('Error2');
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
-          expect(field.value).to.equal('code1');
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.name).to.equal('Error1');
 
-        }));
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(errorEventDefinition.errorRef.name).to.equal('Error2');
+
+          }));
+
+        });
 
       });
 
 
-      describe('on the business object', function() {
+      describe('should switch the Error Code', function() {
 
-        it('should execute', function() {
+        let field;
 
-          expect(errorEventDefinition.errorRef.errorCode).to.equal('code1');
+        beforeEach(inject(function(elementRegistry, propertiesPanel, selection) {
+
+          field = getInputField(container, 'camunda-error-element-code', 'errorCode');
+
+        }));
+
+        describe('in the DOM', function() {
+
+          it('should execute', function() {
+
+            expect(field.value).to.equal('code2');
+
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            commandStack.undo();
+            expect(field.value).to.equal('code1');
+
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(field.value).to.equal('code2');
+
+          }));
 
         });
 
 
-        it('should undo', inject(function(commandStack) {
+        describe('on the business object', function() {
 
-          commandStack.undo();
-          expect(errorEventDefinition.errorRef.errorCode).to.equal('code2');
+          it('should execute', function() {
 
-        }));
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('code2');
+
+          });
 
 
-        it('should redo', inject(function(commandStack) {
+          it('should undo', inject(function(commandStack) {
 
-          commandStack.undo();
-          commandStack.redo();
-          expect(errorEventDefinition.errorRef.errorCode).to.equal('code1');
+            commandStack.undo();
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('code1');
 
-        }));
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            commandStack.undo();
+            commandStack.redo();
+            expect(errorEventDefinition.errorRef.errorCode).to.equal('code2');
+
+          }));
+
+        });
 
       });
 

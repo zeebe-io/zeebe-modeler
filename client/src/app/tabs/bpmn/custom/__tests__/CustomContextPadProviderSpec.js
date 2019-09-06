@@ -171,6 +171,21 @@ describe('customs - context-pad', function() {
     }));
 
 
+    it('should provide EventSubProcess entries', inject(function() {
+
+      expectContextPadEntries('EventSubProcess1', [
+        'connect',
+        'replace',
+        '!append.end-event',
+        '!append.gateway',
+        '!append.append-service-task',
+        '!append.append-send-task',
+        '!append.append-message-event',
+        '!append.append-timer-event'
+      ]);
+    }));
+
+
     it('should provide EventBasedGateway entries', inject(function() {
 
       expectContextPadEntries('EventBasedGateway_1', [

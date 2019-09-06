@@ -29,7 +29,12 @@ export const AVAILABLE_REPLACE_ELEMENTS = [
   'replace-with-timer-start',
   'replace-with-non-interrupting-message-boundary',
   'replace-with-non-interrupting-timer-boundary',
-  'replace-with-error-boundary'
+  'replace-with-error-boundary',
+  'replace-with-event-subprocess',
+  'replace-with-subprocess',
+  'replace-with-error-start',
+  'replace-with-non-interrupting-message-start',
+  'replace-with-non-interrupting-timer-start'
 ];
 
 export const AVAILABLE_CONTEXTPAD_ENTRIES = [

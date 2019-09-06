@@ -94,7 +94,7 @@ export default class CustomContextPadProvider extends ContextPadProvider {
 
     const filteredActions = {};
 
-    if (!is(businessObject, 'bpmn:EndEvent')) {
+    if (!is(businessObject, 'bpmn:EndEvent') && !businessObject.triggeredByEvent) {
       if (!is(businessObject, 'bpmn:EventBasedGateway')) {
         assign(filteredActions, { 'append.append-service-task': appendAction('bpmn:ServiceTask', 'bpmn-icon-service-task') });
         assign(filteredActions, { 'append.append-send-task': appendAction('bpmn:ReceiveTask', 'bpmn-icon-receive-task') });
