@@ -28,54 +28,52 @@ function createFormalExpression(parent, body = undefined, bpmnFactory) {
   return elementHelper.createElement('bpmn:FormalExpression', { body: body }, parent, bpmnFactory);
 }
 
-export default class TimerDurationDefinition {
+export default function(group, bpmnFactory, timerEventDefinition) {
+  group.entries.push(entryFactory.textField({
+    id: 'timer-event-duration',
+    label: 'Timer Duration',
+    modelProperty: 'timerDefinition',
 
-  constructor(group, element, bpmnFactory, timerEventDefinition) {
-    group.entries.push(entryFactory.textField({
-      id: 'timer-event-duration',
-      label: 'Timer Duration',
-      modelProperty: 'timerDefinition',
+    get: function(element, node) {
+      const type = 'timeDuration';
+      const definition = type && timerEventDefinition.get(type);
+      const value = definition && definition.get('body');
+      return {
+        timerDefinition: value
+      };
+    },
 
-      get: function(element, node) {
-        const type = 'timeDuration';
-        const definition = type && timerEventDefinition.get(type);
-        const value = definition && definition.get('body');
-        return {
-          timerDefinition: value
-        };
-      },
+    set: function(element, values) {
+      const type = 'timeDuration';
+      let definition = type && timerEventDefinition.get(type);
+      const commands = [];
 
-      set: function(element, values) {
-        const type = 'timeDuration';
-        let definition = type && timerEventDefinition.get(type);
-        const commands = [];
+      if (!definition) {
+        definition = createFormalExpression(timerEventDefinition, {}, bpmnFactory);
+        commands.push(cmdHelper.updateBusinessObject(element, timerEventDefinition, { 'timeDuration': definition }));
+      }
 
-        if (!definition) {
-          definition = createFormalExpression(timerEventDefinition, {}, bpmnFactory);
-          commands.push(cmdHelper.updateBusinessObject(element, timerEventDefinition, { 'timeDuration': definition }));
-        }
+      if (definition) {
+        commands.push(cmdHelper.updateBusinessObject(element, definition, {
+          body: values.timerDefinition || undefined
+        }));
+        return commands;
+      }
+    },
 
-        if (definition) {
-          commands.push(cmdHelper.updateBusinessObject(element, definition, {
-            body: values.timerDefinition || undefined
-          }));
-          return commands;
-        }
-      },
-
-      validate: function(element) {
-        const type = 'timeDuration';
-        const definition = type && timerEventDefinition.get(type);
-        if (definition) {
-          const value = definition.get('body');
-          if (!value) {
-            return {
-              timerDefinition: 'Must provide a value'
-            };
-          }
+    validate: function(element) {
+      const type = 'timeDuration';
+      const definition = type && timerEventDefinition.get(type);
+      if (definition) {
+        const value = definition.get('body');
+        if (!value) {
+          return {
+            timerDefinition: 'Must provide a value'
+          };
         }
       }
-    }));
-  }
+    }
+  }));
+
 
 }
