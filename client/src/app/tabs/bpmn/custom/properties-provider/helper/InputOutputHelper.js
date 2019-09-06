@@ -96,7 +96,7 @@ export function getOutputParameter(element, idx) {
    * @return {boolean} a boolean value
    */
 export function isInputOutputSupported(element) {
-  return areOutputParametersSupported(element) || areOutputParametersSupported(element);
+  return areOutputParametersSupported(element) || areInputParametersSupported(element);
 }
 
 /**
@@ -120,8 +120,9 @@ export function areInputParametersSupported(element) {
    */
 export function areOutputParametersSupported(element) {
   const bo = getBusinessObject(element);
-  if (is(bo, 'bpmn:ServiceTask') || is(bo, 'bpmn:SubProcess') || is(bo, 'bpmn:ReceiveTask'))
+  if (is(bo, 'bpmn:ServiceTask') || is(bo, 'bpmn:SubProcess') || is(bo, 'bpmn:ReceiveTask')) {
     return true;
+  }
 
   const messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(element);
   return messageEventDefinition;
