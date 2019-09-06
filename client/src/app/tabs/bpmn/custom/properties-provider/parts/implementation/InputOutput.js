@@ -47,11 +47,11 @@ function ensureInputOutputSupported(element) {
   return isInputOutputSupported(element);
 }
 
-function ensureOutparameterSupported(element) {
+function ensureOutParameterSupported(element) {
   return areOutputParametersSupported(element);
 }
 
-function ensureInputparameterSupported(element) {
+function ensureInputParameterSupported(element) {
   return areInputParametersSupported(element);
 }
 
@@ -141,7 +141,7 @@ export default function(element, bpmnFactory, options = {}) {
 
 
   // input parameters ///////////////////////////////////////////////////////////////
-  if (ensureInputparameterSupported(element)) {
+  if (ensureInputParameterSupported(element)) {
     inputEntry = extensionElementsEntry(element, bpmnFactory, {
       id: `${idPrefix}inputs`,
       label: 'Input Parameters',
@@ -169,7 +169,7 @@ export default function(element, bpmnFactory, options = {}) {
 
   // output parameters ///////////////////////////////////////////////////////
 
-  if (ensureOutparameterSupported(element)) {
+  if (ensureOutParameterSupported(element)) {
     outputEntry = extensionElementsEntry(element, bpmnFactory, {
       id: `${idPrefix}outputs`,
       label: 'Output Parameters',
