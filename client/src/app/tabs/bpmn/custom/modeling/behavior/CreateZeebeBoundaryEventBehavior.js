@@ -12,7 +12,10 @@ import inherits from 'inherits';
 
 import CommandInterceptor from 'diagram-js/lib/command/CommandInterceptor';
 
-import { is } from 'bpmn-js/lib/util/ModelUtil';
+import {
+  getBusinessObject,
+  is
+} from 'bpmn-js/lib/util/ModelUtil';
 
 const HIGH_PRIORITY = 15000;
 
@@ -20,8 +23,7 @@ const HIGH_PRIORITY = 15000;
  * BPMN specific create zeebe boundary event behavior
  */
 export default function CreateZeebeBoundaryEventBehavior(
-    eventBus, modeling, elementFactory,
-    bpmnFactory) {
+    eventBus, elementFactory, bpmnFactory) {
 
   CommandInterceptor.call(this, eventBus);
 
@@ -29,47 +31,58 @@ export default function CreateZeebeBoundaryEventBehavior(
    * replace intermediate catch event with boundary event when
    * attaching it to a shape
    */
+  this.preExecute('shape.create', HIGH_PRIORITY, function(context) {
+    const {
+      shape,
+      host
+    } = context;
 
-  this.preExecute('shape.create',HIGH_PRIORITY, function(context) {
-    const shape = context.shape,
-          host = context.host;
+    const businessObject = getBusinessObject(shape);
 
-    let businessObject,
-        boundaryEvent;
-
-    const attrs = {
+    let attrs = {
       cancelActivity: true
     };
 
-    if (host && is(shape, 'bpmn:IntermediateCatchEvent')) {
-      attrs.attachedToRef = host.businessObject;
+    let newBusinessObject,
+        hostBusinessObject,
+        boundaryEvent,
+        eventDefinitions;
 
-      businessObject = bpmnFactory.create('bpmn:BoundaryEvent', attrs);
-
-      if (shape.businessObject.eventDefinitions && shape.businessObject.eventDefinitions[0]) {
-        boundaryEvent = {
-          type: 'bpmn:BoundaryEvent',
-          businessObject: businessObject,
-          eventDefinitionType: shape.businessObject.eventDefinitions[0].$type
-        };
-
-      } else {
-        boundaryEvent = {
-          type: 'bpmn:BoundaryEvent',
-          businessObject: businessObject
-        };
-
-      }
-
-      context.shape = elementFactory.createShape(boundaryEvent);
+    if (!host || !is(shape, 'bpmn:IntermediateCatchEvent')) {
+      return;
     }
+
+    hostBusinessObject = getBusinessObject(host);
+
+    attrs = {
+      attachedToRef: hostBusinessObject,
+      ...attrs
+    };
+
+    eventDefinitions = businessObject.eventDefinitions;
+
+    newBusinessObject = bpmnFactory.create('bpmn:BoundaryEvent', attrs);
+
+    boundaryEvent = {
+      type: 'bpmn:BoundaryEvent',
+      businessObject: newBusinessObject,
+    };
+
+    if (eventDefinitions && eventDefinitions[0]) {
+      boundaryEvent = {
+        ...boundaryEvent,
+        eventDefinitionType: eventDefinitions[0].$type
+      };
+    }
+
+    context.shape = elementFactory.createShape(boundaryEvent);
+
   }, true);
 }
 
 
 CreateZeebeBoundaryEventBehavior.$inject = [
   'eventBus',
-  'modeling',
   'elementFactory',
   'bpmnFactory'
 ];
