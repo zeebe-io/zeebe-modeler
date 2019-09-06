@@ -173,6 +173,21 @@ describe('customs - rules', function() {
       });
     }));
 
+
+    it('should NOT attach BoundaryEvent to EventSubProcess ', inject(function(elementFactory) {
+
+      // given
+      const eventShape = elementFactory.createShape({
+        type: 'bpmn:BoundaryEvent'
+      });
+
+      // then
+      expectCanAttach([ eventShape ], 'EventSubProcess1', {
+        attach: false
+      });
+    }));
+
+
   });
 
 });

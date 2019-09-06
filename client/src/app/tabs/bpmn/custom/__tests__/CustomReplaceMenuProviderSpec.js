@@ -251,13 +251,35 @@ describe('customs - replaceMenu', function() {
     openPopup(subProcess);
 
     const collapsedSubProcessEntry = queryEntry(popupMenu, 'replace-with-collapsed-subprocess'),
+          eventSubProcessEntry = queryEntry(popupMenu, 'replace-with-event-subprocess'),
           sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
           parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
 
     // then
     expect(collapsedSubProcessEntry).to.exist;
+    expect(eventSubProcessEntry).to.exist;
     expect(sequentialMultiInstanceEntry).to.exist;
     expect(parallelMultiInstanceEntry).to.exist;
+
+  }));
+
+
+  it('should contain options for Event SubProcess', inject(function(
+      popupMenu, elementRegistry) {
+
+    // given
+    const eventSubProcess = elementRegistry.get('EventSubProcess1');
+
+    openPopup(eventSubProcess);
+
+    const subProcessEntry = queryEntry(popupMenu, 'replace-with-subprocess'),
+          sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
+          parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
+
+    // then
+    expect(subProcessEntry).to.exist;
+    expect(sequentialMultiInstanceEntry).to.not.exist;
+    expect(parallelMultiInstanceEntry).to.not.exist;
 
   }));
 
