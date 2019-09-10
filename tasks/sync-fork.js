@@ -122,6 +122,56 @@ async function hasUpstream(options) {
 }
 
 /**
+ * $ git tag -d @tags
+ * @param {Array<String>} options.tags
+ */
+async function removeTags(options) {
+  const {
+    tags
+  } = options;
+
+  const tagDeleteCmd = [
+    '--delete',
+    ...tags
+  ];
+
+  return new Promise((resolve, reject) => {
+    git.tag(tagDeleteCmd, (err, res) => {
+
+      if (err) {
+        reject(err);
+      }
+
+      console.log('Sync: Deleted all non-related tags.');
+
+      resolve();
+    });
+  });
+}
+
+/**
+ * $ git tag
+ *
+ * return {Array<String>}
+ */
+async function listTags() {
+  return new Promise((resolve, reject) => {
+    git.tags({}, (err, res)=> {
+
+      if (err) {
+        reject(err);
+      }
+
+      const {
+        all: tags
+      } = res;
+
+      resolve(tags);
+    });
+  });
+}
+
+/**
  * $ git fetch @upstream
  * @param {String} options.upstream
  */
@@ -368,6 +418,8 @@ async function run(options) {
     });
   }
 
+  const originalTags = await listTags();
+
   await fetchUpstream({
     upstream: CAMUNDA_MODELER_UPSTREAM
   });
@@ -381,8 +433,15 @@ async function run(options) {
   } catch (e) {
 
     // todo(pinussilvestrus): catch errors properly
+  } finally {
+
+    const currentTags = await listTags(),
+          newTags = currentTags.filter(t => {
+            return originalTags.indexOf(t) === -1;
+          });
+
+    await removeTags({ tags: newTags });
+
+    console.log('##### Stopped syncing #####');
   }
-
-  console.log('##### Stopped syncing #####');
-
 }
