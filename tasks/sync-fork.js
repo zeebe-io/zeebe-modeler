@@ -184,17 +184,14 @@ async function fetchUpstream(options) {
   const fetchCmd = [
     upstream,
     CAMUNDA_MODELER_BRANCH,
-    '--tags'
+    '--tags',
+    '--quiet'
   ];
 
   console.log(`Sync: Execute 'git fetch ${upstream} ${CAMUNDA_MODELER_BRANCH} --tags' .`);
 
   return new Promise((resolve, reject) => {
     git.fetch(fetchCmd, (err, res) => {
-
-      if (err) {
-        reject(err);
-      }
 
       console.log(`Sync: Fetched actual state of upstream '${upstream}'.`);
 
