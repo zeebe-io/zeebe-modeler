@@ -30,58 +30,58 @@ This project incorporates components from the projects listed below. The origina
 23.   @bpmn-io/add-exporter@0.2.0 (https://github.com/bpmn-io/add-exporter)
 24.   @bpmn-io/align-to-origin@0.6.0 (https://github.com/bpmn-io/align-to-origin)
 25.   @bpmn-io/replace-ids@0.2.0 (https://github.com/bpmn-io/replace-ids)
-26.   @sindresorhus/is@0.7.0 (https://github.com/sindresorhus/is)
-27.   bpmn-js-properties-panel@0.29.0 (https://github.com/bpmn-io/bpmn-js-properties-panel)
-28.   bpmn-js-signavio-compat@1.1.0 (https://github.com/bpmn-io/bpmn-js-signavio-compat)
-29.   bpmn-js@3.2.3 (https://github.com/bpmn-io/bpmn-js)
-30.   bpmn-moddle@5.1.6 (https://github.com/bpmn-io/bpmn-moddle)
+26.   @sindresorhus/is@0.15.0 (https://github.com/sindresorhus/is)
+27.   bpmn-js-properties-panel@0.32.1 (https://github.com/bpmn-io/bpmn-js-properties-panel)
+28.   bpmn-js-signavio-compat@1.2.0 (https://github.com/bpmn-io/bpmn-js-signavio-compat)
+29.   bpmn-js@5.0.4 (https://github.com/bpmn-io/bpmn-js)
+30.   bpmn-moddle@6.0.0 (https://github.com/bpmn-io/bpmn-moddle)
 31.   canvg-browser@1.0.0 (https://github.com/bpmn-io/canvg-browser)
 32.   classnames@2.2.6 (https://github.com/JedWatson/classnames)
-33.   codemirror@5.43.0 (https://github.com/codemirror/CodeMirror)
+33.   codemirror@5.46.0 (https://github.com/codemirror/CodeMirror)
 34.   create-react-context@0.2.3 (https://github.com/thejameskyle/create-react-context)
 35.   css.escape@1.5.1 (https://github.com/mathiasbynens/CSS.escape)
 36.   debug@4.1.1 (https://github.com/visionmedia/debug)
 37.   deepmerge@2.2.1 (https://github.com/KyleAMathews/deepmerge)
-38.   diagram-js-direct-editing@1.4.1 (https://github.com/bpmn-io/diagram-js-direct-editing)
-39.   diagram-js-minimap@1.3.0 (https://github.com/bpmn-io/diagram-js-minimap)
-40.   diagram-js-origin@1.2.0 (https://github.com/bpmn-io/diagram-js-origin)
-41.   diagram-js@3.1.2 (https://github.com/bpmn-io/diagram-js)
+38.   diagram-js-direct-editing@1.6.0 (https://github.com/bpmn-io/diagram-js-direct-editing)
+39.   diagram-js-minimap@2.0.1 (https://github.com/bpmn-io/diagram-js-minimap)
+40.   diagram-js-origin@1.3.0 (https://github.com/bpmn-io/diagram-js-origin)
+41.   diagram-js@5.0.2 (https://github.com/bpmn-io/diagram-js)
 42.   didi@4.0.0 (https://github.com/nikku/didi)
 43.   drag-tabs@2.3.0 (https://github.com/bpmn-io/drag-tabs)
 44.   fbjs@0.8.17 (https://github.com/facebook/fbjs)
-45.   formik@1.4.3 (https://github.com/jaredpalmer/formik)
+45.   formik@1.5.8 (https://github.com/jaredpalmer/formik)
 46.   gud@1.0.0 (https://github.com/jamiebuilds/global-unique-id)
 47.   hammerjs@2.0.8 (https://github.com/hammerjs/hammer.js)
 48.   hat@0.0.3 (https://github.com/substack/node-hat)
-49.   hoist-non-react-statics@2.5.5 (https://github.com/mridgway/hoist-non-react-statics)
+49.   hoist-non-react-statics@3.3.0 (https://github.com/mridgway/hoist-non-react-statics)
 50.   ids@0.2.2 (https://github.com/bpmn-io/ids)
-51.   lodash-es@4.17.11 (https://github.com/lodash/lodash)
-52.   lodash@4.17.11 (https://github.com/lodash/lodash)
+51.   lodash-es@4.17.15 (https://github.com/lodash/lodash)
+52.   lodash@4.17.15 (https://github.com/lodash/lodash)
 53.   min-dom@3.1.1 (https://github.com/bpmn-io/min-dom)
 54.   mitt@1.1.3 (https://github.com/developit/mitt)
-55.   moddle-xml@7.3.0 (https://github.com/bpmn-io/moddle-xml)
-56.   moddle@4.1.0 (https://github.com/bpmn-io/moddle)
+55.   moddle-xml@8.0.1 (https://github.com/bpmn-io/moddle-xml)
+56.   moddle@5.0.1 (https://github.com/bpmn-io/moddle)
 57.   ms@2.1.1 (https://github.com/zeit/ms)
 58.   object-assign@4.1.1 (https://github.com/sindresorhus/object-assign)
 59.   object-refs@0.3.0 (https://github.com/bpmn-io/object-refs)
-60.   p-defer@1.0.0 (https://github.com/sindresorhus/p-defer)
-61.   p-reduce@1.0.0 (https://github.com/sindresorhus/p-reduce)
-62.   p-series@1.1.0 (https://github.com/sindresorhus/p-series)
+60.   p-defer@3.0.0 (https://github.com/sindresorhus/p-defer)
+61.   p-reduce@2.1.0 (https://github.com/sindresorhus/p-reduce)
+62.   p-series@2.1.0 (https://github.com/sindresorhus/p-series)
 63.   path-intersection@1.1.1 (https://github.com/bpmn-io/path-intersection)
 64.   prop-types@15.6.2 (https://github.com/facebook/prop-types)
-65.   react-dom@16.8.1 (https://github.com/facebook/react)
+65.   react-dom@16.9.0 (https://github.com/facebook/react)
 66.   react-fast-compare@2.0.4 (https://github.com/FormidableLabs/react-fast-compare)
-67.   react@16.8.1 (https://github.com/facebook/react)
-68.   rgbcolor@0.0.4 (https://github.com/yetzt/node-rgbcolor)
-69.   saxen@8.1.0 (https://github.com/nikku/saxen)
-70.   scheduler@0.13.1 (https://github.com/facebook/react)
-71.   scroll-tabs@1.0.1 (https://github.com/bpmn-io/scroll-tabs)
-72.   selection-update@0.1.2 (https://github.com/nikku/selection-update)
-73.   sourcemapped-stacktrace@1.1.9 (https://github.com/novocaine/sourcemapped-stacktrace)
-74.   stackblur@1.0.0
-75.   tiny-stack@1.1.0 (https://github.com/avoidwork/tiny-stack)
+67.   react-is@16.8.6 (https://github.com/facebook/react)
+68.   react@16.9.0 (https://github.com/facebook/react)
+69.   rgbcolor@0.0.4 (https://github.com/yetzt/node-rgbcolor)
+70.   saxen@8.1.0 (https://github.com/nikku/saxen)
+71.   scheduler@0.15.0 (https://github.com/facebook/react)
+72.   scroll-tabs@1.0.1 (https://github.com/bpmn-io/scroll-tabs)
+73.   selection-update@0.1.2 (https://github.com/nikku/selection-update)
+74.   sourcemapped-stacktrace@1.1.9 (https://github.com/novocaine/sourcemapped-stacktrace)
+75.   stackblur@1.0.0
 76.   tiny-svg@2.2.1 (https://github.com/bpmn-io/tiny-svg)
-77.   tiny-warning@1.0.2 (https://github.com/alexreardon/tiny-warning)
+77.   tiny-warning@1.0.3 (https://github.com/alexreardon/tiny-warning)
 78.   tslib@1.9.3 (https://github.com/Microsoft/tslib)
 79.   xmldom@0.1.27 (https://github.com/jindw/xmldom)
 
@@ -905,7 +905,7 @@ SOFTWARE.
 END OF classnames@2.2.6 NOTICES AND INFORMATION
 
 
-%% codemirror@5.43.0 NOTICES AND INFORMATION BEGIN HERE
+%% codemirror@5.46.0 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 MIT License
 
@@ -1021,19 +1021,19 @@ END OF css.escape@1.5.1 NOTICES AND INFORMATION
 
 Copyright (c) 2014 TJ Holowaychuk <tj@vision-media.ca>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-and associated documentation files (the 'Software'), to deal in the Software without restriction,
-including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+and associated documentation files (the 'Software'), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
 and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial
+The above copyright notice and this permission notice shall be included in all copies or substantial 
 portions of the Software.
 
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
@@ -1151,7 +1151,7 @@ THE SOFTWARE.
 END OF diagram-js-origin@1.3.0 NOTICES AND INFORMATION
 
 
-%% diagram-js@3.1.2 NOTICES AND INFORMATION BEGIN HERE
+%% diagram-js@5.0.2 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
 
@@ -1175,7 +1175,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ==========================================
-END OF diagram-js@3.1.2 NOTICES AND INFORMATION
+END OF diagram-js@5.0.2 NOTICES AND INFORMATION
 
 
 %% didi@4.0.0 NOTICES AND INFORMATION BEGIN HERE
@@ -1260,7 +1260,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 END OF fbjs@0.8.17 NOTICES AND INFORMATION
 
 
-%% formik@1.4.3 NOTICES AND INFORMATION BEGIN HERE
+%% formik@1.5.8 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 MIT License
 
@@ -1285,7 +1285,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ==========================================
-END OF formik@1.4.3 NOTICES AND INFORMATION
+END OF formik@1.5.8 NOTICES AND INFORMATION
 
 
 %% gud@1.0.0 NOTICES AND INFORMATION BEGIN HERE
@@ -1330,7 +1330,7 @@ MIT*
 END OF hat@0.0.3 NOTICES AND INFORMATION
 
 
-%% hoist-non-react-statics@2.5.5 NOTICES AND INFORMATION BEGIN HERE
+%% hoist-non-react-statics@3.3.0 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 Software License Agreement (BSD License)
 ========================================
@@ -1363,7 +1363,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ==========================================
-END OF hoist-non-react-statics@2.5.5 NOTICES AND INFORMATION
+END OF hoist-non-react-statics@3.3.0 NOTICES AND INFORMATION
 
 
 %% ids@0.2.2 NOTICES AND INFORMATION BEGIN HERE
@@ -1393,9 +1393,9 @@ THE SOFTWARE.
 END OF ids@0.2.2 NOTICES AND INFORMATION
 
 
-%% lodash-es@4.17.11 NOTICES AND INFORMATION BEGIN HERE
+%% lodash-es@4.17.15 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
-Copyright JS Foundation and other contributors <https://js.foundation/>
+Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
 
 Based on Underscore.js, copyright Jeremy Ashkenas,
 DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
@@ -1444,7 +1444,7 @@ licenses; we recommend you read them, as their terms may differ from the
 terms above.
 
 ==========================================
-END OF lodash-es@4.17.11 NOTICES AND INFORMATION
+END OF lodash-es@4.17.15 NOTICES AND INFORMATION
 
 
 %% lodash@4.17.15 NOTICES AND INFORMATION BEGIN HERE
@@ -1557,7 +1557,7 @@ SOFTWARE.
 END OF mitt@1.1.3 NOTICES AND INFORMATION
 
 
-%% moddle-xml@7.3.0 NOTICES AND INFORMATION BEGIN HERE
+%% moddle-xml@8.0.1 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
 
@@ -1581,7 +1581,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ==========================================
-END OF moddle-xml@7.3.0 NOTICES AND INFORMATION
+END OF moddle-xml@8.0.1 NOTICES AND INFORMATION
 
 
 %% moddle@5.0.1 NOTICES AND INFORMATION BEGIN HERE
@@ -1797,7 +1797,7 @@ SOFTWARE.
 END OF prop-types@15.6.2 NOTICES AND INFORMATION
 
 
-%% react-dom@16.8.1 NOTICES AND INFORMATION BEGIN HERE
+%% react-dom@16.9.0 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 MIT License
 
@@ -1822,7 +1822,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ==========================================
-END OF react-dom@16.8.1 NOTICES AND INFORMATION
+END OF react-dom@16.9.0 NOTICES AND INFORMATION
 
 
 %% react-fast-compare@2.0.4 NOTICES AND INFORMATION BEGIN HERE
@@ -1854,7 +1854,7 @@ SOFTWARE.
 END OF react-fast-compare@2.0.4 NOTICES AND INFORMATION
 
 
-%% react@16.8.1 NOTICES AND INFORMATION BEGIN HERE
+%% react-is@16.8.6 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 MIT License
 
@@ -1879,7 +1879,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ==========================================
-END OF react@16.8.1 NOTICES AND INFORMATION
+END OF react-is@16.8.6 NOTICES AND INFORMATION
+
+
+%% react@16.9.0 NOTICES AND INFORMATION BEGIN HERE
+==========================================
+MIT License
+
+Copyright (c) Facebook, Inc. and its affiliates.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+==========================================
+END OF react@16.9.0 NOTICES AND INFORMATION
 
 
 %% rgbcolor@0.0.4 NOTICES AND INFORMATION BEGIN HERE
@@ -1917,7 +1945,7 @@ SOFTWARE.
 END OF saxen@8.1.0 NOTICES AND INFORMATION
 
 
-%% scheduler@0.13.1 NOTICES AND INFORMATION BEGIN HERE
+%% scheduler@0.15.0 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 MIT License
 
@@ -1942,7 +1970,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ==========================================
-END OF scheduler@0.13.1 NOTICES AND INFORMATION
+END OF scheduler@0.15.0 NOTICES AND INFORMATION
 
 
 %% scroll-tabs@1.0.1 NOTICES AND INFORMATION BEGIN HERE
@@ -2040,39 +2068,6 @@ BSD-2-Clause
 END OF stackblur@1.0.0 NOTICES AND INFORMATION
 
 
-%% tiny-stack@1.1.0 NOTICES AND INFORMATION BEGIN HERE
-==========================================
-Copyright (c) 2018, Jason Mulligan
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-* Neither the name of tiny-stack nor the names of its
-  contributors may be used to endorse or promote products derived from
-  this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-==========================================
-END OF tiny-stack@1.1.0 NOTICES AND INFORMATION
-
-
 %% tiny-svg@2.2.1 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
@@ -2101,11 +2096,31 @@ THE SOFTWARE.
 END OF tiny-svg@2.2.1 NOTICES AND INFORMATION
 
 
-%% tiny-warning@1.0.2 NOTICES AND INFORMATION BEGIN HERE
+%% tiny-warning@1.0.3 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
-MIT
+MIT License
+
+Copyright (c) 2019 Alexander Reardon
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ==========================================
-END OF tiny-warning@1.0.2 NOTICES AND INFORMATION
+END OF tiny-warning@1.0.3 NOTICES AND INFORMATION
 
 
 %% tslib@1.9.3 NOTICES AND INFORMATION BEGIN HERE
@@ -2114,7 +2129,7 @@ Apache License
 
 Version 2.0, January 2004
 
-http://www.apache.org/licenses/
+http://www.apache.org/licenses/ 
 
 TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
