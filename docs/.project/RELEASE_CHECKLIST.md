@@ -13,13 +13,14 @@ __Hint:__ Create a release issue and copy the template below into it.
 * [ ] verify `develop` is up to date with `master`: `git checkout master && git pull && git checkout develop && git merge master`
 * [ ] smoke test to verify all diagrams can be created
 * [ ] update CHANGELOG
-* [ ] semantic release (`npm run release`)
+* [ ] semantic release (`npm run release`) 
 * [ ] merge to master: `git checkout master && git merge develop`
 * [ ] wait for CI infrastructure to build the release
 * [ ] execute [integration test](https://github.com/zeebe-io/zeebe-modeler/blob/master/docs/.project/INTEGRATION_TEST.md) on [released artifacts](https://github.com/zeebe-io/zeebe-modeler/releases)
     * [ ] Works on Linux
     * [ ] Works on Mac
     * [ ] Works on Windows
+* [ ] trigger QA for fuzzy testing
 * [ ] Publish release on [Github Releases](https://github.com/zeebe-io/zeebe-modeler/releases)
 * [ ] write blog post on _?_
 * [ ] spread the word
