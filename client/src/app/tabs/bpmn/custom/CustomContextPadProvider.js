@@ -51,15 +51,15 @@ export default class CustomContextPadProvider extends ContextPadProvider {
     const self = this;
 
     /**
-   * Create an append action
-   *
-   * @param {String} type
-   * @param {String} className
-   * @param {String} [title]
-   * @param {Object} [options]
-   *
-   * @return {Object} descriptor
-   */
+     * Create an append action
+     *
+     * @param {String} type
+     * @param {String} className
+     * @param {String} [title]
+     * @param {Object} [options]
+     *
+     * @return {Object} descriptor
+     */
     function appendAction(type, className, title, options) {
 
       if (typeof title !== 'string') {
@@ -93,6 +93,10 @@ export default class CustomContextPadProvider extends ContextPadProvider {
     }
 
     const filteredActions = {};
+
+    if (element.type === 'label') {
+      return filteredActions;
+    }
 
     if (!is(businessObject, 'bpmn:EndEvent')) {
       if (!is(businessObject, 'bpmn:EventBasedGateway')) {

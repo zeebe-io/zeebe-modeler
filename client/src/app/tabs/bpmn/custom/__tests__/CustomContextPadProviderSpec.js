@@ -65,6 +65,24 @@ describe('customs - context-pad', function() {
       });
     }
 
+
+    it('should not provide any entries for labels', inject(
+      function(contextPad, elementRegistry) {
+
+        // given
+        const element = elementRegistry.get('StartEvent_1_label');
+
+        // when
+        contextPad.open(element, true);
+
+        const entries = contextPad._current.entries;
+
+        // then
+        expect(entries).to.be.empty;
+      }
+    ));
+
+
     it('should provide ServiceTask entries', inject(function() {
 
       expectContextPadEntries('ServiceTask_1', [
@@ -77,7 +95,6 @@ describe('customs - context-pad', function() {
         'append.append-message-event',
         'append.append-timer-event'
       ]);
-
     }));
 
 
