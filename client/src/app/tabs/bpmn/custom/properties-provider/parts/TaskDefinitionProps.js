@@ -17,13 +17,15 @@ import {
   is
 } from 'bpmn-js/lib/util/ModelUtil';
 
-import utils from 'bpmn-js-properties-panel/lib/Utils';
+import {
+  containsSpace
+} from 'bpmn-js-properties-panel/lib/Utils';
 
 import entryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
-export default function(group, element, bpmnFactory) {
+export default function(group, element, bpmnFactory, translate) {
 
   if (!is(element, 'bpmn:ServiceTask')) {
     return;
@@ -41,18 +43,18 @@ export default function(group, element, bpmnFactory) {
 
   group.entries.push(entryFactory.validationAwareTextField({
     id: 'taskDefinitionType',
-    label: 'Type',
+    label: translate('Type'),
     modelProperty: 'type',
 
     getProperty: function(element, node) {
-      return (getTaskDefinition(element, node) || {}).type;
+      return (getTaskDefinition(element) || {}).type;
     },
 
     setProperty: function(element, values, node) {
       const bo = getBusinessObject(element);
       const commands = [];
 
-      // CREATE extensionElements
+      // create extensionElements
       let extensionElements = bo.get('extensionElements');
       if (!extensionElements) {
         extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
@@ -79,38 +81,46 @@ export default function(group, element, bpmnFactory) {
     },
 
     validate: function(element, values, node) {
-      const bo = getTaskDefinition(element, node);
-      const validation = {};
+      const bo = getTaskDefinition(element);
+      let validation = {};
       if (bo) {
-        const sourceValue = values.source;
+        const {
+          type
+        } = values;
 
-        if (sourceValue) {
-          if (utils.containsSpace(sourceValue)) {
-            validation.source = 'Type must not contain spaces';
+        if (type) {
+          if (containsSpace(type)) {
+            validation = {
+              type: 'Type must not contain spaces'
+            };
           }
         }
         else {
-          validation.source = 'ServiceTask must have a type';
+          validation = {
+            type: 'ServiceTask must have a type'
+          };
         }
       }
       return validation;
     }
   }));
 
-  group.entries.push(entryFactory.validationAwareTextField({
+  group.entries.push(entryFactory.textField({
     id: 'taskDefinitionRetries',
-    label: 'Retries',
+    label: translate('Retries'),
     modelProperty: 'retries',
 
-    getProperty: function(element, node) {
-      return (getTaskDefinition(element, node) || {}).retries;
+    get: function(element) {
+      return {
+        retries: (getTaskDefinition(element) || {}).retries
+      };
     },
 
-    setProperty: function(element, values, node) {
+    set: function(element, values) {
       const bo = getBusinessObject(element);
       const commands = [];
 
-      // CREATE extensionElements
+      // create extensionElements
       let extensionElements = bo.get('extensionElements');
       if (!extensionElements) {
         extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
@@ -134,11 +144,6 @@ export default function(group, element, bpmnFactory) {
 
       commands.push(cmdHelper.updateBusinessObject(element, taskDefinition, values));
       return commands;
-    },
-
-    validate: function(element, values, node) {
-
-      return true;
     }
 
   }));

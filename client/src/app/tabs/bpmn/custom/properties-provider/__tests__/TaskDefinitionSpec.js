@@ -22,6 +22,7 @@ import TestContainer from 'mocha-test-container-support';
 import propertiesPanelModule from 'bpmn-js-properties-panel';
 
 import {
+  classes as domClasses,
   query as domQuery
 } from 'min-dom';
 
@@ -219,6 +220,44 @@ describe('customs - task definition properties', function() {
 
     });
 
+
+    describe('set task definition type field as invalid', function() {
+
+      let input;
+
+      beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
+
+        const shape = elementRegistry.get('Task_1');
+        selection.select(shape);
+
+        const container = propertiesPanel._container;
+        input = getInputField(container, 'camunda-taskDefinitionType', 'type');
+
+        // ensure task definition is created
+        triggerValue(input, 'foo', 'change');
+      }));
+
+      it('on empty value', function() {
+
+        // when
+        triggerValue(input, '', 'change');
+
+        // then
+        expect(isInputInvalid(input)).to.be.true;
+      });
+
+
+      it('on spaces', function() {
+
+        // when
+        triggerValue(input, 'foo bar', 'change');
+
+        // then
+        expect(isInputInvalid(input)).to.be.true;
+      });
+
+    });
+
   });
 
 
@@ -391,3 +430,7 @@ const getInputField = (container, entryId, inputName) => {
   const selector = 'input' + (inputName ? '[name="' + inputName + '"]' : '');
   return domQuery(selector, getEntry(container, entryId));
 };
+
+function isInputInvalid(node) {
+  return domClasses(node).has('invalid');
+}

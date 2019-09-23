@@ -75,7 +75,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   idProps(generalGroup, element, translate);
   nameProps(generalGroup, element, bpmnFactory, canvas, translate);
   executableProps(generalGroup, element, translate);
-  taskDefinition(generalGroup, element, bpmnFactory);
+  taskDefinition(generalGroup, element, bpmnFactory, translate);
   sequenceFlowProps(generalGroup, element, bpmnFactory, translate);
   messageProps(generalGroup, element, bpmnFactory, translate);
   timerProps(generalGroup, element, bpmnFactory, translate);
