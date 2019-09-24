@@ -279,6 +279,31 @@ describe('customs - context-pad', function() {
       // then
       expect(dragging.context()).to.exist;
     }));
+
+
+    it('should set source on drag start', inject(function(elementRegistry, contextPad, dragging) {
+
+      // given
+      const element = elementRegistry.get('ServiceTask_1');
+
+      contextPad.open(element);
+
+      // mock event
+      const event = padEvent('append.append-service-task');
+
+      // when
+      contextPad.trigger('click', event);
+
+      const draggingContext = dragging.context();
+
+      const {
+        source
+      } = draggingContext.data.context;
+
+      // then
+      expect(source).to.eql(element);
+    }));
+
   });
 
 });
