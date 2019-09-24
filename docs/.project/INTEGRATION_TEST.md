@@ -39,25 +39,13 @@ Manual integration tests:
 ##### properties panel
 
 * [ ] configure service task in properties panel
-* [ ] add `async:before`
-* [ ] add execution listener
 * [ ] add input mapping
+* [ ] Undo last step `CTRL + Z`; input mapping is gone
+* [ ] Redo last step `CTRL + Y`; input mapping is back
 * [ ] verify results in XML tab
-
-##### Keep implementation Details (Copy/Paste and Morph)
-
-Based on the [test diagram](./test.bpmn.png):
-
-* [ ] Add Form configuration (FormField + FormData) to "Inspect Invoice" UserTask
-    * [ ] Copy / Paste task; properties are kept
-    * [ ] Change task to ServiceTask; properties are gone from XML
-    * [ ] Undo last step `CTRL + Z`; properties are back
-    * [ ] Redo last step `CTRL + Y`; Task changed to Service Task without form properties
-* [ ] Add Properties, Input/Output Mapping, `asyncBefore`, Retry Time Cycle and implementation to "Check" ServiceTask
-    * [ ] Copy / Paste task; properties are kept
-    * [ ] Change task to Send Task; properties are kept
-    * [ ] Change task to UserTask; implementation property is gone from XML (except Retry Time Cycle, Input/output Mapping and `asyncBefore`)
-
+* [ ] Copy / Paste service task; properties are kept
+* [ ] Add output mapping
+* [ ] Change service task to ReceiveTask; output parameters are kept    
 
 #### FS integration (platform specific)
 
