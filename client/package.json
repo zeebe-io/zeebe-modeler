@@ -1,6 +1,6 @@
 {
   "name": "zeebe-modeler-client",
-  "version": "0.7.0-alpha.2",
+  "version": "0.7.0",
   "description": "Zeebe Modeler client application",
   "private": true,
   "license": "MIT",
