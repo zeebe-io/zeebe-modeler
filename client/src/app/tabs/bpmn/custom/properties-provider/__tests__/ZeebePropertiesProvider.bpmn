@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_0rxge3k" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.8.0-dev">
+  <bpmn:process id="Process_1ianoxh" isExecutable="true">
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:extensionElements>
+        <zeebe:payloadMappings>
+          <zeebe:mapping source="sourceValue" target="targetValue" type="PUT" />
+        </zeebe:payloadMappings>
+      </bpmn:extensionElements>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="ServiceTask_1">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:input source="inputSourceValue" target="inputTargetValue" />
+          <zeebe:output source="outputSourceValue" target="outputTargetValue" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:multiInstanceLoopCharacteristics />
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1ianoxh">
+      <bpmndi:BPMNShape id="EndEvent_1fd589l_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="312" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0lveymx_di" bpmnElement="ServiceTask_1">
+        <dc:Bounds x="160" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
