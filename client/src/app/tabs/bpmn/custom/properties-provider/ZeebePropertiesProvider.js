@@ -75,11 +75,17 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   idProps(generalGroup, element, translate);
   nameProps(generalGroup, element, bpmnFactory, canvas, translate);
   executableProps(generalGroup, element, translate);
-  taskDefinition(generalGroup, element, bpmnFactory, translate);
-  sequenceFlowProps(generalGroup, element, bpmnFactory, translate);
-  messageProps(generalGroup, element, bpmnFactory, translate);
-  timerProps(generalGroup, element, bpmnFactory, translate);
-  errorProps(generalGroup, element, bpmnFactory, translate);
+
+  const detailsGroup = {
+    id: 'details',
+    label: translate('Details'),
+    entries: []
+  };
+  taskDefinition(detailsGroup, element, bpmnFactory, translate);
+  sequenceFlowProps(detailsGroup, element, bpmnFactory, translate);
+  messageProps(detailsGroup, element, bpmnFactory, translate);
+  timerProps(detailsGroup, element, bpmnFactory, translate);
+  errorProps(detailsGroup, element, bpmnFactory, translate);
 
   const multiInstanceGroup = {
     id: 'multiInstance',
@@ -90,6 +96,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
 
   return [
     generalGroup,
+    detailsGroup,
     multiInstanceGroup
   ];
 }
