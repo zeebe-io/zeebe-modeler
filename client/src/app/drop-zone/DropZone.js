@@ -102,7 +102,7 @@ function DropOverlay() {
 
 /**
  * Checks for droppable items e.g. text/foo, text/plain, application/foo+xml,
- * application/bpmn, application/cmmn, application/dmn.
+ * application/bpmn.
  *
  * @param {Object} item - Item to be dropped.
  *
@@ -115,5 +115,5 @@ export function isDropableItem(item) {
     return false;
   }
 
-  return /^(text\/.*|application\/([^+]*\+)?xml|application\/(cmmn|bpmn|dmn))?$/.test(type);
+  return /^(text\/.*|application\/([^+]*\+)?xml|application\/(bpmn))?$/.test(type);
 }

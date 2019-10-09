@@ -9,7 +9,7 @@
  */
 
 /**
- * A tiny {bpmn|dmn|cmmn}-js utility that writes
+ * A tiny bpmn-js utility that writes
  * exporter and exporterVersion to the definitions element
  * upon serialization.
  *

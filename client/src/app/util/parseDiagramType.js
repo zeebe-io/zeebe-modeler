@@ -19,9 +19,7 @@ import {
 } from 'saxen';
 
 const TYPES = {
-  bpmn: 'http://www.omg.org/spec/BPMN',
-  dmn: 'http://www.omg.org/spec/DMN',
-  cmmn: 'http://www.omg.org/spec/CMMN'
+  bpmn: 'http://www.omg.org/spec/BPMN'
 };
 
 
@@ -37,7 +35,6 @@ function getRootNamespace(xml) {
   parser.on('openTag', function(elementName, attrGetter) {
 
     // bpmn:definitions
-    // dmn:Definitions
     if (elementName.indexOf(':') !== -1) {
       const [ prefix, name ] = elementName.split(':');
 

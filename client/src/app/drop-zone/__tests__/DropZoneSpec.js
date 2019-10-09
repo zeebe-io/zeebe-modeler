@@ -241,8 +241,6 @@ describe('DropZone - isDropableItem', function() {
       item('file', 'application/xml'),
       item('file', 'application/rss+xml'),
       item('file', 'application/bpmn+xml'),
-      item('file', 'application/cmmn'),
-      item('file', 'application/dmn'),
       item('file', 'application/bpmn'),
       item('file', 'text/xml')
     ];
