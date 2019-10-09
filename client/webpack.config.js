@@ -45,7 +45,7 @@ module.exports = {
       {
         oneOf: [
           {
-            test: /\.(bpmn|cmmn|dmn)$/,
+            test: /\.(bpmn)$/,
             use: 'raw-loader'
           },
           {
