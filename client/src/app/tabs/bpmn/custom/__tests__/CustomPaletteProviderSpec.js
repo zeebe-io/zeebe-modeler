@@ -60,6 +60,58 @@ describe('customs - palette', function() {
   }));
 
 
+  it('should activate hand tool', inject(function(dragging) {
+
+    // when
+    triggerPaletteEntry('hand-tool');
+
+    // then
+    const context = dragging.context(),
+          prefix = context.prefix;
+
+    expect(prefix).to.equal('hand');
+  }));
+
+
+  it('should activate lasso tool', inject(function(dragging) {
+
+    // when
+    triggerPaletteEntry('lasso-tool');
+
+    // then
+    const context = dragging.context(),
+          prefix = context.prefix;
+
+    expect(prefix).to.equal('lasso.selection');
+  }));
+
+
+  it('should activate space tool', inject(function(dragging) {
+
+    // when
+    triggerPaletteEntry('space-tool');
+
+    // then
+    const context = dragging.context(),
+          prefix = context.prefix;
+
+    expect(prefix).to.equal('spaceTool.selection');
+  }));
+
+
+  it('should activate global-connect tool', inject(function(dragging) {
+
+    // when
+    triggerPaletteEntry('global-connect-tool');
+
+    // then
+    const context = dragging.context(),
+          prefix = context.prefix;
+
+    expect(prefix).to.equal('global-connect');
+  }));
+
+
   it('should create start event', inject(function(dragging) {
 
     // when
@@ -74,7 +126,21 @@ describe('customs - palette', function() {
   }));
 
 
-  it('should create end task', inject(function(dragging) {
+  it('should create intermediate event', inject(function(dragging) {
+
+    // when
+    triggerPaletteEntry('create.intermediate-event');
+
+    // then
+    const context = dragging.context(),
+          elements = context.data.elements;
+
+    expect(elements).to.exist;
+    expect(is(elements[0], 'bpmn:IntermediateThrowEvent')).to.be.true;
+  }));
+
+
+  it('should create end event', inject(function(dragging) {
 
     // when
     triggerPaletteEntry('create.end-event');
@@ -85,89 +151,6 @@ describe('customs - palette', function() {
 
     expect(elements).to.exist;
     expect(is(elements[0], 'bpmn:EndEvent')).to.be.true;
-  }));
-
-
-  it('should create service task', inject(function(dragging) {
-
-    // when
-    triggerPaletteEntry('create.service-task');
-
-    // then
-    const context = dragging.context(),
-          elements = context.data.elements;
-
-    expect(elements).to.exist;
-    expect(is(elements[0], 'bpmn:ServiceTask')).to.be.true;
-  }));
-
-
-  it('should create receive task', inject(function(dragging) {
-
-    // when
-    triggerPaletteEntry('create.receive-task');
-
-    // then
-    const context = dragging.context(),
-          elements = context.data.elements;
-
-    expect(elements).to.exist;
-    expect(is(elements[0], 'bpmn:ReceiveTask')).to.be.true;
-  }));
-
-
-  it('should create subprocess (expanded)', inject(function(dragging) {
-
-    // when
-    triggerPaletteEntry('create.subprocess-expanded');
-
-    // then
-    const context = dragging.context(),
-          elements = context.data.elements,
-          element = elements[0],
-          bo = getBusinessObject(element);
-
-    expect(element).to.exist;
-    expect(is(element, 'bpmn:SubProcess')).to.be.true;
-    expect(bo.di.isExpanded).to.be.true;
-  }));
-
-
-  it('should intermediate catch message event', inject(function(dragging) {
-
-    // when
-    triggerPaletteEntry('create.intermediate-catch-message-event');
-
-    // then
-    const context = dragging.context(),
-          elements = context.data.elements,
-          element = elements[0],
-          bo = getBusinessObject(element),
-          eventDefinitions = bo.eventDefinitions;
-
-    expect(element).to.exist;
-    expect(is(element, 'bpmn:IntermediateCatchEvent')).to.be.true;
-    expect(eventDefinitions).to.exist;
-    expect(eventDefinitions[0].$type).to.equal('bpmn:MessageEventDefinition');
-  }));
-
-
-  it('should intermediate catch timer event', inject(function(dragging) {
-
-    // when
-    triggerPaletteEntry('create.intermediate-catch-timer-event');
-
-    // then
-    const context = dragging.context(),
-          elements = context.data.elements,
-          element = elements[0],
-          bo = getBusinessObject(element),
-          eventDefinitions = bo.eventDefinitions;
-
-    expect(element).to.exist;
-    expect(is(element, 'bpmn:IntermediateCatchEvent')).to.be.true;
-    expect(eventDefinitions).to.exist;
-    expect(eventDefinitions[0].$type).to.equal('bpmn:TimerEventDefinition');
   }));
 
 
@@ -182,6 +165,67 @@ describe('customs - palette', function() {
 
     expect(elements).to.exist;
     expect(is(elements[0], 'bpmn:ExclusiveGateway')).to.be.true;
+  }));
+
+
+  it('should create task', inject(function(dragging) {
+
+    // when
+    triggerPaletteEntry('create.task');
+
+    // then
+    const context = dragging.context(),
+          elements = context.data.elements;
+
+    expect(elements).to.exist;
+    expect(is(elements[0], 'bpmn:Task')).to.be.true;
+  }));
+
+
+  it('should create subprocess with start event', inject(function(dragging) {
+
+    // when
+    triggerPaletteEntry('create.subprocess-expanded');
+
+    // then
+    const context = dragging.context(),
+          elements = context.data.elements,
+          subProcess = elements[0],
+          startEvent = elements[1],
+          bo = getBusinessObject(subProcess);
+
+    expect(subProcess).to.exist;
+    expect(is(subProcess, 'bpmn:SubProcess')).to.be.true;
+    expect(bo.di.isExpanded).to.be.true;
+
+    expect(startEvent).to.exist;
+    expect(is(startEvent, 'bpmn:StartEvent')).to.be.true;
+  }));
+
+
+  it('should create participant', inject(function(dragging) {
+
+    // when
+    triggerPaletteEntry('create.participant-expanded');
+
+    // then
+    const context = dragging.context(),
+          elements = context.data.elements;
+
+    expect(is(elements[0], 'bpmn:Participant')).to.be.true;
+  }));
+
+
+  it('should create group', inject(function(dragging) {
+
+    // when
+    triggerPaletteEntry('create.group');
+
+    // then
+    const context = dragging.context(),
+          elements = context.data.elements;
+
+    expect(is(elements[0], 'bpmn:Group')).to.be.true;
   }));
 
 });
