@@ -43,11 +43,20 @@ export const AVAILABLE_REPLACE_ELEMENTS = [
 ];
 
 export const AVAILABLE_CONTEXTPAD_ENTRIES = [
+  'append.message-intermediate-event',
+  'append.timer-intermediate-event',
+  'append.append-task',
+  'append.intermediate-event',
+  'append.text-annotation',
   'append.end-event',
   'append.gateway',
   'delete',
   'connect',
-  'replace'
+  'replace',
+  'lane-insert-above',
+  'lane-divide-two',
+  'lane-divide-three',
+  'lane-insert-below'
 ];
 
 export const AVAILABLE_LOOP_ENTRIES = [

@@ -9,13 +9,11 @@
  */
 
 import {
-  assign,
-  bind
+  bind,
+  filter,
+  keys,
+  reduce
 } from 'min-dash';
-
-import {
-  is
-} from 'bpmn-js/lib/util/ModelUtil';
 
 import ContextPadProvider from 'bpmn-js/lib/features/context-pad/ContextPadProvider';
 
@@ -40,85 +38,25 @@ export default class CustomContextPadProvider extends ContextPadProvider {
       this.autoPlace = injector.get('autoPlace', false);
     }
 
-    this.cached = bind(super.getContextPadEntries, this);
+    this.defaultEntries = bind(super.getContextPadEntries, this);
   }
 
   getContextPadEntries = element => {
-    const actions = this.cached(element);
+    const actions = this.defaultEntries(element);
 
-    const businessObject = element.businessObject;
-
-    const self = this;
-
-    /**
-     * Create an append action
-     *
-     * @param {String} type
-     * @param {String} className
-     * @param {String} [title]
-     * @param {Object} [options]
-     *
-     * @return {Object} descriptor
-     */
-    function appendAction(type, className, title, options) {
-
-      if (typeof title !== 'string') {
-        options = title;
-        title = self._translate('Append {type}', { type: type.replace(/^bpmn:/, '') });
-      }
-
-      function appendStart(event, element) {
-
-        const shape = self._elementFactory.createShape(assign({ type: type }, options));
-        self._create.start(event, shape, {
-          source: element
-        });
-      }
-
-
-      const append = self.autoPlace ? (event, element) => {
-        const shape = self._elementFactory.createShape(assign({ type: type }, options));
-
-        self.autoPlace.append(element, shape);
-      } : appendStart;
-
-
-      return {
-        group: 'model',
-        className: className,
-        title: title,
-        action: {
-          dragstart: appendStart,
-          click: append
-        }
-      };
-    }
-
-    const filteredActions = {};
-
-    if (element.type === 'label') {
-      return filteredActions;
-    }
-
-    if (!is(businessObject, 'bpmn:EndEvent') && !businessObject.triggeredByEvent) {
-      if (!is(businessObject, 'bpmn:EventBasedGateway')) {
-        assign(filteredActions, { 'append.append-service-task': appendAction('bpmn:ServiceTask', 'bpmn-icon-service-task') });
-        assign(filteredActions, { 'append.append-send-task': appendAction('bpmn:ReceiveTask', 'bpmn-icon-receive-task') });
-      }
-      assign(filteredActions, { 'append.append-message-event': appendAction('bpmn:IntermediateCatchEvent', 'bpmn-icon-intermediate-event-catch-message', 'Message Event', { eventDefinitionType: 'bpmn:MessageEventDefinition' }) });
-      assign(filteredActions, { 'append.append-timer-event': appendAction('bpmn:IntermediateCatchEvent', 'bpmn-icon-intermediate-event-catch-timer', 'Timer Event', { eventDefinitionType: 'bpmn:TimerEventDefinition' }) });
-    }
-
-    availableActions.forEach(availableAction => {
-      if (actions[availableAction]) {
-
-        filteredActions[availableAction] = actions[availableAction];
-      }
+    const filtered = filter(keys(actions), (action) => {
+      return availableActions.indexOf(action) !== -1;
     });
+
+    const filteredActions = reduce(filtered, (result, action) => {
+      return {
+        ...result,
+        [action]: actions[action]
+      };
+    }, {});
 
     return filteredActions;
   };
-
 }
 
 CustomContextPadProvider.$inject = [
