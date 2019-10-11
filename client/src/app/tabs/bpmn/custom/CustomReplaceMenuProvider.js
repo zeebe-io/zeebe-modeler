@@ -12,7 +12,8 @@ import ReplaceMenuProvider from 'bpmn-js/lib/features/popup-menu/ReplaceMenuProv
 
 import {
   bind,
-  find
+  find,
+  filter
 } from 'min-dash';
 
 import {
@@ -47,7 +48,8 @@ export default class CustomReplaceMenuProvider extends ReplaceMenuProvider {
 
       const loopEntries = this._getLoopEntries(element);
 
-      headerEntries = loopEntries.filter(
+      headerEntries = filter(
+        loopEntries,
         entry => availableLoopEntries.indexOf(entry.id) !== -1
       );
     }
@@ -58,9 +60,10 @@ export default class CustomReplaceMenuProvider extends ReplaceMenuProvider {
   getEntries(element) {
     const entries = this.defaultEntries(element);
 
-    const filteredEntries = entries.filter(entry => {
-      return find(availableReplaceElements, a => a === entry.id);
-    });
+    const filteredEntries = filter(
+      entries,
+      entry => find(availableReplaceElements, a => a === entry.id)
+    );
 
     return filteredEntries;
   }
