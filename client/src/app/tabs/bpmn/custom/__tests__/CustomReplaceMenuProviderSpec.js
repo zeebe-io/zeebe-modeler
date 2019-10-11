@@ -48,14 +48,15 @@ describe('customs - replaceMenu', function() {
     openPopup(startEvent);
 
     const endEventEntry = queryEntry(popupMenu, 'replace-with-none-end'),
+          intermediateEventEntry = queryEntry(popupMenu, 'replace-with-none-intermediate-throwing'),
           messageStartEntry = queryEntry(popupMenu, 'replace-with-message-start'),
           timerStartEntry = queryEntry(popupMenu, 'replace-with-timer-start');
 
     // then
     expect(endEventEntry).to.exist;
+    expect(intermediateEventEntry).to.exist;
     expect(messageStartEntry).to.exist;
     expect(timerStartEntry).to.exist;
-
   }));
 
 
@@ -67,11 +68,12 @@ describe('customs - replaceMenu', function() {
 
     openPopup(endEvent);
 
-    const startEventEntry = queryEntry(popupMenu, 'replace-with-none-start');
+    const startEventEntry = queryEntry(popupMenu, 'replace-with-none-start'),
+          intermediateEventEntry = queryEntry(popupMenu, 'replace-with-none-intermediate-throw');
 
     // then
     expect(startEventEntry).to.exist;
-
+    expect(intermediateEventEntry).to.exist;
   }));
 
 
@@ -85,14 +87,14 @@ describe('customs - replaceMenu', function() {
 
     const startEventEntry = queryEntry(popupMenu, 'replace-with-none-start'),
           endEventEntry = queryEntry(popupMenu, 'replace-with-none-end'),
+          intermediateEventEntry = queryEntry(popupMenu, 'replace-with-none-intermediate-throw'),
           messageEventEntry = queryEntry(popupMenu, 'replace-with-message-intermediate-catch');
-
 
     // then
     expect(startEventEntry).to.exist;
     expect(endEventEntry).to.exist;
+    expect(intermediateEventEntry).to.exist;
     expect(messageEventEntry).to.exist;
-
   }));
 
 
@@ -106,13 +108,39 @@ describe('customs - replaceMenu', function() {
 
     const startEventEntry = queryEntry(popupMenu, 'replace-with-none-start'),
           endEventEntry = queryEntry(popupMenu, 'replace-with-none-end'),
+          intermediateEventEntry = queryEntry(popupMenu, 'replace-with-none-intermediate-throw'),
           timerEventEntry = queryEntry(popupMenu, 'replace-with-timer-intermediate-catch');
 
     // then
     expect(startEventEntry).to.exist;
     expect(endEventEntry).to.exist;
+    expect(intermediateEventEntry).to.exist;
     expect(timerEventEntry).to.exist;
+  }));
 
+
+  it('should contain options for BoundaryEvent', inject(function(
+      popupMenu, elementRegistry) {
+
+    // given
+    const endEvent = elementRegistry.get('BoundaryEvent_1');
+
+    openPopup(endEvent);
+
+    const messageBoundaryEntry = queryEntry(popupMenu, 'replace-with-message-boundary'),
+          timerBoundaryEntry = queryEntry(popupMenu, 'replace-with-timer-boundary'),
+          errorBoundaryEntry = queryEntry(popupMenu, 'replace-with-error-boundary'),
+          nonInterruptingMessageBoundaryEntry =
+          queryEntry(popupMenu, 'replace-with-non-interrupting-message-boundary'),
+          nonInterruptingTimerBoundaryEntry =
+          queryEntry(popupMenu, 'replace-with-non-interrupting-timer-boundary');
+
+    // then
+    expect(messageBoundaryEntry).to.exist;
+    expect(timerBoundaryEntry).to.exist;
+    expect(errorBoundaryEntry).to.exist;
+    expect(nonInterruptingMessageBoundaryEntry).to.exist;
+    expect(nonInterruptingTimerBoundaryEntry).to.exist;
   }));
 
 
@@ -124,19 +152,20 @@ describe('customs - replaceMenu', function() {
 
     openPopup(messageTask);
 
-    const serviceTaskEntry = queryEntry(popupMenu, 'replace-with-service-task'),
+    const taskEntry = queryEntry(popupMenu, 'replace-with-task'),
+          serviceTaskEntry = queryEntry(popupMenu, 'replace-with-service-task'),
           collapsedSubProcessEntry = queryEntry(popupMenu, 'replace-with-collapsed-subprocess'),
           expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess'),
           sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
           parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
 
     // then
+    expect(taskEntry).to.exist;
     expect(serviceTaskEntry).to.exist;
     expect(collapsedSubProcessEntry).to.exist;
     expect(expandedSubProcessEntry).to.exist;
     expect(sequentialMultiInstanceEntry).to.exist;
     expect(parallelMultiInstanceEntry).to.exist;
-
   }));
 
 
@@ -148,19 +177,20 @@ describe('customs - replaceMenu', function() {
 
     openPopup(serviceTask);
 
-    const receiveTaskEntry = queryEntry(popupMenu, 'replace-with-receive-task'),
+    const taskEntry = queryEntry(popupMenu, 'replace-with-task'),
+          receiveTaskEntry = queryEntry(popupMenu, 'replace-with-receive-task'),
           collapsedSubProcessEntry = queryEntry(popupMenu, 'replace-with-collapsed-subprocess'),
           expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess'),
           sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
           parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
 
     // then
+    expect(taskEntry).to.exist;
+    expect(receiveTaskEntry).to.exist;
     expect(collapsedSubProcessEntry).to.exist;
     expect(expandedSubProcessEntry).to.exist;
-    expect(receiveTaskEntry).to.exist;
     expect(sequentialMultiInstanceEntry).to.exist;
     expect(parallelMultiInstanceEntry).to.exist;
-
   }));
 
 
@@ -178,7 +208,6 @@ describe('customs - replaceMenu', function() {
     // then
     expect(exclusiveGatewayEntry).to.exist;
     expect(parallelGatewayEntry).to.exist;
-
   }));
 
 
@@ -196,11 +225,10 @@ describe('customs - replaceMenu', function() {
     // then
     expect(exclusiveGatewayEntry).to.exist;
     expect(eventBasedGatewayEntry).to.exist;
-
   }));
 
 
-  it('should contain options for Exclusive', inject(function(
+  it('should contain options for ExclusiveGateway', inject(function(
       popupMenu, elementRegistry) {
 
     // given
@@ -214,7 +242,6 @@ describe('customs - replaceMenu', function() {
     // then
     expect(parallelGatewayEntry).to.exist;
     expect(eventBasedGatewayEntry).to.exist;
-
   }));
 
 
@@ -226,19 +253,20 @@ describe('customs - replaceMenu', function() {
 
     openPopup(subProcess);
 
-    const receiveTaskEntry = queryEntry(popupMenu, 'replace-with-receive-task'),
+    const taskEntry = queryEntry(popupMenu, 'replace-with-task'),
+          receiveTaskEntry = queryEntry(popupMenu, 'replace-with-receive-task'),
           serviceTaskEntry = queryEntry(popupMenu, 'replace-with-service-task'),
           expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess'),
           sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
           parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
 
     // then
+    expect(taskEntry).to.exist;
     expect(serviceTaskEntry).to.exist;
     expect(expandedSubProcessEntry).to.exist;
     expect(receiveTaskEntry).to.exist;
     expect(sequentialMultiInstanceEntry).to.exist;
     expect(parallelMultiInstanceEntry).to.exist;
-
   }));
 
 
@@ -260,28 +288,52 @@ describe('customs - replaceMenu', function() {
     expect(eventSubProcessEntry).to.exist;
     expect(sequentialMultiInstanceEntry).to.exist;
     expect(parallelMultiInstanceEntry).to.exist;
-
   }));
 
 
-  it('should contain options for Event SubProcess', inject(function(
-      popupMenu, elementRegistry) {
+  describe('event sub process', function() {
 
-    // given
-    const eventSubProcess = elementRegistry.get('EventSubProcess1');
+    it('should contain options for EventSubProcess', inject(function(
+        popupMenu, elementRegistry) {
 
-    openPopup(eventSubProcess);
+      // given
+      const eventSubProcess = elementRegistry.get('EventSubProcess1');
 
-    const subProcessEntry = queryEntry(popupMenu, 'replace-with-subprocess'),
-          sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
-          parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
+      openPopup(eventSubProcess);
 
-    // then
-    expect(subProcessEntry).to.exist;
-    expect(sequentialMultiInstanceEntry).to.not.exist;
-    expect(parallelMultiInstanceEntry).to.not.exist;
+      const subProcessEntry = queryEntry(popupMenu, 'replace-with-subprocess'),
+            sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
+            parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
 
-  }));
+      // then
+      expect(subProcessEntry).to.exist;
+      expect(sequentialMultiInstanceEntry).to.not.exist;
+      expect(parallelMultiInstanceEntry).to.not.exist;
+    }));
+
+
+    it('should contain options for StartEvent in EventSubProcess', inject(function(
+        popupMenu, elementRegistry) {
+
+      // given
+      const startEvent = elementRegistry.get('StartEvent_2');
+
+      openPopup(startEvent);
+
+      const timerStartEntry = queryEntry(popupMenu, 'replace-with-timer-start'),
+            messageStartEntry = queryEntry(popupMenu, 'replace-with-message-start'),
+            errorStartEntry = queryEntry(popupMenu, 'replace-with-error-start'),
+            messageNonInterruptingEntry = queryEntry(popupMenu, 'replace-with-non-interrupting-message-start'),
+            timerNonInterruptingEntry = queryEntry(popupMenu, 'replace-with-non-interrupting-timer-start');
+
+      // then
+      expect(timerStartEntry).to.exist;
+      expect(messageStartEntry).to.exist;
+      expect(errorStartEntry).to.exist;
+      expect(messageNonInterruptingEntry).to.exist;
+      expect(timerNonInterruptingEntry).to.exist;
+    }));
+  });
 
 });
 
