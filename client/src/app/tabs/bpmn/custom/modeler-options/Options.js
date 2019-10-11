@@ -25,8 +25,11 @@ export const AVAILABLE_REPLACE_ELEMENTS = [
   'replace-with-message-boundary',
   'replace-with-event-based-gateway',
   'replace-with-receive-task',
+  'replace-with-task',
   'replace-with-message-start',
   'replace-with-timer-start',
+  'replace-with-none-intermediate-throw',
+  'replace-with-none-intermediate-throwing', // only for StartEvent
   'replace-with-non-interrupting-message-boundary',
   'replace-with-non-interrupting-timer-boundary',
   'replace-with-error-boundary',
