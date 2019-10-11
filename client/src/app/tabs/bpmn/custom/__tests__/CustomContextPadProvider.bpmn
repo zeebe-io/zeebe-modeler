@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.8.0-dev">
+  <bpmn:collaboration id="Collaboration_1r45y6o">
+    <bpmn:participant id="Participant_1" processRef="Process_1" />
+    <bpmn:participant id="Participant2" processRef="Process_1tsj9x3" />
+    <bpmn:group id="Group_1" categoryValueRef="CategoryValue_1w7xfzr" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_1" isExecutable="false">
+    <bpmn:serviceTask id="ServiceTask_1" />
+    <bpmn:eventBasedGateway id="EventBasedGateway_1" />
+    <bpmn:task id="Task_1" />
+    <bpmn:startEvent id="StartEvent_1" name="Label" />
+    <bpmn:endEvent id="EndEvent_1" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_1" />
+    <bpmn:parallelGateway id="ParallelGateway_1" />
+    <bpmn:receiveTask id="ReceiveTask_1" />
+    <bpmn:textAnnotation id="TextAnnotation_1">
+      <bpmn:text>TextAnnotation</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0zqc01p" sourceRef="ServiceTask_1" targetRef="TextAnnotation_1" />
+  </bpmn:process>
+  <bpmn:process id="Process_1tsj9x3" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_11hlnim">
+      <bpmn:lane id="Lane_1">
+        <bpmn:flowNodeRef>SubProcessCollapsed_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SubProcessExpanded_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BoundaryEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>MessageBoundaryEvent_1</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_2">
+        <bpmn:flowNodeRef>EventSubProcess_1</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:subProcess id="SubProcessCollapsed_1" />
+    <bpmn:subProcess id="SubProcessExpanded_1" />
+    <bpmn:subProcess id="EventSubProcess_1" triggeredByEvent="true">
+      <bpmn:startEvent id="ErrorStartEvent_1">
+        <bpmn:errorEventDefinition />
+      </bpmn:startEvent>
+      <bpmn:startEvent id="MessageStartEvent_1">
+        <bpmn:messageEventDefinition />
+      </bpmn:startEvent>
+      <bpmn:startEvent id="TimerStartEvent_1">
+        <bpmn:timerEventDefinition />
+      </bpmn:startEvent>
+      <bpmn:startEvent id="MessageStartEventNonInterrupting_1" isInterrupting="false">
+        <bpmn:messageEventDefinition />
+      </bpmn:startEvent>
+      <bpmn:startEvent id="TimerStartEventNonInterrupting_1" isInterrupting="false">
+        <bpmn:timerEventDefinition />
+      </bpmn:startEvent>
+    </bpmn:subProcess>
+    <bpmn:boundaryEvent id="BoundaryEvent_1" attachedToRef="SubProcessCollapsed_1" />
+    <bpmn:boundaryEvent id="MessageBoundaryEvent_1" attachedToRef="SubProcessExpanded_1">
+      <bpmn:messageEventDefinition />
+    </bpmn:boundaryEvent>
+  </bpmn:process>
+  <bpmn:category id="Category_1kg3kt2">
+    <bpmn:categoryValue id="CategoryValue_1w7xfzr" />
+  </bpmn:category>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1r45y6o">
+      <bpmndi:BPMNShape id="Participant_0w0neg5_di" bpmnElement="Participant_1" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="860" height="350" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0xgotkz_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="312" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="317" y="245" width="27" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_0a85vr5_di" bpmnElement="Task_1">
+        <dc:Bounds x="410" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0gntjoa_di" bpmnElement="ServiceTask_1">
+        <dc:Bounds x="630" y="220" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_1qr6yie_di" bpmnElement="Participant2" isHorizontal="true">
+        <dc:Bounds x="160" y="483" width="850" height="563" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1bb9zn9_di" bpmnElement="Lane_1" isHorizontal="true">
+        <dc:Bounds x="190" y="483" width="820" height="273" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0lrphfy_di" bpmnElement="Lane_2" isHorizontal="true">
+        <dc:Bounds x="190" y="756" width="820" height="290" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_0hz48s3_di" bpmnElement="SubProcessCollapsed_1">
+        <dc:Bounds x="350" y="603" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_1copxsl_di" bpmnElement="SubProcessExpanded_1" isExpanded="true">
+        <dc:Bounds x="500" y="513" width="360" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_1021bwq_di" bpmnElement="EventSubProcess_1" isExpanded="true">
+        <dc:Bounds x="260" y="786" width="360" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_10fx8ru_di" bpmnElement="BoundaryEvent_1">
+        <dc:Bounds x="332" y="665" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_1burnnn_di" bpmnElement="MessageBoundaryEvent_1">
+        <dc:Bounds x="842" y="695" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1alj4vt_di" bpmnElement="ErrorStartEvent_1">
+        <dc:Bounds x="282" y="868" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0ko87ja_di" bpmnElement="MessageStartEvent_1">
+        <dc:Bounds x="282" y="818" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1sojsdd_di" bpmnElement="TimerStartEvent_1">
+        <dc:Bounds x="282" y="928" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0x7xced_di" bpmnElement="MessageStartEventNonInterrupting_1">
+        <dc:Bounds x="362" y="818" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_161i1ee_di" bpmnElement="TimerStartEventNonInterrupting_1">
+        <dc:Bounds x="362" y="928" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1cgv6u3_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="312" y="292" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_03mzhg3_di" bpmnElement="ExclusiveGateway_1" isMarkerVisible="true">
+        <dc:Bounds x="385" y="285" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ParallelGateway_1lqbu9y_di" bpmnElement="ParallelGateway_1">
+        <dc:Bounds x="465" y="285" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EventBasedGateway_0qwmit8_di" bpmnElement="EventBasedGateway_1">
+        <dc:Bounds x="655" y="325" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Group_0a24z7c_di" bpmnElement="Group_1">
+        <dc:Bounds x="275" y="160" width="290" height="190" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1aefvts_di" bpmnElement="TextAnnotation_1">
+        <dc:Bounds x="730" y="140" width="100" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0zqc01p_di" bpmnElement="Association_0zqc01p">
+        <di:waypoint x="718" y="220" />
+        <di:waypoint x="766" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ReceiveTask_162zlog_di" bpmnElement="ReceiveTask_1">
+        <dc:Bounds x="820" y="220" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
