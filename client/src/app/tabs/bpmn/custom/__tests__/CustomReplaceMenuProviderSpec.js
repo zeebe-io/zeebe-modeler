@@ -291,6 +291,40 @@ describe('customs - replaceMenu', function() {
   }));
 
 
+  describe('participants', function() {
+
+    it('should contain options for  (expanded) Participant', inject(function(
+        popupMenu, elementRegistry) {
+
+      // given
+      const participant = elementRegistry.get('Participant_1');
+
+      openPopup(participant);
+
+      const collapseEntry = queryEntry(popupMenu, 'replace-with-collapsed-pool');
+
+      // then
+      expect(collapseEntry).to.exist;
+    }));
+
+
+    it('should contain options for  (collapsed) Participant', inject(function(
+        popupMenu, elementRegistry) {
+
+      // given
+      const participant = elementRegistry.get('Participant_2');
+
+      openPopup(participant);
+
+      const expandEntry = queryEntry(popupMenu, 'replace-with-expanded-pool');
+
+      // then
+      expect(expandEntry).to.exist;
+    }));
+
+  });
+
+
   describe('event sub process', function() {
 
     it('should contain options for EventSubProcess', inject(function(

@@ -37,7 +37,9 @@ export const AVAILABLE_REPLACE_ELEMENTS = [
   'replace-with-subprocess',
   'replace-with-error-start',
   'replace-with-non-interrupting-message-start',
-  'replace-with-non-interrupting-timer-start'
+  'replace-with-non-interrupting-timer-start',
+  'replace-with-expanded-pool',
+  'replace-with-collapsed-pool'
 ];
 
 export const AVAILABLE_CONTEXTPAD_ENTRIES = [
