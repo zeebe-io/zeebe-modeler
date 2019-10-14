@@ -42,8 +42,12 @@ export default class CustomReplaceMenuProvider extends ReplaceMenuProvider {
     let headerEntries = [];
 
     if (
-      isAny(element, [ 'bpmn:ReceiveTask', 'bpmn:ServiceTask', 'bpmn:SubProcess' ]) &&
-      !isEventSubProcess(element)
+      isAny(element, [
+        'bpmn:ReceiveTask',
+        'bpmn:ServiceTask',
+        'bpmn:SubProcess',
+        'bpmn:CallActivity'
+      ]) && !isEventSubProcess(element)
     ) {
 
       const loopEntries = this._getLoopEntries(element);
