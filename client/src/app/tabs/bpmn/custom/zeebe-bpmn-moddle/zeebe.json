@@ -197,6 +197,29 @@
           "isAttr": true
         }
       ]
+    },
+    {
+      "name": "CalledElement",
+      "superClass": [
+        "Element"
+      ],
+      "meta": {
+        "allowedIn": [
+          "bpmn:CallActivity"
+        ]
+      },
+      "properties": [
+        {
+          "name": "processId",
+          "type": "string",
+          "isAttr": true
+        },
+        {
+          "name": "processIdExpression",
+          "type": "string",
+          "isAttr": true
+        }
+      ]
     }
   ]
 }

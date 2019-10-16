@@ -42,6 +42,8 @@ import multiInstanceProps from './parts/MultiInstanceProps';
 
 import errorProps from './parts/ErrorProps';
 
+import callActivityProps from './parts/CallActivityProps';
+
 
 const getInputOutputParameterLabel = param => {
 
@@ -86,6 +88,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   messageProps(detailsGroup, element, bpmnFactory, translate);
   timerProps(detailsGroup, element, bpmnFactory, translate);
   errorProps(detailsGroup, element, bpmnFactory, translate);
+  callActivityProps(detailsGroup, element, bpmnFactory, translate);
 
   const multiInstanceGroup = {
     id: 'multiInstance',
