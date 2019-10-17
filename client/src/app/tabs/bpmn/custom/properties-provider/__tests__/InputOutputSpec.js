@@ -39,6 +39,8 @@ import modelingModule from 'bpmn-js/lib/features/modeling';
 import propertiesProviderModule from '..';
 import zeebeModdleExtensions from '../../zeebe-bpmn-moddle/zeebe';
 
+const HIDE_CLASS = 'bpp-hidden';
+
 describe('customs - input output property tab', function() {
 
   const diagramXML = require('./InputOutput.bpmn');
@@ -79,7 +81,7 @@ describe('customs - input output property tab', function() {
     propertiesPanel.attachTo(container);
   }));
 
-  it('should fetch empty list of input and output parameters', inject(function(propertiesPanel, selection, elementRegistry) {
+  it('should fetch empty list of input and output parameters', inject(function(selection, elementRegistry) {
 
     // given
     const shape = elementRegistry.get('ServiceTask_empty');
@@ -93,15 +95,15 @@ describe('customs - input output property tab', function() {
     selection.select(shape);
 
     // then
-    const inputsSelection = getInputParameterSelect(propertiesPanel._container);
+    const inputsSelection = getInputParameterSelect(container);
     expect(inputsSelection.options.length).to.equal(0);
 
-    const outputsSelection = getOutputParameterSelect(propertiesPanel._container);
+    const outputsSelection = getOutputParameterSelect(container);
     expect(outputsSelection.options.length).to.equal(0);
   }));
 
 
-  it('should fetch list of input parameters', inject(function(propertiesPanel, selection, elementRegistry) {
+  it('should fetch list of input parameters', inject(function(selection, elementRegistry) {
 
     // given
     const shape = elementRegistry.get('ServiceTask_1');
@@ -114,12 +116,12 @@ describe('customs - input output property tab', function() {
     selection.select(shape);
 
     // then
-    const inputsSelection = getInputParameterSelect(propertiesPanel._container);
+    const inputsSelection = getInputParameterSelect(container);
     expect(inputsSelection.options.length).to.equal(4);
   }));
 
 
-  it('should fetch list of output parameters', inject(function(propertiesPanel, selection, elementRegistry) {
+  it('should fetch list of output parameters', inject(function(selection, elementRegistry) {
 
     // given
     const shape = elementRegistry.get('ServiceTask_1');
@@ -132,9 +134,140 @@ describe('customs - input output property tab', function() {
     selection.select(shape);
 
     // then
-    const outputsSelection = getOutputParameterSelect(propertiesPanel._container);
+    const outputsSelection = getOutputParameterSelect(container);
     expect(outputsSelection.options.length).to.equal(4);
   }));
+
+
+  describe('availability', function() {
+
+    it('should display input and output parameters for ServiceTask', inject(
+      function(selection, elementRegistry) {
+
+        // given
+        const shape = elementRegistry.get('ServiceTask_1');
+
+        // when
+        selection.select(shape);
+
+        // then
+        const inputOutputTab = getInputOutputTab(container),
+              inputParameters = getInputParameterSelect(container),
+              outputParameters = getOutputParameterSelect(container);
+
+        expect(inputOutputTab).to.exist;
+        expect(inputParameters).to.exist;
+        expect(outputParameters).to.exist;
+      }
+    ));
+
+
+    it('should display input and output parameters for SubProcess', inject(
+      function(selection, elementRegistry) {
+
+        // given
+        const shape = elementRegistry.get('SubProcess_1');
+
+        // when
+        selection.select(shape);
+
+        // then
+        const inputOutputTab = getInputOutputTab(container),
+              inputParameters = getInputParameterSelect(container),
+              outputParameters = getOutputParameterSelect(container);
+
+        expect(inputOutputTab).to.exist;
+        expect(inputParameters).to.exist;
+        expect(outputParameters).to.exist;
+      }
+    ));
+
+
+    it('should display input and output parameters for CallActivity', inject(
+      function(selection, elementRegistry) {
+
+        // given
+        const shape = elementRegistry.get('CallActivity_1');
+
+        // when
+        selection.select(shape);
+
+        // then
+        const inputOutputTab = getInputOutputTab(container),
+              inputParameters = getInputParameterSelect(container),
+              outputParameters = getOutputParameterSelect(container);
+
+        expect(inputOutputTab).to.exist;
+        expect(inputParameters).to.exist;
+        expect(outputParameters).to.exist;
+      }
+    ));
+
+
+    it('should display output parameters for ReceiveTask', inject(
+      function(selection, elementRegistry) {
+
+        // given
+        const shape = elementRegistry.get('ReceiveTask_1');
+
+        // when
+        selection.select(shape);
+
+        // then
+        const inputOutputTab = getInputOutputTab(container),
+              inputParameters = getInputParameterSelect(container),
+              outputParameters = getOutputParameterSelect(container);
+
+        expect(inputOutputTab).to.exist;
+        expect(inputParameters).not.to.exist;
+        expect(outputParameters).to.exist;
+      }
+    ));
+
+
+    it('should display output parameters for MessageEvent', inject(
+      function(selection, elementRegistry) {
+
+        // given
+        const shape = elementRegistry.get('MessageEvent_1');
+
+        // when
+        selection.select(shape);
+
+        // then
+        const inputOutputTab = getInputOutputTab(container),
+              inputParameters = getInputParameterSelect(container),
+              outputParameters = getOutputParameterSelect(container);
+
+        expect(inputOutputTab).to.exist;
+        expect(inputParameters).not.to.exist;
+        expect(outputParameters).to.exist;
+      }
+    ));
+
+
+    it('should NOT display input and output parameters for Gateway', inject(
+      function(selection, elementRegistry) {
+
+        // given
+        const shape = elementRegistry.get('Gateway_1');
+
+        // when
+        selection.select(shape);
+
+        // then
+        const inputOutputTab = getInputOutputTab(container),
+              inputParameters = getInputParameterSelect(container),
+              outputParameters = getOutputParameterSelect(container);
+
+        expect(inputOutputTab).to.exist;
+        expect(inputOutputTab.className).to.contain(HIDE_CLASS);
+        expect(inputParameters).not.to.exist;
+        expect(outputParameters).not.to.exist;
+      }
+    ));
+
+  });
 
 
   describe('property controls', function() {
