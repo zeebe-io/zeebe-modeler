@@ -9,9 +9,12 @@
  */
 
 import {
-  getBusinessObject,
-  is
+  getBusinessObject
 } from 'bpmn-js/lib/util/ModelUtil';
+
+import {
+  isAny
+} from 'bpmn-js/lib/features/modeling/util/ModelingUtil';
 
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
@@ -107,8 +110,11 @@ export function isInputOutputSupported(element) {
    * @return {boolean} a boolean value
    */
 export function areInputParametersSupported(element) {
-  const bo = getBusinessObject(element);
-  return (is(bo, 'bpmn:ServiceTask') || is(bo, 'bpmn:SubProcess'));
+  return isAny(element, [
+    'bpmn:ServiceTask',
+    'bpmn:SubProcess',
+    'bpmn:CallActivity'
+  ]);
 }
 
 /**
@@ -119,13 +125,14 @@ export function areInputParametersSupported(element) {
    * @return {boolean} a boolean value
    */
 export function areOutputParametersSupported(element) {
-  const bo = getBusinessObject(element);
-  if (is(bo, 'bpmn:ServiceTask') || is(bo, 'bpmn:SubProcess') || is(bo, 'bpmn:ReceiveTask')) {
-    return true;
-  }
-
   const messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(element);
-  return messageEventDefinition;
+
+  return isAny(element, [
+    'bpmn:ServiceTask',
+    'bpmn:SubProcess',
+    'bpmn:ReceiveTask',
+    'bpmn:CallActivity'
+  ]) || messageEventDefinition;
 }
 
 
