@@ -43,6 +43,7 @@ export default class CustomReplaceMenuProvider extends ReplaceMenuProvider {
 
     if (
       isAny(element, [
+        'bpmn:Task',
         'bpmn:ReceiveTask',
         'bpmn:ServiceTask',
         'bpmn:SubProcess',

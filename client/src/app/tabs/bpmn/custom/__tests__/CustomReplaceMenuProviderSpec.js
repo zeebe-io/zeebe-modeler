@@ -162,7 +162,9 @@ describe('customs - replaceMenu', function() {
             serviceTaskEntry = queryEntry(popupMenu, 'replace-with-service-task'),
             callActivityEntry = queryEntry(popupMenu, 'replace-with-call-activity'),
             collapsedSubProcessEntry = queryEntry(popupMenu, 'replace-with-collapsed-subprocess'),
-            expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess');
+            expandedSubProcessEntry = queryEntry(popupMenu, 'replace-with-expanded-subprocess'),
+            sequentialMultiInstanceEntry = queryEntry(popupMenu, 'toggle-parallel-mi'),
+            parallelMultiInstanceEntry = queryEntry(popupMenu, 'toggle-sequential-mi');
 
       // then
       expect(messageTaskEntry).to.exist;
@@ -170,6 +172,8 @@ describe('customs - replaceMenu', function() {
       expect(callActivityEntry).to.exist;
       expect(collapsedSubProcessEntry).to.exist;
       expect(expandedSubProcessEntry).to.exist;
+      expect(sequentialMultiInstanceEntry).to.exist;
+      expect(parallelMultiInstanceEntry).to.exist;
     }));
 
 
