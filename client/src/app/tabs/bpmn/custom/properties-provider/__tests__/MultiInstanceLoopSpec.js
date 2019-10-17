@@ -167,17 +167,18 @@ describe('customs - multi instance loop', function() {
         triggerValue(input, 'foo', 'change');
       }));
 
-      it('should set input collection field as invalid', function() {
-
-        // when
-        triggerValue(input, '', 'change');
-
-        // then
-        expect(isInputInvalid(input)).to.be.true;
-      });
-
 
       describe('in the DOM', function() {
+
+        it('should set input collection field as invalid', function() {
+
+          // when
+          triggerValue(input, '', 'change');
+
+          // then
+          expect(isInputInvalid(input)).to.be.true;
+        });
+
 
         it('should execute', function() {
 
@@ -208,6 +209,16 @@ describe('customs - multi instance loop', function() {
 
 
         describe('on the business object', function() {
+
+          it('should remove', function() {
+
+            // when
+            triggerValue(input, '', 'change');
+
+            // then
+            expect(loopCharacteristics.inputCollection).not.to.exist;
+          });
+
 
           it('should execute', function() {
 
@@ -366,6 +377,16 @@ describe('customs - multi instance loop', function() {
 
         describe('on the business object', function() {
 
+          it('should remove', function() {
+
+            // when
+            triggerValue(input, '', 'change');
+
+            // then
+            expect(loopCharacteristics.inputElement).not.to.exist;
+          });
+
+
           it('should execute', function() {
 
             // then
@@ -523,6 +544,16 @@ describe('customs - multi instance loop', function() {
 
         describe('on the business object', function() {
 
+          it('should remove', function() {
+
+            // when
+            triggerValue(input, '', 'change');
+
+            // then
+            expect(loopCharacteristics.outputCollection).not.to.exist;
+          });
+
+
           it('should execute', function() {
 
             // then
@@ -679,6 +710,16 @@ describe('customs - multi instance loop', function() {
 
 
         describe('on the business object', function() {
+
+          it('should remove', function() {
+
+            // when
+            triggerValue(input, '', 'change');
+
+            // then
+            expect(loopCharacteristics.outputElement).not.to.exist;
+          });
+
 
           it('should execute', function() {
 

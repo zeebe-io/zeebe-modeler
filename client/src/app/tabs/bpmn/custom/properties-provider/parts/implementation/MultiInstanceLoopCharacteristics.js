@@ -74,7 +74,11 @@ export default function(element, bpmnFactory, translate) {
 
     },
 
-    set: setProperties,
+    set: function(element, values) {
+      return setProperties(element, {
+        inputCollection: values.inputCollection || undefined
+      });
+    },
 
     validate: function(element, values) {
       const loopCharacteristics = getLoopCharacteristics(element),
@@ -110,7 +114,11 @@ export default function(element, bpmnFactory, translate) {
 
     },
 
-    set: setProperties
+    set: function(element, values) {
+      return setProperties(element, {
+        inputElement: values.inputElement || undefined
+      });
+    }
   }));
 
   // output collection ////////////////////////////////////////////////////////////
@@ -127,7 +135,11 @@ export default function(element, bpmnFactory, translate) {
 
     },
 
-    set: setProperties
+    set: function(element, values) {
+      return setProperties(element, {
+        outputCollection: values.outputCollection || undefined
+      });
+    },
   }));
 
   // output element //////////////////////////////////////////////////////
@@ -144,7 +156,11 @@ export default function(element, bpmnFactory, translate) {
 
     },
 
-    set: setProperties
+    set: function(element, values) {
+      return setProperties(element, {
+        outputElement: values.outputElement || undefined
+      });
+    },
   }));
 
   return entries;
