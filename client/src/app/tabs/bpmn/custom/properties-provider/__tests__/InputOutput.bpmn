@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_1md541i" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.7.0-dev">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_1md541i" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.8.0-dev">
   <bpmn:process id="Process_1" isExecutable="true">
     <bpmn:serviceTask id="ServiceTask_1">
       <bpmn:extensionElements>
@@ -16,6 +16,13 @@
       </bpmn:extensionElements>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="ServiceTask_empty" />
+    <bpmn:callActivity id="CallActivity_1" />
+    <bpmn:receiveTask id="ReceiveTask_1" />
+    <bpmn:subProcess id="SubProcess_1" />
+    <bpmn:intermediateCatchEvent id="MessageEvent_1">
+      <bpmn:messageEventDefinition />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="Gateway_1" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
@@ -24,6 +31,21 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_0td0iog_di" bpmnElement="ServiceTask_empty">
         <dc:Bounds x="320" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="CallActivity_14nkjpp_di" bpmnElement="CallActivity_1">
+        <dc:Bounds x="160" y="240" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ReceiveTask_0mkif7n_di" bpmnElement="ReceiveTask_1">
+        <dc:Bounds x="320" y="240" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_1mpgqsq_di" bpmnElement="SubProcess_1" isExpanded="true">
+        <dc:Bounds x="160" y="360" width="350" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_0src8du_di" bpmnElement="MessageEvent_1">
+        <dc:Bounds x="474" y="142" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1pfdx83_di" bpmnElement="Gateway_1" isMarkerVisible="true">
+        <dc:Bounds x="555" y="255" width="50" height="50" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
