@@ -24,8 +24,6 @@ import inputOutput from './parts/InputOutputProps';
 
 import inputOutputParameter from './parts/InputOutputParameterProps';
 
-import mappingProps from './parts/MappingProps';
-
 import headers from './parts/HeadersProps';
 
 import taskDefinition from './parts/TaskDefinitionProps';
@@ -35,8 +33,6 @@ import sequenceFlowProps from './parts/SequenceFlowProps';
 import messageProps from './parts/MessageProps';
 
 import timerProps from './parts/TimerEventProps';
-
-import payloadMappingsProps from './parts/PayloadMappingsProps';
 
 import multiInstanceProps from './parts/MultiInstanceProps';
 
@@ -53,15 +49,6 @@ const getInputOutputParameterLabel = param => {
 
   if (is(param, 'zeebe:OutputParameter')) {
     return 'Output Parameter';
-  }
-
-  return '';
-};
-
-const getMappingLabel = param => {
-
-  if (is(param, 'zeebe:Mapping')) {
-    return 'Mapping';
   }
 
   return '';
@@ -119,37 +106,6 @@ function createHeadersGroups(element, bpmnFactory) {
 }
 
 
-function createPayloadMappingsTabGroups(element, bpmnFactory) {
-
-  const payloadMappingsGroup = {
-    id: 'payload-mappings',
-    label: 'Payload Mappings',
-    entries: []
-  };
-
-  const options = payloadMappingsProps(payloadMappingsGroup, element, bpmnFactory);
-
-  const mappingGroup = {
-    id: 'mapping',
-    entries: [],
-    enabled: function(element, node) {
-      return options.getSelectedMapping(element, node);
-    },
-    label: function(element, node) {
-      const param = options.getSelectedMapping(element, node);
-      return getMappingLabel(param);
-    }
-  };
-
-  mappingProps(mappingGroup, element, bpmnFactory, options);
-
-  return [
-    payloadMappingsGroup,
-    mappingGroup
-  ];
-
-}
-
 function createInputOutputTabGroups(element, bpmnFactory) {
 
   const inputOutputGroup = {
@@ -206,13 +162,6 @@ export default class ZeebePropertiesProvider extends PropertiesActivator {
         element, this._bpmnFactory)
     };
 
-    const payloadMappingsTab = {
-      id: 'payload-mappings',
-      label: 'Payload Mappings',
-      groups: createPayloadMappingsTabGroups(
-        element, this._bpmnFactory)
-    };
-
     const headersTab = {
       id: 'headers',
       label: 'Headers',
@@ -223,7 +172,6 @@ export default class ZeebePropertiesProvider extends PropertiesActivator {
     return [
       generalTab,
       inputOutputTab,
-      payloadMappingsTab,
       headersTab
     ];
   }
