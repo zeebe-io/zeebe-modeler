@@ -154,37 +154,6 @@ describe('zeebe-properties-provider', function() {
 
   });
 
-
-  describe('payload mappings tab', function() {
-
-    it('should show payload mappings group ', inject(function(selection, elementRegistry) {
-
-      // given
-      const shape = elementRegistry.get('EndEvent_1');
-
-      // when
-      selection.select(shape);
-
-      // then
-      shouldHaveGroup(container, 'payload-mappings', 'payload-mappings');
-    }));
-
-
-    it('should show mappings group', inject(function(selection, elementRegistry) {
-
-      // given
-      const shape = elementRegistry.get('EndEvent_1');
-
-      // when
-      selection.select(shape);
-      selectInputMappingParameter(0, container);
-
-      // then
-      shouldHaveGroup(container, 'payload-mappings', 'mapping');
-    }));
-
-  });
-
 });
 
 
@@ -208,19 +177,8 @@ const getInputParameterSelect = (container) => {
   return getSelect('inputs', tab);
 };
 
-const getInputMappingParameterSelect = (container) => {
-  const tab = getTab(container, 'payload-mappings');
-  return getSelect('inputs', tab);
-};
-
 const selectInputParameter = (idx, container) => {
   const selectBox = getInputParameterSelect(container);
-  selectBox.options[idx].selected = 'selected';
-  triggerEvent(selectBox, 'change');
-};
-
-const selectInputMappingParameter = (idx, container) => {
-  const selectBox = getInputMappingParameterSelect(container);
   selectBox.options[idx].selected = 'selected';
   triggerEvent(selectBox, 'change');
 };
