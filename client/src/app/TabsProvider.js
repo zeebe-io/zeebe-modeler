@@ -85,7 +85,7 @@ export default class TabsProvider {
         getHelpMenu() {
           return [{
             label: 'Zeebe Modeling Tutorial',
-            action: 'https://docs.zeebe.io/bpmn-modeler/introduction.html'
+            action: 'https://docs.zeebe.io/bpmn-workflows/bpmn-primer.html'
           },
           {
             label: 'BPMN Modeling Reference',
