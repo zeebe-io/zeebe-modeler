@@ -379,7 +379,8 @@ async function sync(options) {
         'client/test/mocks/cmmn-js/',
         'client/test/mocks/dmn-js/',
         'client/src/app/tabs/bpmn/modeler/features/apply-default-templates/',
-        'client/src/app/tabs/bpmn/util/**/*namespace*'
+        'client/src/app/tabs/bpmn/util/**/*namespace*',
+        'client/src/plugins/',
       ]
     });
 
