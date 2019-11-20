@@ -3,7 +3,7 @@
   <bpmn:process id="Process_1" isExecutable="true">
     <bpmn:callActivity id="CallActivity_1">
       <bpmn:extensionElements>
-        <zeebe:calledElement processId="processId" processIdExpression="processIdExpression" />
+        <zeebe:calledElement processId="processId" />
       </bpmn:extensionElements>
     </bpmn:callActivity>
     <bpmn:callActivity id="CallActivity_empty" />
