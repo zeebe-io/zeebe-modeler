@@ -19,14 +19,6 @@ import {
   getBusinessObject
 } from 'bpmn-js/lib/util/ModelUtil';
 
-import {
-  classes as domClasses
-} from 'min-dom';
-
-import {
-  escapeHTML
-} from 'bpmn-js-properties-panel/lib/Utils';
-
 import entryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 
 export default function(group, element, bpmnFactory, translate) {
@@ -73,37 +65,6 @@ export default function(group, element, bpmnFactory, translate) {
     return commands;
   }
 
-
-  // validation /////////////////////////////////////////////////////////////////
-
-  group.entries.push({
-    id: 'callActivity-errorMessage',
-    html: `<div data-show="isInvalid">
-             <span class="bpp-icon-warning"></span>
-             ${escapeHTML(translate('Must either provide process id or process id expression'))}
-          </div>`,
-
-    isInvalid: function(element, node, notification) {
-
-      const businessObject = getBusinessObject(element),
-            calledElement = getCalledElement(businessObject);
-
-      let isInvalid = true;
-      if (calledElement) {
-        const processId = getProperty(element, 'processId'),
-              processIdExpression = getProperty(element, 'processIdExpression');
-
-        isInvalid = !processId && !processIdExpression;
-      }
-
-      domClasses(node).toggle('bpp-hidden', !isInvalid);
-      domClasses(notification).toggle('bpp-error-message', isInvalid);
-
-      return isInvalid;
-    }
-  });
-
-
   // properties /////////////////////////////////////////////////////////////////
 
   group.entries.push(entryFactory.textField({
@@ -124,23 +85,6 @@ export default function(group, element, bpmnFactory, translate) {
     }
   }));
 
-  group.entries.push(entryFactory.textField({
-    id: 'processIdExpression',
-    label: translate('Process Id Expression'),
-    modelProperty: 'processIdExpression',
-
-    get: function(element) {
-      return {
-        processIdExpression: getProperty(element, 'processIdExpression')
-      };
-    },
-
-    set: function(element, values) {
-      return setProperties(element, {
-        processIdExpression: values.processIdExpression || undefined
-      });
-    }
-  }));
 }
 
 // helper //////////
