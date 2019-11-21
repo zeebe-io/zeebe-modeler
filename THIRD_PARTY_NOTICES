@@ -33,7 +33,7 @@ This project incorporates components from the projects listed below. The origina
 26.   @sindresorhus/is@0.15.0 (https://github.com/sindresorhus/is)
 27.   bpmn-js-properties-panel@0.32.1 (https://github.com/bpmn-io/bpmn-js-properties-panel)
 28.   bpmn-js-signavio-compat@1.2.0 (https://github.com/bpmn-io/bpmn-js-signavio-compat)
-29.   bpmn-js@5.0.4 (https://github.com/bpmn-io/bpmn-js)
+29.   bpmn-js@5.1.0 (https://github.com/bpmn-io/bpmn-js)
 30.   bpmn-moddle@6.0.0 (https://github.com/bpmn-io/bpmn-moddle)
 31.   canvg-browser@1.0.0 (https://github.com/bpmn-io/canvg-browser)
 32.   classnames@2.2.6 (https://github.com/JedWatson/classnames)
@@ -814,7 +814,7 @@ THE SOFTWARE.
 END OF bpmn-js-signavio-compat@1.2.0 NOTICES AND INFORMATION
 
 
-%% bpmn-js@5.0.4 NOTICES AND INFORMATION BEGIN HERE
+%% bpmn-js@5.1.0 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 Copyright (c) 2014-present Camunda Services GmbH
 
@@ -840,7 +840,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRA
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 ==========================================
-END OF bpmn-js@5.0.4 NOTICES AND INFORMATION
+END OF bpmn-js@5.1.0 NOTICES AND INFORMATION
 
 
 %% bpmn-moddle@6.0.0 NOTICES AND INFORMATION BEGIN HERE
@@ -1096,7 +1096,7 @@ THE SOFTWARE.
 END OF diagram-js-direct-editing@1.6.0 NOTICES AND INFORMATION
 
 
-%% diagram-js-minimap@2.0.1 NOTICES AND INFORMATION BEGIN HERE
+%% diagram-js-minimap@2.0.3 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
 
@@ -1120,7 +1120,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ==========================================
-END OF diagram-js-minimap@2.0.1 NOTICES AND INFORMATION
+END OF diagram-js-minimap@2.0.3 NOTICES AND INFORMATION
 
 
 %% diagram-js-origin@1.3.0 NOTICES AND INFORMATION BEGIN HERE
@@ -1151,7 +1151,7 @@ THE SOFTWARE.
 END OF diagram-js-origin@1.3.0 NOTICES AND INFORMATION
 
 
-%% diagram-js@5.0.2 NOTICES AND INFORMATION BEGIN HERE
+%% diagram-js@5.1.0 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
 
@@ -1175,7 +1175,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ==========================================
-END OF diagram-js@5.0.2 NOTICES AND INFORMATION
+END OF diagram-js@5.1.0 NOTICES AND INFORMATION
 
 
 %% didi@4.0.0 NOTICES AND INFORMATION BEGIN HERE

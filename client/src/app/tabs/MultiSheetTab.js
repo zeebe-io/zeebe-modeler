@@ -15,8 +15,6 @@ import {
   TabContainer
 } from '../primitives';
 
-import { ToastConductor } from '../toasts';
-
 import {
   WithCache,
   WithCachedState,
@@ -161,34 +159,22 @@ export class MultiSheetTab extends CachedComponent {
     }
 
     if (warnings && warnings.length) {
-
-      this.openWarningsToast({
-        warnings
-      });
-
       warnings.forEach(warning => {
         this.handleWarning(warning);
       });
+
+      this.displayImportWarningsNotification(warnings);
     }
   }
 
-  openWarningsToast = options => {
-    const {
-      warnings
-    } = options;
-
-    this.setCached({
-      warnings
+  displayImportWarningsNotification(warnings) {
+    this.props.onAction('display-notification', {
+      type: 'warning',
+      title: `Imported with ${warnings.length} warning${warnings.length !== 1 ? 's' : ''}`,
+      content: 'See further details in the log.',
+      duration: 0
     });
-
-    this.setToast('WARNINGS');
   }
-
-  setToast = currentToast => this.setCached({ currentToast })
-
-  closeToast = () => {
-    this.setToast(null);
-  };
 
   /**
    * Open fallback sheet if provided.
@@ -290,6 +276,11 @@ export class MultiSheetTab extends CachedComponent {
       activeSheet: sheet,
       lastXML: xml
     });
+
+    this.props.onAction('emit-event', {
+      type: 'tab.activeSheetChanged',
+      payload: { activeSheet: sheet }
+    });
   }
 
   getDefaultSheets = () => {
@@ -347,9 +338,7 @@ export class MultiSheetTab extends CachedComponent {
     let {
       activeSheet,
       sheets,
-      lastXML,
-      warnings,
-      currentToast
+      lastXML
     } = this.getCached();
 
     let {
@@ -391,7 +380,7 @@ export class MultiSheetTab extends CachedComponent {
             onImport={ this.handleImport }
             onLayoutChanged={ this.handleLayoutChanged }
             onModal={ this.props.onModal }
-            onLoadConfig={ this.props.onLoadConfig }
+            getConfig={ this.props.getConfig }
             getPlugins={ this.props.getPlugins }
           />
         </TabContainer>
@@ -401,12 +390,6 @@ export class MultiSheetTab extends CachedComponent {
           tabs={ sheets }
           activeTab={ activeSheet }
           onSelect={ this.switchSheet } />
-
-        <ToastConductor
-          currentToast={ currentToast }
-          warnings={ warnings }
-          onClose={ this.closeToast }
-        />
 
       </div>
     );

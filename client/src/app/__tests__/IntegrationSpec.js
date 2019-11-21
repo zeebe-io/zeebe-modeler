@@ -15,6 +15,7 @@ import { App } from '../App';
 import {
   Backend,
   Cache,
+  Config,
   Dialog,
   FileSystem,
   Plugins,
@@ -108,6 +109,19 @@ describe('Integration', function() {
 
 
   describe('modals', function() {
+    const modalRoot = document.createElement('div');
+    modalRoot.id = 'modal-root';
+
+
+    beforeEach(() => {
+      document.body.appendChild(modalRoot);
+    });
+
+
+    afterEach(() => {
+      document.body.removeChild(modalRoot);
+    });
+
 
     it('should show shortcuts modals', async function() {
 
@@ -137,6 +151,7 @@ function createApp(options = {}) {
 
   let globals = {
     backend: new Backend(),
+    config: new Config(),
     dialog: new Dialog(),
     fileSystem: new FileSystem(),
     plugins: new Plugins(),

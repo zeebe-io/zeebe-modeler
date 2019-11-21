@@ -119,25 +119,19 @@ describe('<MultiSheetTab>', function() {
     });
 
 
-    it('should open warnings toast', function() {
+    it('should show notification when imported with warnings', function() {
 
       // given
+      const actionSpy = spy();
       const {
         instance
-      } = renderTab();
+      } = renderTab({ onAction: actionSpy });
 
       // when
       instance.handleImport(null, warnings);
 
-      const {
-        warnings: stateWarnings,
-        currentToast
-      } = instance.getCached();
-
       // then
-      expect(stateWarnings).to.eql(warnings);
-      expect(currentToast).to.eql('WARNINGS');
-
+      expect(actionSpy).to.have.been.calledOnceWith('display-notification');
     });
 
 
@@ -302,6 +296,38 @@ describe('<MultiSheetTab>', function() {
   });
 
 
+  describe('#switchSheet', function() {
+
+    it('should emit tab.activeSheetChanged when sheet is changed', async function() {
+
+      // given
+      const emitEventSpy = sinon.spy();
+      const { instance } = renderTab({
+        onAction: (...args) => args[0] === 'emit-event' && emitEventSpy(...args),
+        providers: [{
+          type: 'foo',
+          editor: DefaultEditor,
+          defaultName: 'Foo'
+        }, {
+          type: 'bar',
+          editor: DefaultEditor,
+          defaultName: 'Bar'
+        }]
+      });
+      const { sheets } = instance.getCached();
+
+      // when
+      await instance.switchSheet(sheets[1]);
+
+      // then
+      expect(emitEventSpy).to.have.been.calledOnce;
+      expect(emitEventSpy.args).to.eql([
+        [ 'emit-event', { type: 'tab.activeSheetChanged', payload: { activeSheet: sheets[1] } } ]
+      ]);
+    });
+  });
+
+
   describe('dirty state', function() {
 
     let instance,
@@ -394,56 +420,6 @@ describe('<MultiSheetTab>', function() {
       // then
       expect(instance.isDirty()).to.be.false;
     });
-
-  });
-
-
-  describe('toast handling', function() {
-
-    let instance;
-
-    beforeEach(function() {
-      const rendered = renderTab();
-
-      instance = rendered.instance;
-    });
-
-
-    it('should set toast', function() {
-
-      // given
-      const fakeToastName = 'toast';
-
-      // when
-      instance.setToast(fakeToastName);
-
-      const {
-        currentToast
-      } = instance.getCached();
-
-      // then
-      expect(currentToast).to.eql(fakeToastName);
-    });
-
-
-    it('should close toast', function() {
-
-      // given
-      const fakeToastName = 'toast';
-
-      instance.setToast(fakeToastName);
-
-      // when
-      instance.closeToast();
-
-      const {
-        currentToast
-      } = instance.getCached();
-
-      // then
-      expect(currentToast).to.eql(null);
-    });
-
 
   });
 

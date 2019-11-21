@@ -8,4 +8,4 @@
  * except in compliance with the MIT License.
  */
 
-export { default as ModalConductor } from './ModalConductor';
+export { KeyboardShortcutsModal } from './keyboard-shortcuts';

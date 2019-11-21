@@ -21,6 +21,7 @@ import Flags, { DISABLE_PLUGINS, RELAUNCH } from '../../util/Flags';
 
 import {
   Backend,
+  Config,
   Dialog,
   FileSystem,
   KeyboardBindings,
@@ -435,6 +436,32 @@ describe('<AppParent>', function() {
     });
 
 
+    it('should log client errors with string source attached', async function() {
+
+      // given
+      const backend = new Backend();
+
+      const {
+        appParent
+      } = createAppParent({ globals: { backend } }, mount);
+
+      const app = appParent.getApp();
+      const actionSpy = spy(app, 'triggerAction');
+      const error = createError();
+      const source = 'error-source';
+
+      // when
+      await appParent.handleError(error, source);
+
+      // then
+      expect(actionSpy).to.have.been.calledWith('log', {
+        message: `[${source}] ${error.message}\n${error.stack}`,
+        category: 'error'
+      });
+
+    });
+
+
     it('should log tab errors with file path attached', async function() {
 
       // given
@@ -654,6 +681,34 @@ describe('<AppParent>', function() {
     });
 
 
+    it('should log client warnings with string source attached', async function() {
+
+      // given
+      const backend = new Backend();
+
+      const {
+        appParent
+      } = createAppParent({ globals: { backend } }, mount);
+
+      const app = appParent.getApp();
+      const actionSpy = spy(app, 'triggerAction');
+      const warning = {
+        message: 'warning'
+      };
+      const source = 'warning-source';
+
+      // when
+      await app.handleWarning(warning, source);
+
+      // then
+      expect(actionSpy).to.have.been.calledWith('log', {
+        message: `[${source}] ${warning.message}`,
+        category: 'warning'
+      });
+
+    });
+
+
     it('should log tab warnings with file path attached', async function() {
 
       // given
@@ -761,7 +816,7 @@ describe('<AppParent>', function() {
       });
 
       const plugins = new Plugins({
-        getAll: () => [{}]
+        getAppPlugins: () => [{}]
       });
 
       const { appParent } = createAppParent({
@@ -830,6 +885,7 @@ function createAppParent(options = {}, mountFn=shallow) {
 
   const defaultGlobals = {
     backend: new Backend(),
+    config: new Config(),
     dialog: new Dialog(),
     fileSystem: new FileSystem(),
     log: new Log(),

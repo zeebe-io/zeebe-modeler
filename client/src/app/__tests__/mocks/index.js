@@ -388,6 +388,16 @@ export class KeyboardBindings extends Mock {
 
 export class Config extends Mock {
   get() {}
+
+  set() {}
+
+  getForFile() {}
+
+  setForFile() {}
+
+  getForPlugin() {}
+
+  setForPlugin() {}
 }
 
 export class Log extends Mock {
@@ -444,7 +454,7 @@ export class Plugins extends Mock {
     return [];
   }
 
-  getAll() {
+  getAppPlugins() {
     return [];
   }
 }

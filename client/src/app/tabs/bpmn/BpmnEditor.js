@@ -568,7 +568,7 @@ export class BpmnEditor extends CachedComponent {
 
         <Loader hidden={ !importing } />
 
-        <Fill name="toolbar" group="color">
+        <Fill slot="toolbar" group="5_color">
           <DropdownButton
             title="Set element color"
             disabled={ !this.state.setColor }
@@ -591,7 +591,7 @@ export class BpmnEditor extends CachedComponent {
           </DropdownButton>
         </Fill>
 
-        <Fill name="toolbar" group="align">
+        <Fill slot="toolbar" group="6_align">
           <Button
             title="Align elements left"
             disabled={ !this.state.align }
@@ -635,7 +635,7 @@ export class BpmnEditor extends CachedComponent {
           </Button>
         </Fill>
 
-        <Fill name="toolbar" group="distribute">
+        <Fill slot="toolbar" group="7_distribute">
           <Button
             title="Distribute elements horizontally"
             disabled={ !this.state.distribute }
@@ -676,8 +676,19 @@ export class BpmnEditor extends CachedComponent {
 
     const {
       getPlugins,
+      onAction,
       onError
     } = props;
+
+    // notify interested parties that modeler will be configured
+    const handleMiddlewareExtensions = (middlewares) => {
+      onAction('emit-event', {
+        type: 'bpmn.modeler.configure',
+        payload: {
+          middlewares
+        }
+      });
+    };
 
     const {
       options,
@@ -686,8 +697,8 @@ export class BpmnEditor extends CachedComponent {
       exporter: {
         name,
         version
-      }
-    });
+      },
+    }, handleMiddlewareExtensions);
 
     if (warnings.length && isFunction(onError)) {
       onError(
@@ -705,6 +716,14 @@ export class BpmnEditor extends CachedComponent {
     const commandStack = modeler.get('commandStack');
 
     const stackIdx = commandStack._stackIdx;
+
+    // notify interested parties that modeler was created
+    onAction('emit-event', {
+      type: 'bpmn.modeler.created',
+      payload: {
+        modeler
+      }
+    });
 
     return {
       __destroy: () => {

@@ -15,6 +15,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import {
+  find
+} from 'min-dash';
+
+import {
   Cache,
   WithCachedState
 } from '../../../cached';
@@ -174,7 +178,8 @@ describe('<BpmnEditor>', function() {
 
           return [];
         },
-        onError: onErrorSpy
+        onError: onErrorSpy,
+        onAction: noop
       };
 
       // then
@@ -1026,6 +1031,62 @@ describe('<BpmnEditor>', function() {
 
   });
 
+
+  describe('extensions event emitting', function() {
+
+    let recordActions, emittedEvents;
+
+    beforeEach(function() {
+      emittedEvents = [];
+
+      recordActions = (action, options) => {
+        emittedEvents.push(options);
+      };
+    });
+
+    it('should notify when modeler configures', async function() {
+
+      // when
+      await renderEditor(diagramXML, {
+        onAction: recordActions
+      });
+
+      // then
+      const modelerConfigureEvent = getEvent(emittedEvents, 'bpmn.modeler.configure');
+
+      const {
+        payload
+      } = modelerConfigureEvent;
+
+      expect(modelerConfigureEvent).to.exist;
+      expect(payload.middlewares).to.exist;
+    });
+
+
+    it('should notify when modeler was created', async function() {
+
+      // when
+      const {
+        instance
+      } = await renderEditor(diagramXML, {
+        onAction: recordActions
+      });
+
+      // then
+      const modeler = instance.getModeler();
+
+      const modelerCreatedEvent = getEvent(emittedEvents, 'bpmn.modeler.created');
+
+      const {
+        payload
+      } = modelerCreatedEvent;
+
+      expect(modelerCreatedEvent).to.exist;
+      expect(payload.modeler).to.eql(modeler);
+    });
+
+  });
+
 });
 
 
@@ -1046,7 +1107,7 @@ async function renderEditor(xml, options = {}) {
     onImport,
     onLayoutChanged,
     onModal,
-    onLoadConfig,
+    getConfig,
     getPlugins,
     isNew
   } = options;
@@ -1064,7 +1125,7 @@ async function renderEditor(xml, options = {}) {
       onLayoutChanged={ onLayoutChanged || noop }
       onContentUpdated={ onContentUpdated || noop }
       onModal={ onModal || noop }
-      onLoadConfig={ onLoadConfig || noop }
+      getConfig={ getConfig || noop }
       getPlugins={ getPlugins || (() => []) }
       cache={ options.cache || new Cache() }
       layout={ layout || {
@@ -1084,4 +1145,9 @@ async function renderEditor(xml, options = {}) {
     instance,
     wrapper
   };
+}
+
+// helper /////////
+function getEvent(events, eventName) {
+  return find(events, e => e.type === eventName);
 }
