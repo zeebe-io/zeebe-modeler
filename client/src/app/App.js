@@ -22,8 +22,6 @@ import {
 
 import EventEmitter from 'events';
 
-import defaultPlugins from '../plugins';
-
 import executeOnce from './util/executeOnce';
 
 import { WithCache } from './cached';
@@ -119,7 +117,6 @@ export class App extends PureComponent {
     const userPlugins = this.getPlugins('client');
 
     this.plugins = [
-      ...defaultPlugins,
       ...userPlugins
     ];
 
