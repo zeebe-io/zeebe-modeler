@@ -6,6 +6,18 @@ All notable changes to the [Zeebe Modeler](https://github.com/zeebe-io/zeebe-mod
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.8.0
+
+* `FEAT`: add support for non-execution relevant BPMN symbols ([#112](https://github.com/zeebe-io/zeebe-modeler/issues/112))
+* `FEAT`: align Palette visually with Camunda Modeler ([#113](https://github.com/zeebe-io/zeebe-modeler/issues/113))
+* `FEAT`: align Context Pad visually with Camunda Modeler ([#114](https://github.com/zeebe-io/zeebe-modeler/issues/114))
+* `FEAT`: align Replace Menu visually with Camunda Modeler ([#115](https://github.com/zeebe-io/zeebe-modeler/issues/115))
+* `FEAT`: align Properties Panel visually with Camunda Modeler ([#116](https://github.com/zeebe-io/zeebe-modeler/issues/116))
+* `FEAT`: add support for call activities ([#118](https://github.com/zeebe-io/zeebe-modeler/issues/118))
+* `FIX`: fix copy and pasting to new diagrams ([#134](https://github.com/zeebe-io/zeebe-modeler/issues/134))
+* `CHORE`: remove payload mapping support ([#138](https://github.com/zeebe-io/zeebe-modeler/issues/138))
+* `CHORE`: update foundation to Camunda Modeler `v3.4` ([#126](https://github.com/zeebe-io/zeebe-modeler/pull/126))
+
 ## 0.7.0
 
 * `FEAT`: add feature parity with Zeebe 0.21.0 ([#87](https://github.com/zeebe-io/zeebe-modeler/issues/87))
