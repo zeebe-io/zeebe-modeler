@@ -24,6 +24,7 @@ __Hint:__ Create a release issue and copy the template below into it.
 * [ ] Publish release on [Github Releases](https://github.com/zeebe-io/zeebe-modeler/releases)
 * [ ] write blog post on _?_
 * [ ] spread the word
+    * [ ] send [release notice email](https://github.com/bpmn-io/internal-docs/blob/master/camunda-modeler/README.md#release-notice-email)
     * [ ] tweet
 * [ ] Close [current milestone](https://github.com/zeebe-io/zeebe-modeler/milestones), if it exists
 ```
