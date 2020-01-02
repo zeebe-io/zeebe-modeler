@@ -170,7 +170,8 @@ describe('customs - message properties', function() {
 
   });
 
-  describe('on IntermediateEvent', function() {
+
+  describe('on Message IntermediateEvent', function() {
 
     describe('of correlationKey', function() {
 
@@ -267,6 +268,248 @@ describe('customs - message properties', function() {
 
   });
 
+
+  describe('on Message BoundaryEvent', function() {
+
+    describe('of correlationKey', function() {
+
+      let input, subscriptionDefinition;
+
+      beforeEach(inject(function(elementRegistry, selection) {
+
+        // given
+        const shape = elementRegistry.get('MessageEvent_3');
+        selection.select(shape);
+
+        const bo = getBusinessObject(shape);
+
+        const messageEventDefinition =
+          eventDefinitionHelper.getMessageEventDefinition(bo);
+
+        const messageRef = messageEventDefinition.messageRef;
+
+        subscriptionDefinition = getSubscriptionDefinitions(messageRef)[0];
+
+        input = getInputField(
+          container, 'camunda-message-element-subscription', 'correlationKey');
+
+        // when
+        triggerValue(input, 'foo', 'change');
+
+      }));
+
+      describe('in the DOM', function() {
+
+        it('should execute', function() {
+
+          // then
+          expect(input.value).to.equal('foo');
+        });
+
+
+        it('should undo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+
+          // then
+          expect(input.value).to.equal('subscription');
+        }));
+
+
+        it('should redo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+          commandStack.redo();
+
+          // then
+          expect(input.value).to.equal('foo');
+        }));
+
+
+        describe('on the business object', function() {
+
+          it('should execute', function() {
+
+            // then
+
+            expect(subscriptionDefinition.correlationKey).to.equal('foo');
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            // when
+            commandStack.undo();
+
+            // then
+            expect(subscriptionDefinition.correlationKey).to.equal('subscription');
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            // when
+            commandStack.undo();
+            commandStack.redo();
+
+            // then
+            expect(subscriptionDefinition.correlationKey).to.equal('foo');
+          }));
+
+        });
+
+      });
+
+    });
+
+  });
+
+
+  describe('on EventSubProcess MessageStartEvent', function() {
+
+    describe('of correlationKey', function() {
+
+      let input, subscriptionDefinition;
+
+      beforeEach(inject(function(elementRegistry, selection) {
+
+        // given
+        const shape = elementRegistry.get('MessageEvent_2');
+        selection.select(shape);
+
+        const bo = getBusinessObject(shape);
+
+        const messageEventDefinition =
+          eventDefinitionHelper.getMessageEventDefinition(bo);
+
+        const messageRef = messageEventDefinition.messageRef;
+
+        subscriptionDefinition = getSubscriptionDefinitions(messageRef)[0];
+
+        input = getInputField(
+          container, 'camunda-message-element-subscription', 'correlationKey');
+
+        // when
+        triggerValue(input, 'foo', 'change');
+
+      }));
+
+      describe('in the DOM', function() {
+
+        it('should execute', function() {
+
+          // then
+          expect(input.value).to.equal('foo');
+        });
+
+
+        it('should undo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+
+          // then
+          expect(input.value).to.equal('subscription');
+        }));
+
+
+        it('should redo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+          commandStack.redo();
+
+          // then
+          expect(input.value).to.equal('foo');
+        }));
+
+
+        describe('on the business object', function() {
+
+          it('should execute', function() {
+
+            // then
+
+            expect(subscriptionDefinition.correlationKey).to.equal('foo');
+          });
+
+
+          it('should undo', inject(function(commandStack) {
+
+            // when
+            commandStack.undo();
+
+            // then
+            expect(subscriptionDefinition.correlationKey).to.equal('subscription');
+          }));
+
+
+          it('should redo', inject(function(commandStack) {
+
+            // when
+            commandStack.undo();
+            commandStack.redo();
+
+            // then
+            expect(subscriptionDefinition.correlationKey).to.equal('foo');
+          }));
+
+        });
+
+      });
+
+    });
+
+  });
+
+
+  describe('on process level MessageStartEvent', function() {
+
+    describe('of correlationKey', function() {
+
+      let input, subscriptionDefinitions;
+
+      beforeEach(inject(function(elementRegistry, selection) {
+
+        // given
+        const shape = elementRegistry.get('MessageEvent_4');
+        selection.select(shape);
+
+        const bo = getBusinessObject(shape);
+
+        const messageEventDefinition =
+          eventDefinitionHelper.getMessageEventDefinition(bo);
+
+        const messageRef = messageEventDefinition.messageRef;
+
+        subscriptionDefinitions = getSubscriptionDefinitions(messageRef);
+
+        input = getInputField(
+          container, 'camunda-message-element-subscription', 'correlationKey');
+      }));
+
+      describe('in the DOM', function() {
+
+        it('correlationKey field should not exist', function() {
+
+          // then
+          expect(input).to.be.null;
+        });
+      });
+
+
+      describe('on the business object', function() {
+
+        it('subscription definitions should not exist', function() {
+
+          // then
+          expect(subscriptionDefinitions).to.be.undefined;
+        });
+      });
+    });
+  });
 });
 
 

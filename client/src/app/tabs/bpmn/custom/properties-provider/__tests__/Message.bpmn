@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_0mce3k2" targetNamespace="http://bpmn.io/schema/bpmn">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_0mce3k2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.9.0-dev">
   <bpmn:process id="Process_1" isExecutable="true">
     <bpmn:intermediateCatchEvent id="MessageEvent_1">
       <bpmn:messageEventDefinition messageRef="Message_0knv8lx" />
     </bpmn:intermediateCatchEvent>
     <bpmn:receiveTask id="MessageTask_1" messageRef="Message_1fykwuh" />
+    <bpmn:subProcess id="SubProcess_06jesus" triggeredByEvent="true">
+      <bpmn:startEvent id="MessageEvent_2">
+        <bpmn:messageEventDefinition messageRef="Message_1l7yf8a" />
+      </bpmn:startEvent>
+    </bpmn:subProcess>
+    <bpmn:task id="Task_0qptfk3" />
+    <bpmn:boundaryEvent id="MessageEvent_3" attachedToRef="Task_0qptfk3">
+      <bpmn:messageEventDefinition messageRef="Message_1unhfoo" />
+    </bpmn:boundaryEvent>
+    <bpmn:startEvent id="MessageEvent_4">
+      <bpmn:messageEventDefinition messageRef="Message_0c2reey" />
+    </bpmn:startEvent>
   </bpmn:process>
   <bpmn:message id="Message_1fykwuh" name="Message_1">
     <bpmn:extensionElements>
@@ -16,13 +28,39 @@
       <zeebe:subscription correlationKey="subscription" />
     </bpmn:extensionElements>
   </bpmn:message>
+  <bpmn:message id="Message_1l7yf8a" name="Message_0utp79q">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="subscription" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_1unhfoo" name="Message_2nog05g">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="subscription" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_0c2reey" name="Message_1mnm6jf" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
       <bpmndi:BPMNShape id="IntermediateCatchEvent_17817xz_di" bpmnElement="MessageEvent_1">
-        <dc:Bounds x="180" y="170" width="36" height="36" />
+        <dc:Bounds x="180" y="100" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ReceiveTask_1bd8yax_di" bpmnElement="MessageTask_1">
-        <dc:Bounds x="293" y="148" width="100" height="80" />
+        <dc:Bounds x="293" y="78" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0ukk0ye_di" bpmnElement="MessageEvent_2">
+        <dc:Bounds x="260" y="312" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_09bql0f_di" bpmnElement="SubProcess_06jesus" isExpanded="true">
+        <dc:Bounds x="220" y="230" width="350" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_0qptfk3_di" bpmnElement="Task_0qptfk3">
+        <dc:Bounds x="450" y="78" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_144e64w_di" bpmnElement="MessageEvent_3">
+        <dc:Bounds x="462" y="140" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1kd62un_di" bpmnElement="MessageEvent_4">
+        <dc:Bounds x="632" y="172" width="36" height="36" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
