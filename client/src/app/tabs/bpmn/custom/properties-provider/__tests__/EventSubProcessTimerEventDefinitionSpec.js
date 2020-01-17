@@ -94,9 +94,9 @@ function isInputHidden(node) {
   return isHidden(node.parentNode);
 }
 
-describe('boundary-event-timer-event-properties', function() {
+describe('event-sub-process-timer-start', function() {
 
-  const diagramXML = require('./BoundaryEventTimerEventDefinition.bpmn');
+  const diagramXML = require('./EventSubProcessTimerEventDefinitionSpec.bpmn');
 
   const testModules = [
     coreModule, selectionModule, modelingModule,
@@ -381,7 +381,6 @@ describe('boundary-event-timer-event-properties', function() {
 
     });
 
-
     describe('from timeCycle', function() {
 
       let timerDefinition;
@@ -395,7 +394,6 @@ describe('boundary-event-timer-event-properties', function() {
         const bo = getBusinessObject(shape);
         timerDefinition = eventDefinitionHelper.getTimerEventDefinition(bo);
       }));
-
 
       describe('to undefined', function() {
 
@@ -734,6 +732,7 @@ describe('boundary-event-timer-event-properties', function() {
 
   });
 
+
   describe('change timer definition', function() {
 
     let container;
@@ -912,6 +911,7 @@ describe('boundary-event-timer-event-properties', function() {
     });
 
   });
+
 
   describe('validation', function() {
 

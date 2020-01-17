@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_183z9t4" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.9.0-dev">
+  <bpmn:process id="Process_1y6h5pa" isExecutable="true">
+    <bpmn:subProcess id="SubProcess_0m4iqsu" triggeredByEvent="true">
+      <bpmn:startEvent id="TIME_CYCLE" isInterrupting="false">
+        <bpmn:timerEventDefinition>
+          <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">cycle</bpmn:timeCycle>
+        </bpmn:timerEventDefinition>
+      </bpmn:startEvent>
+      <bpmn:startEvent id="WITHOUT_TYPE" isInterrupting="false">
+        <bpmn:timerEventDefinition id="TimerEventDefinition_1vah8rs" />
+      </bpmn:startEvent>
+      <bpmn:startEvent id="TIME_DURATION" isInterrupting="false">
+        <bpmn:timerEventDefinition id="TimerEventDefinition_05d77cc">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">duration</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:startEvent>
+      <bpmn:startEvent id="INTERRUPTED">
+        <bpmn:timerEventDefinition id="TimerEventDefinition_182lj39" />
+      </bpmn:startEvent>
+    </bpmn:subProcess>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1y6h5pa">
+      <bpmndi:BPMNShape id="SubProcess_1n6472y_di" bpmnElement="SubProcess_0m4iqsu" isExpanded="true">
+        <dc:Bounds x="155" y="80" width="350" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1oftja9_di" bpmnElement="TIME_CYCLE">
+        <dc:Bounds x="192" y="192" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1a89k6z_di" bpmnElement="WITHOUT_TYPE">
+        <dc:Bounds x="192" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_183w0qr_di" bpmnElement="TIME_DURATION">
+        <dc:Bounds x="282" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_007xj7u_di" bpmnElement="INTERRUPTED">
+        <dc:Bounds x="302" y="202" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
