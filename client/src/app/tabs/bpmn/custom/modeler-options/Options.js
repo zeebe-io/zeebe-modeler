@@ -33,6 +33,7 @@ export const AVAILABLE_REPLACE_ELEMENTS = [
   'replace-with-non-interrupting-message-boundary',
   'replace-with-non-interrupting-timer-boundary',
   'replace-with-error-boundary',
+  'replace-with-error-end',
   'replace-with-event-subprocess',
   'replace-with-subprocess',
   'replace-with-error-start',
