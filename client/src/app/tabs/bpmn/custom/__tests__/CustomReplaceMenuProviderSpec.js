@@ -71,11 +71,13 @@ describe('customs - replaceMenu', function() {
       openPopup(endEvent);
 
       const startEventEntry = queryEntry(popupMenu, 'replace-with-none-start'),
-            intermediateEventEntry = queryEntry(popupMenu, 'replace-with-none-intermediate-throw');
+            intermediateEventEntry = queryEntry(popupMenu, 'replace-with-none-intermediate-throw'),
+            errorEndEventEntry = queryEntry(popupMenu, 'replace-with-error-end');
 
       // then
       expect(startEventEntry).to.exist;
       expect(intermediateEventEntry).to.exist;
+      expect(errorEndEventEntry).to.exist;
     }));
 
 
