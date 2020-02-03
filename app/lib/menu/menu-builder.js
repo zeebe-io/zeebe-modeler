@@ -540,13 +540,6 @@ class MenuBuilder {
         label: 'Report Issue',
         click: () => browserOpen('https://github.com/zeebe-io/zeebe-modeler/issues/new/choose')
       },
-      ... (app.flags && !app.flags.get('disable-remote-interaction')) ? [
-        getSeparatorTemplate(),
-        {
-          label: 'Privacy Preferences',
-          click: () => app.emit('menu:action', 'emit-event', { type: 'show-privacy-preferences' })
-        },
-      ] : [],
       getSeparatorTemplate()
     ];
 
