@@ -1437,18 +1437,21 @@ export class App extends PureComponent {
 
     const fileSystem = this.getGlobal('fileSystem');
 
-    const contents = await this.tabRef.current.triggerAction('export-as', {
-      fileType: exportType
-    });
+    try {
+      const contents = await this.tabRef.current.triggerAction('export-as', {
+        fileType: exportType
+      });
 
-    return fileSystem.writeFile(exportPath, {
-      ...originalFile,
-      contents
-    }, {
-      encoding,
-      fileType: exportType
-    });
-
+      return fileSystem.writeFile(exportPath, {
+        ...originalFile,
+        contents
+      }, {
+        encoding,
+        fileType: exportType
+      });
+    } catch (err) {
+      this.logEntry(err.message, 'ERROR');
+    }
   }
 
   /**
@@ -1554,6 +1557,10 @@ export class App extends PureComponent {
 
     if (action === 'save-all') {
       return this.saveAllTabs();
+    }
+
+    if (action === 'save-tab') {
+      return this.saveTab(options.tab);
     }
 
     if (action === 'save') {

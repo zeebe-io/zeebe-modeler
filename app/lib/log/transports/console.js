@@ -9,12 +9,21 @@
  */
 
 class ConsoleTransport {
+
+  log(type, message) {
+    console[type](type.toUpperCase(), message);
+  }
+
   info(message) {
-    console.info(message);
+    this.log('info', message);
+  }
+
+  warn(message) {
+    this.log('warn', message);
   }
 
   error(message) {
-    console.error(message);
+    this.log('error', message);
   }
 }
 

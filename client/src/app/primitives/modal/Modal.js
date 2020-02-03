@@ -13,15 +13,57 @@ import ReactDOM from 'react-dom';
 
 import classNames from 'classnames';
 
+import FocusTrap from './FocusTrap';
+import EscapeTrap from './EscapeTrap';
+
 import css from './Modal.less';
 
 
-class Modal extends PureComponent {
+export default class Modal extends PureComponent {
+
+  constructor(props) {
+    super(props);
+
+    this.modalRef = React.createRef();
+
+    this.focusTrap = FocusTrap(() => {
+      return this.modalRef.current;
+    });
+
+    this.escapeTrap = EscapeTrap(() => {
+      this.close();
+    });
+  }
+
+  close = () => {
+    if (this.props.onClose) {
+      return this.props.onClose();
+    }
+  }
+
+  componentDidMount() {
+    this.focusTrap.mount();
+    this.escapeTrap.mount();
+  }
+
+  componentWillUnmount() {
+    this.focusTrap.unmount();
+    this.escapeTrap.unmount();
+  }
+
   render() {
+
+    const {
+      className,
+      children,
+      onClose
+    } = this.props;
+
     return ReactDOM.createPortal(
       <div className={ css.ModalOverlay } onClick={ this.handleBackgroundClick }>
-        <div className={ classNames(css.ModalContainer, this.props.className) }>
-          { this.props.children }
+        <div className={ classNames(css.ModalContainer, className) } ref={ this.modalRef }>
+          { onClose && (<Close onClick={ this.close } />) }
+          { children }
         </div>
       </div>,
       document.body
@@ -30,13 +72,56 @@ class Modal extends PureComponent {
 
   handleBackgroundClick = event => {
     if (event.target === event.currentTarget) {
-      this.props.onClose();
+      this.close();
     }
   };
 }
 
-Modal.defaultProps = {
-  onClose: () => {}
-};
+Modal.Body = Body;
 
-export default Modal;
+Modal.Title = Title;
+
+Modal.Close = Close;
+
+Modal.Footer = Footer;
+
+
+function Title(props) {
+
+  return (
+    <div className="modal-header">
+      <h2 className="modal-title">
+        { props.children }
+      </h2>
+    </div>
+  );
+}
+
+function Close(props) {
+
+  const {
+    onClick
+  } = props;
+
+  return (
+    <span className="close" onClick={ onClick }>
+      ×
+    </span>
+  );
+}
+
+function Body(props) {
+  return (
+    <div className="modal-body">
+      { props.children }
+    </div>
+  );
+}
+
+function Footer(props) {
+  return (
+    <div className="modal-footer">
+      { props.children }
+    </div>
+  );
+}

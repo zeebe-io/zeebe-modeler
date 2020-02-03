@@ -749,7 +749,21 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 END OF @sindresorhus/is@0.15.0 NOTICES AND INFORMATION
 
 
-%% bpmn-js-properties-panel@0.32.1 NOTICES AND INFORMATION BEGIN HERE
+%% bpmn-js-disable-collapsed-subprocess@0.1.1 NOTICES AND INFORMATION BEGIN HERE
+==========================================
+MIT
+==========================================
+END OF bpmn-js-disable-collapsed-subprocess@0.1.1 NOTICES AND INFORMATION
+
+
+%% bpmn-js-executable-fix@0.1.1 NOTICES AND INFORMATION BEGIN HERE
+==========================================
+MIT
+==========================================
+END OF bpmn-js-executable-fix@0.1.1 NOTICES AND INFORMATION
+
+
+%% bpmn-js-properties-panel@0.33.1 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
 
@@ -773,10 +787,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ==========================================
-END OF bpmn-js-properties-panel@0.32.1 NOTICES AND INFORMATION
+END OF bpmn-js-properties-panel@0.33.1 NOTICES AND INFORMATION
 
 
-%% bpmn-js-signavio-compat@1.2.0 NOTICES AND INFORMATION BEGIN HERE
+%% bpmn-js-signavio-compat@1.2.1 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
 
@@ -801,7 +815,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ==========================================
-END OF bpmn-js-signavio-compat@1.2.0 NOTICES AND INFORMATION
+END OF bpmn-js-signavio-compat@1.2.1 NOTICES AND INFORMATION
 
 
 %% bpmn-js@5.1.2 NOTICES AND INFORMATION BEGIN HERE
@@ -833,7 +847,7 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 END OF bpmn-js@5.1.2 NOTICES AND INFORMATION
 
 
-%% bpmn-moddle@6.0.0 NOTICES AND INFORMATION BEGIN HERE
+%% bpmn-moddle@6.0.2 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
 
@@ -857,7 +871,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ==========================================
-END OF bpmn-moddle@6.0.0 NOTICES AND INFORMATION
+END OF bpmn-moddle@6.0.2 NOTICES AND INFORMATION
 
 
 %% canvg-browser@1.0.0 NOTICES AND INFORMATION BEGIN HERE
@@ -1000,7 +1014,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ==========================================
-END OF diagram-js-direct-editing@1.6.0 NOTICES AND INFORMATION
+END OF diagram-js-direct-editing@1.6.1 NOTICES AND INFORMATION
 
 
 %% diagram-js-minimap@2.0.3 NOTICES AND INFORMATION BEGIN HERE
@@ -1030,7 +1044,7 @@ THE SOFTWARE.
 END OF diagram-js-minimap@2.0.3 NOTICES AND INFORMATION
 
 
-%% diagram-js-origin@1.3.0 NOTICES AND INFORMATION BEGIN HERE
+%% diagram-js-origin@1.3.1 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
 
@@ -1055,7 +1069,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ==========================================
-END OF diagram-js-origin@1.3.0 NOTICES AND INFORMATION
+END OF diagram-js-origin@1.3.1 NOTICES AND INFORMATION
 
 
 %% diagram-js@5.1.1 NOTICES AND INFORMATION BEGIN HERE
@@ -1341,7 +1355,7 @@ SOFTWARE.
 END OF mitt@1.1.3 NOTICES AND INFORMATION
 
 
-%% moddle-xml@8.0.1 NOTICES AND INFORMATION BEGIN HERE
+%% moddle-xml@8.0.2 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
 
@@ -1365,7 +1379,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ==========================================
-END OF moddle-xml@8.0.1 NOTICES AND INFORMATION
+END OF moddle-xml@8.0.2 NOTICES AND INFORMATION
 
 
 %% moddle@5.0.1 NOTICES AND INFORMATION BEGIN HERE
@@ -1526,7 +1540,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 END OF p-series@2.1.0 NOTICES AND INFORMATION
 
 
-%% path-intersection@1.1.1 NOTICES AND INFORMATION BEGIN HERE
+%% path-intersection@2.2.0 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 The MIT License (MIT)
 
@@ -1550,14 +1564,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ==========================================
-END OF path-intersection@1.1.1 NOTICES AND INFORMATION
+END OF path-intersection@2.2.0 NOTICES AND INFORMATION
 
 
-%% prop-types@15.6.2 NOTICES AND INFORMATION BEGIN HERE
+%% react-dom@16.8.6 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 MIT License
 
-Copyright (c) 2013-present, Facebook, Inc.
+Copyright (c) Facebook, Inc. and its affiliates.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1578,14 +1592,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ==========================================
-END OF prop-types@15.6.2 NOTICES AND INFORMATION
+END OF react-dom@16.8.6 NOTICES AND INFORMATION
 
 
 %% react-dom@16.9.0 NOTICES AND INFORMATION BEGIN HERE
 ==========================================
 MIT License
 
-Copyright (c) Facebook, Inc. and its affiliates.
+Copyright (c) 2018 Formidable Labs
+Copyright (c) 2017 Evgeny Poberezkin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

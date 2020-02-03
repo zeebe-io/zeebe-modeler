@@ -18,8 +18,8 @@ class Flags {
     this.data = data;
   }
 
-  get(key) {
-    return this.data[key];
+  get(key, defaultValue) {
+    return key in this.data ? this.data[key] : defaultValue;
   }
 
   reset = () => {
@@ -34,3 +34,6 @@ export default new Flags();
 export const DISABLE_ADJUST_ORIGIN = 'disable-adjust-origin';
 export const DISABLE_PLUGINS = 'disable-plugins';
 export const RELAUNCH = 'relaunch';
+export const DISABLE_REMOTE_INTERACTION = 'disable-remote-interaction';
+export const UPDATE_SERVER_URL = 'update-server-url';
+export const FORCE_UPDATE_CHECKS = 'force-update-checks';

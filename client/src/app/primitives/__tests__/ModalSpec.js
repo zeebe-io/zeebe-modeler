@@ -13,8 +13,7 @@
 import React from 'react';
 
 import {
-  mount,
-  shallow
+  mount
 } from 'enzyme';
 
 import { Modal } from '..';
@@ -22,37 +21,63 @@ import { Modal } from '..';
 
 describe('<Modal>', function() {
 
+  let wrapper;
+
+
+  afterEach(function() {
+    if (wrapper && wrapper.exists()) {
+      wrapper.unmount();
+    }
+  });
+
+
   it('should render', function() {
-    shallow(<Modal />);
+    wrapper = mount(<Modal />);
   });
 
 
   it('should render children', function() {
-    const wrapper = shallow((
+    const wrapper = mount((
       <Modal>
-        <div>
-          { 'Test' }
-        </div>
+        <Modal.Title><div>{ 'Foo' }</div></Modal.Title>
+        <Modal.Body>
+          <div>
+            { 'Test' }
+          </div>
+        </Modal.Body>
       </Modal>
     ));
 
+    expect(wrapper.contains(<div>{ 'Foo' }</div>)).to.be.true;
     expect(wrapper.contains(<div>{ 'Test' }</div>)).to.be.true;
+  });
+
+
+  describe('onClose parameter', function() {
+
+    it('should render close icon if onClose existent', function() {
+
+      const wrapper = mount(<Modal onClose={ () => {} } />);
+
+      expect(wrapper.find('.close')).to.have.lengthOf(1);
+    });
+
+
+    it('should not render close icon if onClose not set', function() {
+
+      const wrapper = mount(<Modal />);
+
+      expect(wrapper.find('.close')).to.have.lengthOf(0);
+    });
   });
 
 
   describe('onClose handling', function() {
 
-    let wrapper, onCloseSpy;
+    let onCloseSpy;
 
     beforeEach(function() {
       onCloseSpy = sinon.spy();
-    });
-
-
-    afterEach(function() {
-      if (wrapper) {
-        wrapper.unmount();
-      }
     });
 
 
@@ -72,7 +97,11 @@ describe('<Modal>', function() {
     it('should NOT invoke passed onClose prop for click on modal container', function() {
 
       // given
-      wrapper = mount(<Modal onClose={ onCloseSpy }><button id="button" /></Modal>);
+      wrapper = mount(<Modal onClose={ onCloseSpy }>
+        <Modal.Body>
+          <button id="button" />
+        </Modal.Body>
+      </Modal>);
 
       // when
       wrapper.find('#button').simulate('click');
@@ -98,7 +127,11 @@ describe('<Modal>', function() {
     it('should correctly handle autofocus', function() {
 
       // given
-      wrapper = mount(<Modal><input id="input" autoFocus /></Modal>);
+      wrapper = mount(<Modal>
+        <Modal.Body>
+          <input id="input" autoFocus />
+        </Modal.Body>
+      </Modal>);
 
       const input = wrapper.find('#input').getDOMNode();
 

@@ -1,11 +1,6 @@
-> :warning: __The feature Plugins may be subject to change in the future.__ As an example, this may lead to breaking changes regarding the configuration and consuption of plugins.
-
 # Plugins :electric_plug:
 
 Plugins allow you to change the appearance and behavior of the Camunda Modeler and add new features.
-
-![Camunda Modeler Plugins](./screencast.gif)
-<p align="center">Using the Camunda Modeler with a Plugin</p>
 
 ## Plugging into the Camunda Modeler
 
@@ -27,7 +22,7 @@ module.exports = {
 ```
 The modeler will automatically load your plugins on startup.
 
-### Changing the appearance of the modeler
+### Changing the Appearance of the Modeler
 
 You can change the appearance of the modeler using CSS.
 
@@ -47,7 +42,7 @@ module.exports = {
 };
 ```
 
-### Adding menu entries to the modeler
+### Adding Menu Entries to the Modeler
 
 You can add new menu entries to the modelers menu.
 

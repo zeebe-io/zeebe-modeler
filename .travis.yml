@@ -7,7 +7,7 @@ cache:
 jobs:
   include:
     - stage: test
-      node_js: node
+      node_js: lts/*
       language: node_js
       script:
       - COVERAGE=1 npm run all -- --x64 --no-compress
@@ -27,15 +27,15 @@ jobs:
           /bin/bash -c "npm i && npm run build -- --win --linux --publish"
     - stage: "distro [macos]"
       os: osx
-      osx_image: xcode9
-      node_js: node
+      osx_image: xcode11.2
+      node_js: lts/*
       language: node_js
       env:
         - ELECTRON_CACHE=$HOME/.cache/electron
         - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
       script: npm run build -- --mac --publish
     - stage: "post distro"
-      node_js: node
+      node_js: lts/*
       language: node_js
       git:
         depth: false
@@ -57,8 +57,8 @@ jobs:
           /bin/bash -c "npm i && npm run build -- --win --linux --nightly --publish"
     - stage: "nightly build [macos]"
       os: osx
-      osx_image: xcode9
-      node_js: node
+      osx_image: xcode11.2
+      node_js: lts/*
       language: node_js
       env:
         - ELECTRON_CACHE=$HOME/.cache/electron

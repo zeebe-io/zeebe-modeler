@@ -26,6 +26,7 @@ var windows = /^win/.test(platform);
 var { DefinePlugin } = require('webpack');
 
 var absoluteBasePath = path.resolve(__dirname);
+var resourcePath = path.resolve(__dirname + '/resources');
 
 /* global process */
 
@@ -103,8 +104,16 @@ module.exports = function(karma) {
             use: 'babel-loader'
           },
           {
-            test: /\.(css|bpmn|less|xml|png|svg)$/,
-            use: 'raw-loader'
+            oneOf: [
+              {
+                test: /[/\\][A-Z][^/]+\.svg$/,
+                use: 'react-svg-loader'
+              },
+              {
+                test: /\.(css|bpmn|less|xml|png|svg)$/,
+                use: 'raw-loader'
+              }
+            ]
           }
         ]
       },
@@ -125,7 +134,8 @@ module.exports = function(karma) {
         ],
         modules: [
           'node_modules',
-          absoluteBasePath
+          absoluteBasePath,
+          resourcePath
         ],
         alias: {
           'bpmn-js/lib/Modeler': 'test/mocks/bpmn-js/Modeler',

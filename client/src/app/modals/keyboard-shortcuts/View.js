@@ -26,25 +26,35 @@ class View extends PureComponent {
 
     return (
       <Modal className={ css.View } onClose={ onClose }>
-        <h2>Keyboard Shortcuts</h2>
-        <p>
-          The following special shortcuts can be used on opened diagrams.
-        </p>
-        <table>
-          <tbody className="keyboard-shortcuts">
-            {
-              (shortcuts || []).map(s => {
-                return <tr key={ s.id }>
-                  <td>{ s.label }</td>
-                  <td className="binding"><code>{ s.binding }</code></td>
-                </tr>;
-              })
-            }
-          </tbody>
-        </table>
-        <p>
-          Find additional shortcuts on individual items in the application menu.
-        </p>
+
+        <Modal.Title>Keyboard Shortcuts</Modal.Title>
+
+        <Modal.Body>
+          <p>
+            The following special shortcuts can be used on opened diagrams.
+          </p>
+          <table>
+            <tbody className="keyboard-shortcuts">
+              {
+                (shortcuts || []).map(s => {
+                  return <tr key={ s.id }>
+                    <td>{ s.label }</td>
+                    <td className="binding"><code>{ s.binding }</code></td>
+                  </tr>;
+                })
+              }
+            </tbody>
+          </table>
+          <p>
+            Find additional shortcuts on individual items in the application menu.
+          </p>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <div className="buttonDiv">
+            <button className="btn btn-primary" onClick={ onClose }>Close</button>
+          </div>
+        </Modal.Footer>
       </Modal>
     );
   }

@@ -10,14 +10,23 @@
 
 'use strict';
 
-const DEV = process.env.NODE_ENV === 'development';
+const path = require('path');
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+const DEV = NODE_ENV === 'development';
 const LICENSE_CHECK = process.env.LICENSE_CHECK;
+
+const {
+  DefinePlugin
+} = require('webpack');
 
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const { LicenseWebpackPlugin } = require('license-webpack-plugin');
 
+const resourcePath = path.resolve(__dirname + '/resources');
 
 module.exports = {
   mode: DEV ? 'development' : (LICENSE_CHECK ? 'none' : 'production'),
@@ -30,9 +39,13 @@ module.exports = {
     filename: '[name].js',
     chunkFilename: '[name].[id].js'
   },
-  resolve: DEV && {
-    mainFields: [ 'browser', 'dev:module', 'module', 'main' ]
-  } || { },
+  resolve: {
+    mainFields: DEV ? [ 'browser', 'dev:module', 'module', 'main' ] : undefined,
+    modules: [
+      'node_modules',
+      resourcePath
+    ]
+  },
   module: {
     rules: [
       {
@@ -44,6 +57,10 @@ module.exports = {
       // apply loaders, falling back to file-loader, if non matches
       {
         oneOf: [
+          {
+            test: /\/[A-Z][^/]+\.svg$/,
+            use: 'react-svg-loader'
+          },
           {
             test: /\.(bpmn)$/,
             use: 'raw-loader'
@@ -78,6 +95,9 @@ module.exports = {
   },
   plugins: [
     new CaseSensitivePathsPlugin(),
+    new DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(NODE_ENV)
+    }),
     new CopyWebpackPlugin([
       {
         from: './public',
