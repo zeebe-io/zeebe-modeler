@@ -26,5 +26,5 @@ __Expected Behavior__
 
 __Environment__
 
- - OS: [e.g. MacOS 10.2, Windows 10]
- - Zeeber Modeler Version: [e.g. 0.5.0]
+- OS: [e.g. MacOS 10.2, Windows 10]
+- Zeebe Modeler Version: [e.g. 2.0.0]

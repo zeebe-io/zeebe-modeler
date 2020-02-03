@@ -40,6 +40,7 @@ export default function(group, element, bpmnFactory) {
   timerEventDefinitionImpl(group, bpmnFactory, timerEventDefinition, timerOptions);
 }
 
+
 // helper //////////
 
 const cancelActivity = (element) => {

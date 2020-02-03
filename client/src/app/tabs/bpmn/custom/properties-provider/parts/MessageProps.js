@@ -13,6 +13,10 @@ import {
   is
 } from 'bpmn-js/lib/util/ModelUtil';
 
+import {
+  isEventSubProcess
+} from 'bpmn-js/lib/util/DiUtil';
+
 import eventDefinitionHelper from 'bpmn-js-properties-panel/lib/helper/EventDefinitionHelper';
 
 import message from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/implementation/MessageEventDefinition';
@@ -21,7 +25,8 @@ import referenceExtensionElementProperty from './implementation/ElementReference
 
 export default function(group, element, bpmnFactory, translate) {
 
-  const messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(element);
+  const messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(element),
+        parent = element.parent;
 
   if (is(element, 'bpmn:ReceiveTask')) {
     message(group, element, bpmnFactory, getBusinessObject(element), translate);
@@ -35,7 +40,8 @@ export default function(group, element, bpmnFactory, translate) {
     }));
   } else if (messageEventDefinition) {
     message(group, element, bpmnFactory, messageEventDefinition, translate);
-    if (!is(element, 'bpmn:StartEvent')) {
+    if (!is(element, 'bpmn:StartEvent') || isEventSubProcess(parent)) {
+
       group.entries = group.entries.concat(referenceExtensionElementProperty(element, messageEventDefinition, bpmnFactory, {
         id: 'message-element-subscription',
         label: 'Subscription Correlation Key',
