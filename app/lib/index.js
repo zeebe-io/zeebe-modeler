@@ -569,21 +569,5 @@ function bootstrap() {
   };
 }
 
-/**
- * Returns the app title suffix based on app version.
- *
- * @param {String} version
- * @return {String}
- */
-function getTitleSuffix(version) {
-  if (version.includes('dev')) {
-    return ' (dev)';
-  } else if (version.includes('nightly')) {
-    return ' (' + version.split('-')[1] + ')';
-  }
-  return '';
-}
-
-
 // expose app
 module.exports = app;
