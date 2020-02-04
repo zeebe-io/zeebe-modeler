@@ -521,7 +521,7 @@ class MenuBuilder {
     const topPart = [
       {
         label: 'Documentation',
-        click: () => browserOpen('https://docs.zeebe.io/bpmn-modeler/README.html')
+        click: () => browserOpen('https://docs.zeebe.io/bpmn-workflows/bpmn-primer.html')
       },
       {
         label: 'User Forum',
