@@ -16,11 +16,15 @@
     "min-dash": "^3.4.0",
     "mri": "^1.1.4",
     "node-fetch": "^2.1.2",
-    "parents": "^1.0.1"
+    "parents": "^1.0.1",
+    "zeebe-node": "^0.22.1"
   },
   "homepage": "https://github.com/zeebe-io/zeebe-modeler",
   "repository": {
     "type": "git",
     "url": "https://github.com/zeebe-io/zeebe-modeler"
+  },
+  "devDependencies": {
+    "electron-rebuild": "^1.9.0"
   }
 }
