@@ -26,7 +26,8 @@ import {
   flags,
   log,
   metadata,
-  workspace
+  workspace,
+  zeebeAPI
 } from './remote';
 
 import Metadata from './util/Metadata';
@@ -58,7 +59,8 @@ const globals = {
   isMac,
   log,
   plugins,
-  workspace
+  workspace,
+  zeebeAPI
 };
 
 
