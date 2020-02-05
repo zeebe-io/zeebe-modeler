@@ -35,6 +35,7 @@ const Menu = require('./menu');
 const Platform = require('./platform');
 const Plugins = require('./plugins');
 const Workspace = require('./workspace');
+const ZeebeAPI = require('./zeebe-api');
 
 const {
   readFile,
@@ -185,6 +186,38 @@ renderer.on('file:write', function(filePath, file, options = {}, done) {
     const newFile = writeFile(filePath, file, options);
 
     done(null, newFile);
+  } catch (err) {
+    done(err);
+  }
+});
+
+// zeebe api //////////
+
+renderer.on('zeebe:checkConnectivity', async function(parameters, done) {
+  try {
+    const connectivity = await ZeebeAPI.checkConnectivity(parameters);
+
+    done(null, connectivity);
+  } catch (err) {
+    done(err);
+  }
+});
+
+renderer.on('zeebe:deploy', async function(parameters, done) {
+  try {
+    const deploymentResult = await ZeebeAPI.deploy(parameters);
+
+    done(null, deploymentResult);
+  } catch (err) {
+    done(err);
+  }
+});
+
+renderer.on('zeebe:run', async function(parameters, done) {
+  try {
+    const runResult = await ZeebeAPI.run(parameters);
+
+    done(null, runResult);
   } catch (err) {
     done(err);
   }
