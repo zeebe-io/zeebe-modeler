@@ -69,7 +69,7 @@ const expectedFiles = {
   linux: [
     {
       name: 'zeebe-modeler-${version}-linux-${arch}.tar.gz',
-      archs,
+      archs: [ 'x64' ],
       contents: [
         'zeebe-modeler-${version}-linux-${arch}/zeebe-modeler',
         'zeebe-modeler-${version}-linux-${arch}/support/xdg_register.sh',
