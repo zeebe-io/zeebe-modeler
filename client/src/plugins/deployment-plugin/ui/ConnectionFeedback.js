@@ -20,7 +20,8 @@ export default function ConnectionFeedback(props) {
 
   const {
     isValidating,
-    validationSuccessful
+    validationSuccessful,
+    failureReason
   } = props;
 
   if (isValidating) {
@@ -39,9 +40,11 @@ export default function ConnectionFeedback(props) {
     );
   }
 
+  const connectionFeedbackText = failureReason ? (UNABLE_TO_CONNECT + ' (' + failureReason + ')') : UNABLE_TO_CONNECT;
+
   return (
     <div className="configuration-status configuration-status__error">
-      { UNABLE_TO_CONNECT }
+      { connectionFeedbackText }
     </div>
   );
 

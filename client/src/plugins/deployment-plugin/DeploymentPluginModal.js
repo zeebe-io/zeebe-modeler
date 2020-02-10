@@ -131,7 +131,8 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
     this.setState({
       isValidating: false,
-      validationSuccessful: validationResult
+      validationSuccessful: validationResult.isSuccessful,
+      failureReason: validationResult.reason
     });
   }
 
@@ -172,7 +173,8 @@ export default class DeploymentPluginModal extends React.PureComponent {
       isValidating,
       validationSuccessful,
       isDeploying,
-      valuesInitiated
+      valuesInitiated,
+      failureReason
     } = this.state;
 
     const {
@@ -226,7 +228,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                         { ENDPOINT_CONFIGURATION_TITLE }
                       </legend>
 
-                      <ConnectionFeedback isValidating={ isValidating } validationSuccessful={ validationSuccessful } />
+                      <ConnectionFeedback isValidating={ isValidating } validationSuccessful={ validationSuccessful } failureReason={ failureReason } />
 
                       <div className="fields">
                         <Field
