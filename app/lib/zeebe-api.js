@@ -65,6 +65,7 @@ module.exports.checkConnectivity = async function(parameters) {
           audience: parameters.audience,
           clientId: parameters.clientId,
           clientSecret: parameters.clientSecret,
+          cacheOnDisk: false
         },
         useTLS: true,
         port: port
@@ -88,7 +89,8 @@ module.exports.checkConnectivity = async function(parameters) {
         camundaCloud: {
           clientId: parameters.clientId,
           clientSecret: parameters.clientSecret,
-          clusterId: parameters.clusterId
+          clusterId: parameters.clusterId,
+          cacheOnDisk: false
         },
         useTLS: true
       });
