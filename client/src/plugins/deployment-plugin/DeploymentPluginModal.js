@@ -11,7 +11,8 @@
 import React from 'react';
 
 import {
-  omit
+  omit,
+  find
 } from 'min-dash';
 
 import { Modal } from '../../app/primitives';
@@ -66,7 +67,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
     this.state = {
       isValidating: true,
       isDeploying: false,
-      validationSuccessful: false,
+      connectionValidationSuccessful: false,
       valuesInitiated: false
     };
 
@@ -83,6 +84,26 @@ export default class DeploymentPluginModal extends React.PureComponent {
       camundaCloudClientSecret: '',
       camundaCloudClusterId: '',
       rememberCredentials: false
+    };
+
+    const { validator } = props;
+
+    this.validatorFunctionsByFieldNames = {
+      deploymentName: validator.validateDeploymentName,
+      zeebeContactPointOauth: validator.validateZeebeContactPoint,
+      oauthURL: validator.validateOAuthURL,
+      audience: validator.validateAudience,
+      oauthClientId: validator.validateClientId,
+      oauthClientSecret: validator.validateClientSecret,
+      camundaCloudClientId: validator.validateClientId,
+      camundaCloudClientSecret: validator.validateClientSecret,
+      camundaCloudClusterId: validator.validateClusterId
+    };
+
+    this.fieldsByConnectionsMethod = {
+      [ SELF_HOSTED ]: [ 'deploymentName' ],
+      [ OAUTH ]: [ 'deploymentName', 'oauthURL', 'audience', 'oauthClientId', 'oauthClientSecret' ],
+      [ CAMUNDA_CLOUD ]: [ 'deploymentName', 'camundaCloudClientId', 'camundaCloudClientSecret', 'camundaCloudClusterId' ]
     };
   }
 
@@ -114,6 +135,13 @@ export default class DeploymentPluginModal extends React.PureComponent {
     return JSON.stringify(lastCheckFormValuesOmitted) !== JSON.stringify(formValuesOmitted);
   }
 
+  validateVisibleFields = (formValues) => {
+    const mandatoryFields = this.fieldsByConnectionsMethod[formValues.connectionMethod];
+    return !find(mandatoryFields, (fieldName) => {
+      return this.validatorFunctionsByFieldNames[fieldName] && this.validatorFunctionsByFieldNames[fieldName](formValues[fieldName]);
+    });
+  }
+
   checkConnection = async (formValues) => {
     if (!this.shouldCheckConnection() || this.isCheckingConnection) {
       return;
@@ -131,7 +159,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
     this.setState({
       isValidating: false,
-      validationSuccessful: validationResult.isSuccessful,
+      connectionValidationSuccessful: validationResult.isSuccessful,
       failureReason: validationResult.reason
     });
   }
@@ -165,13 +193,12 @@ export default class DeploymentPluginModal extends React.PureComponent {
   render() {
 
     const {
-      onClose,
-      validator
+      onClose
     } = this.props;
 
     const {
       isValidating,
-      validationSuccessful,
+      connectionValidationSuccessful,
       isDeploying,
       valuesInitiated,
       failureReason
@@ -179,7 +206,8 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
     const {
       defaultValues,
-      initialValues
+      initialValues,
+      validatorFunctionsByFieldNames
     } = this;
 
     return (
@@ -197,9 +225,13 @@ export default class DeploymentPluginModal extends React.PureComponent {
                 clearTimeout(this.timeoutID);
               }
 
-              this.timeoutID = setTimeout(() => {
-                this.checkConnection(this.formValues);
-              }, (this.timeoutID === undefined ? 0 : 350));
+              const validationResult = this.validateVisibleFields(this.formValues);
+
+              if (validationResult) {
+                this.timeoutID = setTimeout(() => {
+                  this.checkConnection(this.formValues);
+                }, (this.timeoutID === undefined ? 0 : 350));
+              }
 
               return (
                 <form onSubmit={ this.handleFormSubmit }>
@@ -218,7 +250,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                           component={ TextInput }
                           label={ NAME }
                           fieldError={ this.fieldError }
-                          validate={ validator.validateDeploymentName }
+                          validate={ validatorFunctionsByFieldNames.deploymentName }
                           autoFocus
                         />
                       </div>
@@ -228,7 +260,12 @@ export default class DeploymentPluginModal extends React.PureComponent {
                         { ENDPOINT_CONFIGURATION_TITLE }
                       </legend>
 
-                      <ConnectionFeedback isValidating={ isValidating } validationSuccessful={ validationSuccessful } failureReason={ failureReason } />
+                      <ConnectionFeedback
+                        isValidating={ isValidating }
+                        validationResult={ validationResult }
+                        connectionValidationSuccessful={ connectionValidationSuccessful }
+                        failureReason={ failureReason }
+                      />
 
                       <div className="fields">
                         <Field
@@ -266,7 +303,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 component={ TextInput }
                                 label={ CONTACT_POINT }
                                 fieldError={ this.fieldError }
-                                validate={ validator.validateZeebeContactPoint }
+                                validate={ validatorFunctionsByFieldNames.zeebeContactPointOauth }
                                 hint={ CONTACT_POINT_HINT_OAUTH }
                                 autoFocus
                               />
@@ -275,14 +312,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 component={ TextInput }
                                 label={ CLIENT_ID }
                                 fieldError={ this.fieldError }
-                                validate={ validator.validateClientId }
+                                validate={ validatorFunctionsByFieldNames.oauthClientId }
                               />
                               <Field
                                 name="oauthClientSecret"
                                 component={ TextInput }
                                 label={ CLIENT_SECRET }
                                 fieldError={ this.fieldError }
-                                validate={ validator.validateClientSecret }
+                                validate={ validatorFunctionsByFieldNames.oauthClientSecret }
                                 type="password"
                               />
                               <Field
@@ -290,14 +327,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 component={ TextInput }
                                 label={ OAUTH_URL }
                                 fieldError={ this.fieldError }
-                                validate={ validator.validateOAuthURL }
+                                validate={ validatorFunctionsByFieldNames.oauthURL }
                               />
                               <Field
                                 name="audience"
                                 component={ TextInput }
                                 label={ AUDIENCE }
                                 fieldError={ this.fieldError }
-                                validate={ validator.validateAudience }
+                                validate={ validatorFunctionsByFieldNames.audience }
                               />
                             </React.Fragment>
                           )
@@ -310,7 +347,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 component={ TextInput }
                                 label={ CLIENT_ID }
                                 fieldError={ this.fieldError }
-                                validate={ validator.validateClientId }
+                                validate={ validatorFunctionsByFieldNames.camundaCloudClientId }
                                 autoFocus
                               />
                               <Field
@@ -318,7 +355,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 component={ TextInput }
                                 label={ CLIENT_SECRET }
                                 fieldError={ this.fieldError }
-                                validate={ validator.validateClientSecret }
+                                validate={ validatorFunctionsByFieldNames.camundaCloudClientSecret }
                                 type="password"
                               />
                               <Field
@@ -326,7 +363,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 component={ TextInput }
                                 label={ CLUSTER_ID }
                                 fieldError={ this.fieldError }
-                                validate={ validator.validateClusterId }
+                                validate={ validatorFunctionsByFieldNames.camundaCloudClusterId }
                               />
                             </React.Fragment>
                           )
@@ -355,7 +392,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                       <button
                         type="submit"
                         className="btn btn-primary"
-                        disabled={ !valuesInitiated || isValidating || !validationSuccessful || isDeploying }
+                        disabled={ !valuesInitiated || isValidating || !connectionValidationSuccessful || isDeploying || !validationResult }
                       >
                         { DEPLOY }
                       </button>

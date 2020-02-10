@@ -42,6 +42,7 @@ const AUDIENCE_MUST_NOT_BE_EMPTY = 'Audience must not be empty.';
 const CLIENT_ID_MUST_NOT_BE_EMPTY = 'Client Id must not be empty.';
 const CLIENT_SECRET_MUST_NOT_BE_EMPTY = 'Client Secret must not be empty.';
 const CLUSTER_ID_MUST_NOT_BE_EMPTY = 'Cluster Id must not be empty.';
+const FILL_IN_ALL_THE_FIELDS = 'You must fill in all the fields';
 
 const SELF_HOSTED = 'selfHosted';
 const OAUTH = 'oauth';
@@ -81,5 +82,6 @@ export {
   CLIENT_ID,
   CLIENT_SECRET,
   CLUSTER_ID,
-  REMEMBER_CREDENTIALS
+  REMEMBER_CREDENTIALS,
+  FILL_IN_ALL_THE_FIELDS
 };

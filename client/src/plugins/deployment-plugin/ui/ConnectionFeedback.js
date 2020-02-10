@@ -13,16 +13,26 @@ import React from 'react';
 import {
   VALIDATING_CONNECTION,
   CONNECTED_SUCCESSFULLY,
-  UNABLE_TO_CONNECT
+  UNABLE_TO_CONNECT,
+  FILL_IN_ALL_THE_FIELDS
 } from '../DeploymentPluginConstants';
 
 export default function ConnectionFeedback(props) {
 
   const {
     isValidating,
-    validationSuccessful,
+    connectionValidationSuccessful,
+    validationResult,
     failureReason
   } = props;
+
+  if (!validationResult) {
+    return (
+      <div className="configuration-status configuration-status__hint">
+        { FILL_IN_ALL_THE_FIELDS }
+      </div>
+    );
+  }
 
   if (isValidating) {
     return (
@@ -32,7 +42,7 @@ export default function ConnectionFeedback(props) {
     );
   }
 
-  if (validationSuccessful) {
+  if (connectionValidationSuccessful) {
     return (
       <div className="configuration-status configuration-status__success">
         { CONNECTED_SUCCESSFULLY }
