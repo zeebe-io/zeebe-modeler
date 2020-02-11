@@ -48,6 +48,7 @@ describe('<DeploymentPluginModal>', () => {
     const { instance } = createDeploymentPluginModal({ validateConnectionSpy });
 
     instance.lastCheckedFormValues = JSON.stringify(instance.formValues);
+    instance.renderWaitingState = false;
 
     // when
     await instance.checkConnection(instance.formValues);
@@ -57,13 +58,13 @@ describe('<DeploymentPluginModal>', () => {
   });
 
 
-  it('should not check connection if in isCheckingConnection state', async () => {
+  it('should not check connection if in isValidating state', async () => {
 
     // given
     const validateConnectionSpy = sinon.spy();
     const { instance } = createDeploymentPluginModal({ validateConnectionSpy });
 
-    instance.isCheckingConnection = true;
+    instance.setState({ isValidating: true });
 
     // when
     await instance.checkConnection(instance.formValues);

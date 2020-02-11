@@ -62,10 +62,8 @@ export default class DeploymentPluginModal extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.isCheckingConnection = false;
-
     this.state = {
-      isValidating: true,
+      isValidating: false,
       isDeploying: false,
       connectionValidationSuccessful: false,
       valuesInitiated: false
@@ -105,6 +103,8 @@ export default class DeploymentPluginModal extends React.PureComponent {
       [ OAUTH ]: [ 'deploymentName', 'oauthURL', 'audience', 'oauthClientId', 'oauthClientSecret' ],
       [ CAMUNDA_CLOUD ]: [ 'deploymentName', 'camundaCloudClientId', 'camundaCloudClientSecret', 'camundaCloudClusterId' ]
     };
+
+    this.validationResultCache = null;
   }
 
   componentDidMount = async () => {
@@ -125,7 +125,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
   }
 
   shouldCheckConnection = () => {
-    if (!this.lastCheckedFormValues) {
+    if (!this.lastCheckedFormValues || this.renderWaitingState) {
       return true;
     }
 
@@ -143,19 +143,18 @@ export default class DeploymentPluginModal extends React.PureComponent {
   }
 
   checkConnection = async (formValues) => {
-    if (!this.shouldCheckConnection() || this.isCheckingConnection) {
+    if (!this.shouldCheckConnection() || this.state.isValidating) {
       return;
     }
 
     this.lastCheckedFormValues = JSON.stringify(formValues);
+    this.renderWaitingState = false;
 
     this.setState({
       isValidating: true
     });
 
-    this.isCheckingConnection = true;
     const validationResult = await this.props.validator.validateConnection(formValues);
-    this.isCheckingConnection = false;
 
     this.setState({
       isValidating: false,
@@ -233,6 +232,12 @@ export default class DeploymentPluginModal extends React.PureComponent {
                 }, (this.timeoutID === undefined ? 0 : 350));
               }
 
+              if (validationResult && validationResult !== this.validationResultCache) {
+                this.renderWaitingState = true;
+              }
+
+              this.validationResultCache = validationResult;
+
               return (
                 <form onSubmit={ this.handleFormSubmit }>
                   <Modal.Body>
@@ -261,6 +266,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                       </legend>
 
                       <ConnectionFeedback
+                        renderWaitingState={ this.renderWaitingState }
                         isValidating={ isValidating }
                         validationResult={ validationResult }
                         connectionValidationSuccessful={ connectionValidationSuccessful }

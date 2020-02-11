@@ -20,6 +20,7 @@ import {
 export default function ConnectionFeedback(props) {
 
   const {
+    renderWaitingState,
     isValidating,
     connectionValidationSuccessful,
     validationResult,
@@ -34,7 +35,7 @@ export default function ConnectionFeedback(props) {
     );
   }
 
-  if (isValidating) {
+  if (isValidating || renderWaitingState) {
     return (
       <div className="configuration-status configuration-status__loading">
         { VALIDATING_CONNECTION }
