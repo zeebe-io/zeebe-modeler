@@ -17,93 +17,16 @@ let zbClientInstance;
 
 module.exports.checkConnectivity = async function(parameters) {
 
-  shutdownClientInstance();
+  restartZeebeClient(parameters);
 
-  if (parameters.type === 'selfHosted') {
-
-    let url = parameters.url;
-    let port = '26500';
-    if (parameters.url.includes(':')) {
-      const splitted = parameters.url.split(':');
-      url = splitted[0];
-      port = splitted[1];
-    }
-
-    try {
-
-      zbClientInstance = new ZB.ZBClient(url, {
-        retry: false,
-        port: port
-      });
-
-      await zbClientInstance.topology();
-
-      return { isSuccessful: true };
-    } catch (err) {
-
-      return {
-        isSuccessful: false,
-        reason: err.details
-      };
-    }
-  } else if (parameters.type === 'oauth') {
-
-    let url = parameters.url;
-    let port = '443';
-    if (parameters.url.includes(':')) {
-      const splitted = parameters.url.split(':');
-      url = splitted[0];
-      port = splitted[1];
-    }
-
-    try {
-
-      zbClientInstance = new ZB.ZBClient(url, {
-        retry: false,
-        oAuth: {
-          url: parameters.oauthURL,
-          audience: parameters.audience,
-          clientId: parameters.clientId,
-          clientSecret: parameters.clientSecret,
-          cacheOnDisk: false
-        },
-        useTLS: true,
-        port: port
-      });
-
-      await zbClientInstance.topology();
-
-      return { isSuccessful: true };
-    } catch (err) {
-
-      return {
-        isSuccessful: false,
-        reason: err.details
-      };
-    }
-  } else if (parameters.type === 'camundaCloud') {
-
-    try {
-      zbClientInstance = new ZB.ZBClient({
-        retry: false,
-        camundaCloud: {
-          clientId: parameters.clientId,
-          clientSecret: parameters.clientSecret,
-          clusterId: parameters.clusterId,
-          cacheOnDisk: false
-        },
-        useTLS: true
-      });
-
-      await zbClientInstance.topology();
-
-      return { isSuccessful: true };
-    } catch (err) {
-      return {
-        isSuccessful: false,
-        reason: err.details
-      };
-    }
+  try {
+    await zbClientInstance.topology();
+    return { isSuccessful: true };
+  } catch (err) {
+    return {
+      isSuccessful: false,
+      reason: err.details
+    };
   }
 };
 
@@ -148,5 +71,59 @@ module.exports.run = async function(parameters) {
 async function shutdownClientInstance() {
   if (zbClientInstance) {
     await zbClientInstance.close();
+  }
+}
+
+function restartZeebeClient(parameters) {
+  shutdownClientInstance();
+
+  if (parameters.type === 'selfHosted') {
+
+    let url = parameters.url;
+    let port = '26500';
+    if (parameters.url.includes(':')) {
+      const splitted = parameters.url.split(':');
+      url = splitted[0];
+      port = splitted[1];
+    }
+
+    zbClientInstance = new ZB.ZBClient(url, {
+      retry: false,
+      port: port
+    });
+  } else if (parameters.type === 'oauth') {
+
+    let url = parameters.url;
+    let port = '443';
+    if (parameters.url.includes(':')) {
+      const splitted = parameters.url.split(':');
+      url = splitted[0];
+      port = splitted[1];
+    }
+
+    zbClientInstance = new ZB.ZBClient(url, {
+      retry: false,
+      oAuth: {
+        url: parameters.oauthURL,
+        audience: parameters.audience,
+        clientId: parameters.clientId,
+        clientSecret: parameters.clientSecret,
+        cacheOnDisk: false
+      },
+      useTLS: true,
+      port: port
+    });
+  } else if (parameters.type === 'camundaCloud') {
+
+    zbClientInstance = new ZB.ZBClient({
+      retry: false,
+      camundaCloud: {
+        clientId: parameters.clientId,
+        clientSecret: parameters.clientSecret,
+        clusterId: parameters.clusterId,
+        cacheOnDisk: false
+      },
+      useTLS: true
+    });
   }
 }
