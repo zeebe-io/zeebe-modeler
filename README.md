@@ -21,6 +21,13 @@ Requires [homebrew](https://brew.sh/index_de.html) and [cask](https://caskroom.g
 brew cask install zeebe-modeler
 ```
 
+#### Windows (using Scoop)
+
+Requires [Scoop](https://github.com/lukesampson/scoop) and the [scoop-extras](https://github.com/lukesampson/scoop-extras) bucket:
+
+```
+scoop install zeebe-modeler
+```
 
 ## Resources
 
