@@ -10,7 +10,6 @@
 
 import {
   MUST_PROVIDE_A_VALUE,
-  DEPLOYMENT_NAME_MUST_NOT_BE_EMPTY,
   CONTACTPOINT_MUST_NOT_BE_EMPTY,
   OAUTH_URL_MUST_NOT_BE_EMPTY,
   AUDIENCE_MUST_NOT_BE_EMPTY,
@@ -30,10 +29,6 @@ export default class DeploymentPluginValidator {
 
   validateNonEmpty = (value, message = MUST_PROVIDE_A_VALUE) => {
     return value ? null : message;
-  }
-
-  validateDeploymentName = (value) => {
-    return this.validateNonEmpty(value, DEPLOYMENT_NAME_MUST_NOT_BE_EMPTY);
   }
 
   validateZeebeContactPoint = (value) => {

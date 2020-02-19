@@ -201,9 +201,9 @@ const createDeploymentPlugin = (params = {}) => {
   const subscribe = (type, callback) => {
     if (type === 'app.activeTabChanged') {
       callback(params.emptyTab ? {
-        activeTab: { type: 'empty' }
+        activeTab: { type: 'empty', name: 'testName' }
       } : {
-        activeTab: { type: 'nonEmpty' }
+        activeTab: { type: 'nonEmpty', name: 'testName' }
       });
     }
   };
