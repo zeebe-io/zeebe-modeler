@@ -17,6 +17,15 @@ import {
   FILL_IN_ALL_THE_FIELDS
 } from '../DeploymentPluginConstants';
 
+const errorReasons = {
+  UNKNOWN: 'UNKNOWN',
+  CONTACT_POINT: 'CONTACT_POINT',
+  AUTHORIZATION: 'AUTHORIZATION',
+  CLUSTER_ID: 'CLUSTER_ID',
+  AUDIENCE: 'AUDIENCE',
+  OAUTH_URL: 'OAUTH_URL'
+};
+
 export default function ConnectionFeedback(props) {
 
   const {
@@ -51,7 +60,7 @@ export default function ConnectionFeedback(props) {
     );
   }
 
-  const connectionFeedbackText = failureReason ? (UNABLE_TO_CONNECT + ' (' + failureReason + ')') : UNABLE_TO_CONNECT;
+  const connectionFeedbackText = failureReason ? (UNABLE_TO_CONNECT + ' ' + getErrorText(failureReason)) : UNABLE_TO_CONNECT;
 
   return (
     <div className="configuration-status configuration-status__error">
@@ -59,4 +68,22 @@ export default function ConnectionFeedback(props) {
     </div>
   );
 
+}
+
+function getErrorText(failureReason) {
+  switch (failureReason) {
+  case errorReasons.UNKNOWN:
+    return '';
+  case errorReasons.CONTACT_POINT:
+    return 'Please check the contact point.';
+  case errorReasons.AUTHORIZATION:
+    return 'Please check your credentials.';
+  case errorReasons.CLUSTER_ID:
+    return 'Please check the cluster id.';
+  case errorReasons.AUDIENCE:
+    return 'Please check the audience.';
+  case errorReasons.OAUTH_URL:
+    return 'Please check the OAuth URL.';
+  }
+  return '';
 }
