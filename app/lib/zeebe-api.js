@@ -15,6 +15,15 @@ const ZB = require('zeebe-node');
 
 let zbClientInstance;
 
+const errorReasons = {
+  UNKNOWN: 'UNKNOWN',
+  CONTACT_POINT: 'CONTACT_POINT',
+  AUTHORIZATION: 'AUTHORIZATION',
+  CLUSTER_ID: 'CLUSTER_ID',
+  AUDIENCE: 'AUDIENCE',
+  OAUTH_URL: 'OAUTH_URL'
+};
+
 module.exports.checkConnectivity = async function(parameters) {
 
   restartZeebeClient(parameters);
@@ -25,7 +34,7 @@ module.exports.checkConnectivity = async function(parameters) {
   } catch (err) {
     return {
       isSuccessful: false,
-      reason: err.details
+      reason: getErrorReason(err, parameters)
     };
   }
 };
@@ -72,6 +81,32 @@ async function shutdownClientInstance() {
   if (zbClientInstance) {
     await zbClientInstance.close();
   }
+}
+
+
+function getErrorReason(error, parameters) {
+  if (error.code === 14) { // grpc unavailable
+    if (parameters.type === 'camundaCloud') {
+      return errorReasons.CLUSTER_ID;
+    }
+    return errorReasons.CONTACT_POINT;
+  }
+
+  if (error.message) {
+    if (error.message.includes('Unauthorized')) {
+      return errorReasons.AUTHORIZATION;
+    }
+    if (error.message.includes('Forbidden')) {
+      return errorReasons.AUDIENCE;
+    }
+    if (error.message.includes('ENOTFOUND') || error.message.includes('Not Found')) {
+      return errorReasons.OAUTH_URL;
+    }
+    if (error.message.includes('Unsupported protocol') && parameters.type === 'oauth') {
+      return errorReasons.OAUTH_URL;
+    }
+  }
+  return errorReasons.UNKNOWN;
 }
 
 function restartZeebeClient(parameters) {
