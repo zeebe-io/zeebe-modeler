@@ -168,7 +168,8 @@ describe('<DeploymentPluginModal>', () => {
     // then
     expect(setConfigSpy).to.have.been.calledWith({
       ...config,
-      rememberCredentials: false
+      rememberCredentials: false,
+      deploymentName: 'test'
     });
   });
 
@@ -283,6 +284,7 @@ const createDeploymentPluginModal = (params = {}) => {
     onDeploy={ onDeploy }
     setConfig={ setConfig }
     onClose={ onClose }
+    tabName={ params.tabName || 'test' }
   />);
 
   const instance = wrapper.instance();

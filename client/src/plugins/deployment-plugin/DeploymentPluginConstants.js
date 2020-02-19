@@ -21,6 +21,7 @@ const SELF_HOSTED_TEXT = 'Self hosted';
 const OAUTH_TEXT = 'Oauth';
 const CAMUNDA_CLOUD_TEXT = 'Camunda Cloud';
 const CONTACT_POINT = 'Contactpoint';
+const DEPLOYMENT_NAME_HINT = 'Default value is the file name.';
 const CONTACT_POINT_HINT = 'Default value is 0.0.0.0:26500';
 const CONTACT_POINT_HINT_OAUTH = 'Should point to a running Zeebe broker.';
 const OAUTH_URL = 'OAuth URL';
@@ -35,7 +36,6 @@ const CONNECTED_SUCCESSFULLY = 'Connected successfully.';
 const UNABLE_TO_CONNECT = 'Unable to connect.';
 
 const MUST_PROVIDE_A_VALUE = 'Must provide a value.';
-const DEPLOYMENT_NAME_MUST_NOT_BE_EMPTY = 'Deployment name must not be empty.';
 const CONTACTPOINT_MUST_NOT_BE_EMPTY = 'Contactpoint must not be empty.';
 const OAUTH_URL_MUST_NOT_BE_EMPTY = 'OAuth URL must not be empty.';
 const AUDIENCE_MUST_NOT_BE_EMPTY = 'Audience must not be empty.';
@@ -59,7 +59,6 @@ export {
   CONNECTED_SUCCESSFULLY,
   UNABLE_TO_CONNECT,
   MUST_PROVIDE_A_VALUE,
-  DEPLOYMENT_NAME_MUST_NOT_BE_EMPTY,
   CONTACTPOINT_MUST_NOT_BE_EMPTY,
   OAUTH_URL_MUST_NOT_BE_EMPTY,
   AUDIENCE_MUST_NOT_BE_EMPTY,
@@ -75,6 +74,7 @@ export {
   OAUTH_TEXT,
   CAMUNDA_CLOUD_TEXT,
   CONTACT_POINT,
+  DEPLOYMENT_NAME_HINT,
   CONTACT_POINT_HINT,
   CONTACT_POINT_HINT_OAUTH,
   OAUTH_URL,

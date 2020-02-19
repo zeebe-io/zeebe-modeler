@@ -97,7 +97,7 @@ export default class DeploymentPlugin extends PureComponent {
     const zeebeAPI = this.props._getGlobal('zeebeAPI');
     const deploymentResult = await zeebeAPI.deploy({
       filePath: path,
-      name: parameters.deploymentName
+      name: parameters.deploymentName || withoutExtension(this.activeTab.name)
     });
 
     if (!deploymentResult.success) {
@@ -145,9 +145,16 @@ export default class DeploymentPlugin extends PureComponent {
             onDeploy={ this.onDeploy }
             getConfig={ this.getConfig }
             setConfig={ this.setConfig }
+            tabName={ withoutExtension(this.activeTab.name) }
           />
         </KeyboardInteractionTrap>
       }
     </React.Fragment>;
   }
+}
+
+// helpers //////////
+
+function withoutExtension(name) {
+  return name.replace(/\.[^.]+$/, '');
 }

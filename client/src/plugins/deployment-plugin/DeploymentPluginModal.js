@@ -33,6 +33,7 @@ import {
   OAUTH_TEXT,
   CAMUNDA_CLOUD_TEXT,
   CONTACT_POINT,
+  DEPLOYMENT_NAME_HINT,
   CONTACT_POINT_HINT,
   CONTACT_POINT_HINT_OAUTH,
   OAUTH_URL,
@@ -70,7 +71,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
     };
 
     this.defaultValues = {
-      deploymentName: 'deployment1',
+      deploymentName: props.tabName,
       connectionMethod: SELF_HOSTED,
       zeebeContactpointSelfHosted: '0.0.0.0:26500',
       zeebeContactPointOauth: '',
@@ -87,7 +88,6 @@ export default class DeploymentPluginModal extends React.PureComponent {
     const { validator } = props;
 
     this.validatorFunctionsByFieldNames = {
-      deploymentName: validator.validateDeploymentName,
       zeebeContactPointOauth: validator.validateZeebeContactPoint,
       oauthURL: validator.validateOAuthURL,
       audience: validator.validateAudience,
@@ -99,9 +99,9 @@ export default class DeploymentPluginModal extends React.PureComponent {
     };
 
     this.fieldsByConnectionsMethod = {
-      [ SELF_HOSTED ]: [ 'deploymentName' ],
-      [ OAUTH ]: [ 'deploymentName', 'oauthURL', 'audience', 'oauthClientId', 'oauthClientSecret' ],
-      [ CAMUNDA_CLOUD ]: [ 'deploymentName', 'camundaCloudClientId', 'camundaCloudClientSecret', 'camundaCloudClusterId' ]
+      [ SELF_HOSTED ]: [],
+      [ OAUTH ]: [ 'oauthURL', 'audience', 'oauthClientId', 'oauthClientSecret' ],
+      [ CAMUNDA_CLOUD ]: [ 'camundaCloudClientId', 'camundaCloudClientSecret', 'camundaCloudClusterId' ]
     };
 
     this.validationResultCache = null;
@@ -129,8 +129,9 @@ export default class DeploymentPluginModal extends React.PureComponent {
       return true;
     }
 
-    const lastCheckFormValuesOmitted = omit(JSON.parse(this.lastCheckedFormValues), 'rememberCredentials');
-    const formValuesOmitted = omit(this.formValues, 'rememberCredentials');
+    const omitFields = ['rememberCredentials', 'deploymentName'];
+    const lastCheckFormValuesOmitted = omit(JSON.parse(this.lastCheckedFormValues), omitFields);
+    const formValuesOmitted = omit(this.formValues, omitFields);
 
     return JSON.stringify(lastCheckFormValuesOmitted) !== JSON.stringify(formValuesOmitted);
   }
@@ -173,13 +174,13 @@ export default class DeploymentPluginModal extends React.PureComponent {
   }
 
   handleFormSubmit = () => {
-
     const lastCheckValuesParsed = JSON.parse(this.lastCheckedFormValues);
-    const { rememberCredentials } = this.formValues;
+    const { rememberCredentials, deploymentName } = this.formValues;
 
     const formValuesParsed = {
       ...lastCheckValuesParsed,
-      rememberCredentials
+      rememberCredentials,
+      deploymentName
     };
 
     this.saveConfig(formValuesParsed);
@@ -254,8 +255,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                           name="deploymentName"
                           component={ TextInput }
                           label={ NAME }
-                          fieldError={ this.fieldError }
-                          validate={ validatorFunctionsByFieldNames.deploymentName }
+                          hint={ DEPLOYMENT_NAME_HINT }
                           autoFocus
                         />
                       </div>

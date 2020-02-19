@@ -13,7 +13,6 @@
 import DeploymentPluginValidator from '../DeploymentPluginValidator';
 
 import {
-  DEPLOYMENT_NAME_MUST_NOT_BE_EMPTY,
   CONTACTPOINT_MUST_NOT_BE_EMPTY,
   OAUTH_URL_MUST_NOT_BE_EMPTY,
   AUDIENCE_MUST_NOT_BE_EMPTY,
@@ -30,18 +29,6 @@ describe('<DeploymentPluginValidator>', () => {
   describe('Basic validation', () => {
 
     const validator = new DeploymentPluginValidator(null);
-
-    it('should validate deployment name', () => {
-
-      // given
-      const nonValidName = '';
-      const validName = 'validName';
-
-      // then
-      expect(validator.validateDeploymentName(nonValidName)).to.eql(DEPLOYMENT_NAME_MUST_NOT_BE_EMPTY);
-      expect(validator.validateDeploymentName(validName)).to.not.exist;
-    });
-
 
     it('should validate Zeebe contact point', () => {
 
