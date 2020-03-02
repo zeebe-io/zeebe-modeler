@@ -15,7 +15,7 @@ import {
   find
 } from 'min-dash';
 
-import { Modal } from '../../app/primitives';
+import { Modal } from '../../../app/primitives';
 
 import {
   MODAL_TITLE,
@@ -24,9 +24,7 @@ import {
   ENDPOINT_CONFIGURATION_TITLE,
   CANCEL,
   DEPLOY,
-  SELF_HOSTED,
-  OAUTH,
-  CAMUNDA_CLOUD,
+  START,
   NAME,
   METHOD,
   SELF_HOSTED_TEXT,
@@ -43,6 +41,12 @@ import {
   CLUSTER_ID,
   REMEMBER_CREDENTIALS
 } from './DeploymentPluginConstants';
+
+import {
+  SELF_HOSTED,
+  OAUTH,
+  CAMUNDA_CLOUD
+} from '../shared/ZeebeConnectionTypes';
 
 import {
   Formik,
@@ -193,7 +197,8 @@ export default class DeploymentPluginModal extends React.PureComponent {
   render() {
 
     const {
-      onClose
+      onClose,
+      isStart
     } = this.props;
 
     const {
@@ -400,7 +405,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                         className="btn btn-primary"
                         disabled={ !valuesInitiated || isValidating || !connectionValidationSuccessful || isDeploying || !validationResult }
                       >
-                        { DEPLOY }
+                        { isStart ? START : DEPLOY }
                       </button>
                     </div>
                   </Modal.Footer>
