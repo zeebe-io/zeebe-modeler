@@ -194,6 +194,115 @@ describe('<DeploymentPlugin>', () => {
       message: 'details'
     });
   });
+
+
+  it('should broadcast deploymentInitiated message when clicked on icon', () => {
+
+    // given
+    const broadcastMessageSpy = sinon.spy();
+    const { instance } = createDeploymentPlugin({ broadcastMessageSpy });
+
+    // when
+    instance.onIconClicked();
+
+    // then
+    expect(broadcastMessageSpy).to.have.been.calledWith('deploymentInitiated');
+  });
+
+
+  it('should show modal when forceDeploy message is received', () => {
+
+    // given
+    const { instance } = createDeploymentPlugin();
+
+    // when
+    instance.onMessageReceived('forceDeploy');
+
+    // then
+    expect(instance.state.modalVisible).to.be.true;
+  });
+
+
+  it('should be in isStart:true state when forceDeploy message is received', () => {
+
+    // given
+    const { instance } = createDeploymentPlugin();
+
+    // when
+    instance.onMessageReceived('forceDeploy');
+
+    // then
+    expect(instance.state.isStart).to.be.true;
+  });
+
+
+  it('should subscribe to messaging when mounted', () => {
+
+    // given
+    const subscribeToMessagingSpy = sinon.spy();
+    createDeploymentPlugin({ subscribeToMessagingSpy });
+
+    // then
+    expect(subscribeToMessagingSpy).to.have.been.calledWith('deploymentPlugin');
+  });
+
+
+  it('should unsubscribe from messaging when unmounted', () => {
+
+    // given
+    const unsubscribeFromMessagingSpy = sinon.spy();
+    const { wrapper } = createDeploymentPlugin({ unsubscribeFromMessagingSpy });
+
+    // when
+    wrapper.unmount();
+
+    // then
+    expect(unsubscribeFromMessagingSpy).to.have.been.calledWith('deploymentPlugin');
+  });
+
+
+  it('should have skipNotificationOnSuccess:true after receiving forceDeploy message', () => {
+
+    // given
+    const { instance } = createDeploymentPlugin();
+
+    // when
+    instance.onMessageReceived('forceDeploy');
+
+    // then
+    expect(instance.skipNotificationOnSuccess).to.be.true;
+  });
+
+
+  it('should have skipNotificationOnSuccess:false after clicking on icon', () => {
+
+    // given
+    const { instance } = createDeploymentPlugin();
+    instance.skipNotificationOnSuccess = true;
+
+    // when
+    instance.onIconClicked();
+
+    // then
+    expect(instance.skipNotificationOnSuccess).to.be.false;
+  });
+
+
+  it('should not display notification if skipNotificationOnSuccess is true', () => {
+
+    // given
+    const displayNotificationSpy = sinon.spy();
+    const { instance } = createDeploymentPlugin();
+    instance.skipNotificationOnSuccess = true;
+
+    // when
+    instance.onDeploymentSuccess({
+      workflows: [ { bpmnProcessId: 'test' } ]
+    });
+
+    // then
+    expect(displayNotificationSpy).to.not.have.been.called;
+  });
 });
 
 
@@ -215,7 +324,7 @@ const createDeploymentPlugin = (params = {}) => {
             if (!params.deploymentSuccessful) {
               resolve({ response: { details: 'details' } });
             } else {
-              resolve({ success: true });
+              resolve({ success: true, response: { workflows: [ { bpmnProcessId: 'test' } ] } });
             }
           });
         }
@@ -256,6 +365,21 @@ const createDeploymentPlugin = (params = {}) => {
       };
     }
   };
+  const broadcastMessage = (msg) => {
+    if (params.broadcastMessageSpy) {
+      params.broadcastMessageSpy(msg);
+    }
+  };
+  const subscribeToMessaging = (key) => {
+    if (params.subscribeToMessagingSpy) {
+      params.subscribeToMessagingSpy(key);
+    }
+  };
+  const unsubscribeFromMessaging = (key) => {
+    if (params.unsubscribeFromMessagingSpy) {
+      params.unsubscribeFromMessagingSpy(key);
+    }
+  };
 
   const wrapper = shallow(<DeploymentPlugin
     subscribe={ subscribe }
@@ -264,6 +388,9 @@ const createDeploymentPlugin = (params = {}) => {
     displayNotification={ displayNotification }
     log={ log }
     triggerAction={ triggerAction }
+    subscribeToMessaging={ subscribeToMessaging }
+    unsubscribeFromMessaging={ unsubscribeFromMessaging }
+    broadcastMessage={ broadcastMessage }
   />);
 
   const instance = wrapper.instance();

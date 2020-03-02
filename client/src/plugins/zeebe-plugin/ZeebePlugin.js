@@ -10,6 +10,8 @@
 
 import React, { PureComponent } from 'react';
 
+import DeploymentPlugin from './deployment-plugin';
+
 import { forEach, omit } from 'min-dash';
 
 /**
@@ -41,7 +43,12 @@ export default class ZeebePlugin extends PureComponent {
 
   render() {
     return <React.Fragment>
-
+      <DeploymentPlugin
+        { ...this.props }
+        subscribeToMessaging={ this.subscribeToMessaging }
+        broadcastMessage={ this.broadcastMessage }
+        unsubscribeFromMessaging={ this.unsubscribeFromMessaging }
+      />
     </React.Fragment>;
   }
 }

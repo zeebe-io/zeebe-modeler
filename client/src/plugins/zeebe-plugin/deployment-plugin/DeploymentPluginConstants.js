@@ -14,6 +14,7 @@ const DEPLOYMENT_DETAILS_TITLE = 'Deployment Details';
 const ENDPOINT_CONFIGURATION_TITLE = 'Endpoint Configuration';
 const CANCEL = 'Cancel';
 const DEPLOY = 'Deploy';
+const START = 'Start';
 
 const NAME = 'Name';
 const METHOD = 'Method';
@@ -44,10 +45,6 @@ const CLIENT_SECRET_MUST_NOT_BE_EMPTY = 'Client Secret must not be empty.';
 const CLUSTER_ID_MUST_NOT_BE_EMPTY = 'Cluster Id must not be empty.';
 const FILL_IN_ALL_THE_FIELDS = 'You must fill in all the fields';
 
-const SELF_HOSTED = 'selfHosted';
-const OAUTH = 'oauth';
-const CAMUNDA_CLOUD = 'camundaCloud';
-
 export {
   MODAL_TITLE,
   INTRO,
@@ -55,6 +52,7 @@ export {
   ENDPOINT_CONFIGURATION_TITLE,
   CANCEL,
   DEPLOY,
+  START,
   VALIDATING_CONNECTION,
   CONNECTED_SUCCESSFULLY,
   UNABLE_TO_CONNECT,
@@ -65,9 +63,6 @@ export {
   CLIENT_ID_MUST_NOT_BE_EMPTY,
   CLIENT_SECRET_MUST_NOT_BE_EMPTY,
   CLUSTER_ID_MUST_NOT_BE_EMPTY,
-  SELF_HOSTED,
-  OAUTH,
-  CAMUNDA_CLOUD,
   NAME,
   METHOD,
   SELF_HOSTED_TEXT,

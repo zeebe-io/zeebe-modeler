@@ -8,8 +8,8 @@
  * except in compliance with the MIT License.
  */
 
-import DeploymentPlugin from './deployment-plugin';
+import ZeebePlugin from './zeebe-plugin';
 
 export default [
-  DeploymentPlugin
+  ZeebePlugin
 ];

@@ -19,10 +19,13 @@ import {
   CLIENT_ID_MUST_NOT_BE_EMPTY,
   CLIENT_SECRET_MUST_NOT_BE_EMPTY,
   CLUSTER_ID_MUST_NOT_BE_EMPTY,
+} from '../DeploymentPluginConstants';
+
+import {
   SELF_HOSTED,
   OAUTH,
   CAMUNDA_CLOUD
-} from '../DeploymentPluginConstants';
+} from '../../shared/ZeebeConnectionTypes';
 
 describe('<DeploymentPluginValidator>', () => {
 

@@ -10,12 +10,12 @@
 
 import React, { PureComponent } from 'react';
 
-import { Fill } from '../../app/slot-fill';
+import { Fill } from '../../../app/slot-fill';
 
 import {
   Button,
   Icon
-} from '../../app/primitives';
+} from '../../../app/primitives';
 
 import DeploymentPluginModal from './DeploymentPluginModal';
 
@@ -32,18 +32,36 @@ export default class DeploymentPlugin extends PureComponent {
 
     this.state = {
       modalVisible: false,
-      hasActiveTab: false
+      hasActiveTab: false,
+      isStart: false
     };
     this.validator = new DeploymentPluginValidator(props._getGlobal('zeebeAPI'));
+
+  }
+
+  onMessageReceived = (msg, body) => {
+    if (msg === 'forceDeploy') {
+      this.setState({ modalVisible: true, isStart: true });
+      this.skipNotificationOnSuccess = true;
+    }
+    if (msg === 'deploymentFailure') {
+      this.onDeploymentError(body);
+    }
   }
 
   componentDidMount() {
+    this.props.subscribeToMessaging('deploymentPlugin', this.onMessageReceived);
+
     this.props.subscribe('app.activeTabChanged', ({ activeTab }) => {
       this.activeTab = activeTab;
       this.setState({
         hasActiveTab: activeTab && activeTab.type !== 'empty'
       });
     });
+  }
+
+  componentWillUnmount() {
+    this.props.unsubscribeFromMessaging('deploymentPlugin');
   }
 
   getConfig = async () => {
@@ -55,16 +73,21 @@ export default class DeploymentPlugin extends PureComponent {
     this.props.config.set(DEPLOYMENT_CONFIG_KEY, config);
   }
 
-  onDeploymentSuccess = () => {
+  onDeploymentSuccess = (response) => {
     const {
-      displayNotification
+      displayNotification,
+      broadcastMessage
     } = this.props;
 
-    displayNotification({
-      type: 'success',
-      title: 'Deployment succeeded',
-      duration: 4000
-    });
+    if (!this.skipNotificationOnSuccess) {
+      displayNotification({
+        type: 'success',
+        title: 'Deployment succeeded',
+        duration: 4000
+      });
+    }
+
+    broadcastMessage('deploymentSucceeded', response.workflows[0].bpmnProcessId);
   }
 
   onDeploymentError = (response) => {
@@ -100,10 +123,12 @@ export default class DeploymentPlugin extends PureComponent {
       name: parameters.deploymentName || withoutExtension(this.activeTab.name)
     });
 
-    if (!deploymentResult.success) {
-      this.onDeploymentError(deploymentResult.response);
+    const { response, success } = deploymentResult;
+
+    if (!success) {
+      this.onDeploymentError(response);
     } else {
-      this.onDeploymentSuccess();
+      this.onDeploymentSuccess(response);
     }
   }
 
@@ -117,18 +142,23 @@ export default class DeploymentPlugin extends PureComponent {
     } = this.state;
 
     this.setState({ modalVisible: !modalVisible });
+
+    this.props.broadcastMessage('deploymentInitiated');
+
+    this.skipNotificationOnSuccess = false;
   }
 
   render() {
 
     const {
       modalVisible,
-      hasActiveTab
+      hasActiveTab,
+      isStart
     } = this.state;
 
     return <React.Fragment>
       { hasActiveTab &&
-        <Fill slot="toolbar" group="8_deploy">
+        <Fill slot="toolbar" group="8_deploy" priority={ 1 }>
           <Button
             onClick={ this.onIconClicked }
             title="Deploy current diagram"
@@ -146,6 +176,7 @@ export default class DeploymentPlugin extends PureComponent {
             getConfig={ this.getConfig }
             setConfig={ this.setConfig }
             tabName={ withoutExtension(this.activeTab.name) }
+            isStart={ isStart }
           />
         </KeyboardInteractionTrap>
       }
