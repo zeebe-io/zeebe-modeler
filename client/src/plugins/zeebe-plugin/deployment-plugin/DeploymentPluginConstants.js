@@ -9,7 +9,7 @@
  */
 
 const MODAL_TITLE = 'Deploy Diagram';
-const INTRO = 'Specify deployment details and deploy this diagram to Camunda.';
+const INTRO = 'Specify deployment details and deploy this diagram to Zeebe.';
 const DEPLOYMENT_DETAILS_TITLE = 'Deployment Details';
 const ENDPOINT_CONFIGURATION_TITLE = 'Endpoint Configuration';
 const CANCEL = 'Cancel';
