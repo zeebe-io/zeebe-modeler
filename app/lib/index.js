@@ -11,6 +11,7 @@
 const {
   app,
   dialog: electronDialog,
+  screen: electronScreen,
   session,
   BrowserWindow
 } = require('electron');
@@ -34,6 +35,7 @@ const logTransports = require('./log/transports');
 const Menu = require('./menu');
 const Platform = require('./platform');
 const Plugins = require('./plugins');
+const WindowManager = require('./window-manager');
 const Workspace = require('./workspace');
 const ZeebeAPI = require('./zeebe-api');
 
@@ -67,7 +69,8 @@ const {
   files,
   flags,
   menu,
-  plugins
+  plugins,
+  windowManager
 } = bootstrap();
 
 app.flags = flags;
@@ -371,6 +374,8 @@ app.createEditorWindow = function() {
 
   const mainWindow = app.mainWindow = new BrowserWindow(windowOptions);
 
+  windowManager.manage(mainWindow);
+
   dialog.setActiveWindow(mainWindow);
 
   menu.init();
@@ -416,10 +421,6 @@ app.createEditorWindow = function() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
-  });
-
-  mainWindow.webContents.on('dom-ready', function() {
-    mainWindow.maximize();
   });
 
   app.emit('app:window-created', mainWindow);
@@ -574,6 +575,12 @@ function bootstrap() {
   // (7) plugins
   const pluginsDisabled = flags.get('disable-plugins');
 
+  // (8) window manager
+  const windowManager = new WindowManager({
+    config,
+    electronScreen
+  });
+
   let paths;
 
   if (pluginsDisabled) {
@@ -598,7 +605,8 @@ function bootstrap() {
     files,
     flags,
     menu,
-    plugins
+    plugins,
+    windowManager
   };
 }
 

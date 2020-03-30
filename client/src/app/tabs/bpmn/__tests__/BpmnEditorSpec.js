@@ -1147,7 +1147,6 @@ async function renderEditor(xml, options = {}) {
   };
 }
 
-// helper /////////
 function getEvent(events, eventName) {
   return find(events, e => e.type === eventName);
 }

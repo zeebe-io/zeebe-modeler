@@ -363,7 +363,7 @@ describe('<App>', function() {
 
       const showSpy = spy(dialog, 'showOpenFileErrorDialog');
 
-      dialog.setShowOpenFileErrorDialogResponse('cancel');
+      dialog.setShowOpenFileErrorDialogResponse({ button: 'cancel' });
 
       const { app } = createApp({
         globals: {
@@ -418,7 +418,7 @@ describe('<App>', function() {
       // given
       const dialog = new Dialog();
 
-      dialog.setShowEmptyFileDialogResponse('create');
+      dialog.setShowEmptyFileDialogResponse({ button: 'create' });
 
       const { app } = createApp({
         globals: {
@@ -495,7 +495,7 @@ describe('<App>', function() {
       // given
       const dialog = new Dialog();
 
-      dialog.setShowEmptyFileDialogResponse('create');
+      dialog.setShowEmptyFileDialogResponse({ button: 'create' });
 
       const { app } = createApp({
         globals: {
@@ -528,7 +528,7 @@ describe('<App>', function() {
       // given
       const dialog = new Dialog();
 
-      dialog.setShowEmptyFileDialogResponse('create');
+      dialog.setShowEmptyFileDialogResponse({ button: 'create' });
 
       const showSpy = spy(dialog, 'showEmptyFileDialog');
 
@@ -556,7 +556,7 @@ describe('<App>', function() {
       // given
       const dialog = new Dialog();
 
-      dialog.setShowOpenFileErrorDialogResponse('cancel');
+      dialog.setShowOpenFileErrorDialogResponse({ button: 'cancel' });
 
       const { app } = createApp({
         globals: {
@@ -666,7 +666,7 @@ describe('<App>', function() {
         ...app.setDirty(tab)
       });
 
-      dialog.setShowCloseFileDialogResponse('discard');
+      dialog.setShowCloseFileDialogResponse({ button: 'discard' });
 
       // when
       await app.closeTab(tab);
@@ -705,7 +705,7 @@ describe('<App>', function() {
         ...app.setDirty(tab)
       });
 
-      dialog.setShowCloseFileDialogResponse('cancel');
+      dialog.setShowCloseFileDialogResponse({ button: 'cancel' });
 
       // when
       const closeTabResponse = await app.closeTab(tab);
@@ -927,7 +927,7 @@ describe('<App>', function() {
       await app.createDiagram();
 
       dialog.setShowSaveFileDialogResponse('foo.svg');
-      dialog.setShowSaveFileErrorDialogResponse('cancel');
+      dialog.setShowSaveFileErrorDialogResponse({ button: 'cancel' });
 
       const err = new Error('foo');
 
@@ -947,7 +947,7 @@ describe('<App>', function() {
       await app.createDiagram();
 
       dialog.setShowSaveFileDialogResponse('foo.svg');
-      dialog.setShowSaveFileErrorDialogResponse('retry');
+      dialog.setShowSaveFileErrorDialogResponse({ button: 'retry' });
 
       const err = new Error('foo');
 
@@ -1075,7 +1075,7 @@ describe('<App>', function() {
       await app.createDiagram();
 
       dialog.setShowSaveFileDialogResponse('foo.svg');
-      dialog.setShowSaveFileErrorDialogResponse('cancel');
+      dialog.setShowSaveFileErrorDialogResponse({ button: 'cancel' });
 
       const err = new Error('foo');
 
@@ -1095,7 +1095,7 @@ describe('<App>', function() {
       await app.createDiagram();
 
       dialog.setShowSaveFileDialogResponse('foo.svg');
-      dialog.setShowSaveFileErrorDialogResponse('retry');
+      dialog.setShowSaveFileErrorDialogResponse({ button: 'retry' });
 
       const err = new Error('foo');
 
@@ -1114,6 +1114,23 @@ describe('<App>', function() {
 
       expect(exportAsSpy).to.have.been.calledTwice;
       expect(writeFileSpy).to.have.been.calledTwice;
+    });
+
+
+    it('should handle missing export extension', async function() {
+
+      // given
+      await app.createDiagram();
+
+      dialog.setShowSaveFileDialogResponse('foo');
+
+      // when
+      await app.triggerAction('export-as');
+
+      // then
+      expect(showSaveFileDialogSpy).to.have.been.called;
+
+      expect(writeFileSpy).not.to.have.been.called;
     });
 
   });
@@ -1873,7 +1890,9 @@ describe('<App>', function() {
 
       // given
       const showSpy = spy(_ => {
-        return 'ok';
+        return {
+          button: 'ok'
+        };
       });
 
       const dialog = new Dialog({
@@ -2365,6 +2384,36 @@ describe('<App>', function() {
 
       // then
       expect(getConfigSpy).to.be.calledOnceWith('foo');
+    });
+
+  });
+
+
+  describe('#setConfig', function() {
+
+    afterEach(sinon.restore);
+
+
+    it('should set config', async function() {
+
+      // given
+      const setConfigSpy = spy();
+
+      const config = new Config({
+        set: setConfigSpy
+      });
+
+      const { app } = createApp({
+        globals: {
+          config
+        }
+      });
+
+      // when
+      app.setConfig('foo');
+
+      // then
+      expect(setConfigSpy).to.be.calledOnceWith('foo');
     });
 
   });

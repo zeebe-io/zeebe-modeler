@@ -218,7 +218,9 @@ describe('<MultiSheetTab>', function() {
       // given
       const actionSpy = spy(action => {
         if (action === 'show-dialog') {
-          return 'ask-in-forum';
+          return {
+            button: 'ask-in-forum'
+          };
         }
       });
 
@@ -451,6 +453,47 @@ describe('<MultiSheetTab>', function() {
       expect(instance.isDirty()).to.be.false;
     });
 
+  });
+
+
+  describe('#onAction', function() {
+
+    it('should propagate action', async function() {
+
+      // given
+      const onAction = sinon.spy();
+
+      const {
+        instance
+      } = renderTab({
+        onAction
+      });
+
+      // when
+      await instance.onAction('foo');
+
+      // then
+      expect(onAction).to.have.been.calledWith('foo');
+    });
+
+
+    it('should handle close-tab action', async function() {
+
+      // given
+      const onAction = sinon.spy();
+
+      const {
+        instance
+      } = renderTab({
+        onAction
+      });
+
+      // when
+      await instance.onAction('close-tab');
+
+      // then
+      expect(onAction).to.have.been.calledWith('close-tab', { tabId: instance.props.tab.id });
+    });
   });
 
 });

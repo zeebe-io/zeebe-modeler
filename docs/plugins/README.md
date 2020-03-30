@@ -63,7 +63,7 @@ module.exports = function(electronApp, menuState) {
       shell.openExternal('https://camunda.org/bpmn/reference/');
     }
   }];
-});
+};
 ```
 
 Plug them into the modeler like this:
@@ -80,7 +80,7 @@ For more information on how the modeler's menu works, have a look at its impleme
 
 ### Extend the modeling tools for BPMN
 
-> Currently you can only extend bpmn-js
+> Currently you can only extend bpmn-js and dmn-js
 
 You can extend the modeling tools for [BPMN](https://github.com/bpmn-io/bpmn-js).
 

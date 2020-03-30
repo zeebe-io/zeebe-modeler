@@ -245,9 +245,9 @@ export class App extends PureComponent {
       return tab;
     }
 
-    const answer = await this.showDialog(getContentChangedDialog());
+    const { button } = await this.showDialog(getContentChangedDialog());
 
-    if (answer === 'ok') {
+    if (button === 'ok') {
       const updatedFile = await fileSystem.readFile(file.path);
 
       return this.updateTab(tab, {
@@ -370,11 +370,11 @@ export class App extends PureComponent {
     const { name } = file;
 
     if (this.isDirty(tab)) {
-      const response = await this.showCloseFileDialog({ name });
+      const { button } = await this.showCloseFileDialog({ name });
 
-      if (response === 'save') {
+      if (button === 'save') {
         await this.saveTab(tab);
-      } else if (response === 'cancel') {
+      } else if (button === 'cancel') {
         return false;
       }
     }
@@ -548,12 +548,12 @@ export class App extends PureComponent {
       return;
     }
 
-    const response = await dialog.showEmptyFileDialog({
+    const { button } = await dialog.showEmptyFileDialog({
       file,
       type: fileType
     });
 
-    if (response == 'create') {
+    if (button == 'create') {
 
       let tab = this.addTab(
         tabsProvider.createTabForFile({
@@ -1328,9 +1328,9 @@ export class App extends PureComponent {
         return this.tabSaved(tab, savedFile);
       } catch (err) {
 
-        const response = await this.askForSaveRetry(tab, err, getSaveFileErrorDialog);
+        const { button } = await this.askForSaveRetry(tab, err, getSaveFileErrorDialog);
 
-        if (response !== 'retry') {
+        if (button !== 'retry') {
 
           // cancel
           return false;
@@ -1487,7 +1487,14 @@ export class App extends PureComponent {
 
     const exportType = getFileTypeFromExtension(exportPath);
 
-    const { encoding } = provider.exports ? provider.exports[ exportType ] : ENCODING_UTF8;
+    // handle missing extension / export type as abortion
+    // this ensures file export does not fail on Linux,
+    // cf. https://github.com/camunda/camunda-modeler/issues/1699
+    if (provider.exports && !provider.exports[exportType]) {
+      return false;
+    }
+
+    const { encoding } = provider.exports && provider.exports[ exportType ] || ENCODING_UTF8;
 
     return {
       encoding,
@@ -1510,10 +1517,11 @@ export class App extends PureComponent {
 
         return exportOptions ? await this.exportAsFile(exportOptions) : false;
       } catch (err) {
+        console.error('Tab export failed', err);
 
-        const response = await this.askForSaveRetry(tab, err, getExportFileErrorDialog);
+        const { button } = await this.askForSaveRetry(tab, err, getExportFileErrorDialog);
 
-        if (response !== 'retry') {
+        if (button !== 'retry') {
 
           // cancel
           return;
@@ -1634,6 +1642,10 @@ export class App extends PureComponent {
       return this.checkFileChanged(activeTab);
     }
 
+    if (action === 'notify-focus-change') {
+      return this.emit('app.focus-changed');
+    }
+
     if (action === 'resize') {
       return this.resizeTab();
     }
@@ -1703,6 +1715,12 @@ export class App extends PureComponent {
     const { file } = activeTab;
 
     return config.get(key, file, ...args);
+  }
+
+  setConfig = (key, ...args) => {
+    const config = this.getGlobal('config');
+
+    return config.set(key, ...args);
   }
 
   getPlugins = type => {
@@ -1882,6 +1900,7 @@ export class App extends PureComponent {
                     onAction={ this.triggerAction }
                     onModal={ this.openModal }
                     getConfig={ this.getConfig }
+                    setConfig={ this.setConfig }
                     getPlugins={ this.getPlugins }
                     ref={ this.tabRef }
                   />
@@ -1894,6 +1913,7 @@ export class App extends PureComponent {
               layout={ layout.log }
               onClear={ this.clearLog }
               onLayoutChanged={ this.handleLayoutChanged }
+              onUpdateMenu={ this.updateMenu }
             />
 
             <PluginsRoot
