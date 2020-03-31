@@ -8,6 +8,8 @@
  * except in compliance with the MIT License.
  */
 
+import './styles/style.less';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -71,12 +73,12 @@ async function render() {
 
   await plugins.loadAll();
 
-  const rootElement = document.getElementById('root');
+  const rootElement = document.querySelector('#root');
 
   const onStarted = () => {
 
     // mark as finished loading
-    document.body.classList.remove('loading');
+    document.querySelector('body > .spinner-border').classList.add('hidden');
   };
 
   ReactDOM.render(

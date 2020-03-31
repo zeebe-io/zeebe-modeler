@@ -186,12 +186,10 @@ export class BpmnEditor extends CachedComponent {
     modeler.get('commandStack').redo();
   }
 
-  align = (type) => {
-    const modeler = this.getModeler();
-
-    const selection = modeler.get('selection').get();
-
-    modeler.get('alignElements').trigger(selection, type);
+  handleAlignElements = (type) => {
+    this.triggerAction('alignElements', {
+      type
+    });
   }
 
   handleMinimapToggle = (event) => {
@@ -595,41 +593,41 @@ export class BpmnEditor extends CachedComponent {
           <Button
             title="Align elements left"
             disabled={ !this.state.align }
-            onClick={ () => this.align('left') }
+            onClick={ () => this.handleAlignElements('left') }
           >
             <Icon name="align-left-tool" />
           </Button>
           <Button
             title="Align elements center"
             disabled={ !this.state.align }
-            onClick={ () => this.align('center') }
+            onClick={ () => this.handleAlignElements('center') }
           >
             <Icon name="align-center-tool" />
           </Button>
           <Button
             title="Align elements right"
             disabled={ !this.state.align }
-            onClick={ () => this.align('right') }
+            onClick={ () => this.handleAlignElements('right') }
           >
             <Icon name="align-right-tool" />
           </Button>
           <Button
             title="Align elements top"
             disabled={ !this.state.align }
-            onClick={ () => this.align('top') }>
+            onClick={ () => this.handleAlignElements('top') }>
             <Icon name="align-top-tool" />
           </Button>
           <Button
             title="Align elements middle"
             disabled={ !this.state.align }
-            onClick={ () => this.align('middle') }
+            onClick={ () => this.handleAlignElements('middle') }
           >
             <Icon name="align-middle-tool" />
           </Button>
           <Button
             title="Align elements bottom"
             disabled={ !this.state.align }
-            onClick={ () => this.align('bottom') }
+            onClick={ () => this.handleAlignElements('bottom') }
           >
             <Icon name="align-bottom-tool" />
           </Button>
