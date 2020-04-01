@@ -17,10 +17,10 @@ let zbClientInstance;
 
 const errorReasons = {
   UNKNOWN: 'UNKNOWN',
-  CONTACT_POINT: 'CONTACT_POINT',
-  AUTHORIZATION: 'AUTHORIZATION',
-  CLUSTER_ID: 'CLUSTER_ID',
-  AUDIENCE: 'AUDIENCE',
+  CONTACT_POINT_UNAVAILABLE: 'CONTACT_POINT_UNAVAILABLE',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  CLUSTER_UNAVAILABLE: 'CLUSTER_UNAVAILABLE',
+  FORBIDDEN: 'FORBIDDEN',
   OAUTH_URL: 'OAUTH_URL'
 };
 
@@ -87,20 +87,26 @@ async function shutdownClientInstance() {
 function getErrorReason(error, parameters) {
   if (error.code === 14) { // grpc unavailable
     if (parameters.type === 'camundaCloud') {
-      return errorReasons.CLUSTER_ID;
+      return errorReasons.CLUSTER_UNAVAILABLE;
     }
-    return errorReasons.CONTACT_POINT;
+    return errorReasons.CONTACT_POINT_UNAVAILABLE;
   }
 
   if (error.message) {
     if (error.message.includes('Unauthorized')) {
-      return errorReasons.AUTHORIZATION;
+      return errorReasons.UNAUTHORIZED;
     }
     if (error.message.includes('Forbidden')) {
-      return errorReasons.AUDIENCE;
+      return errorReasons.FORBIDDEN;
     }
     if (error.message.includes('ENOTFOUND') || error.message.includes('Not Found')) {
-      return errorReasons.OAUTH_URL;
+      if (parameters.type === 'oauth') {
+        return errorReasons.OAUTH_URL;
+      } else if (parameters.type === 'camundaCloud') {
+        return errorReasons.CLUSTER_UNAVAILABLE;
+      }
+
+      return errorReasons.CONTACT_POINT_UNAVAILABLE;
     }
     if (error.message.includes('Unsupported protocol') && parameters.type === 'oauth') {
       return errorReasons.OAUTH_URL;
