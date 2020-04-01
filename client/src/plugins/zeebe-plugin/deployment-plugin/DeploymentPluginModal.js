@@ -39,7 +39,9 @@ import {
   CLIENT_ID,
   CLIENT_SECRET,
   CLUSTER_ID,
-  REMEMBER_CREDENTIALS
+  REMEMBER_CREDENTIALS,
+  ERROR_REASONS,
+  CONNECTION_ERROR_MESSAGES
 } from './DeploymentPluginConstants';
 
 import {
@@ -55,7 +57,6 @@ import {
 
 import {
   CheckBox,
-  ConnectionFeedback,
   Radio,
   TextInput
 } from './ui';
@@ -172,6 +173,42 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
   fieldError = (meta) => {
     return meta.error;
+  }
+
+  endpointConfigurationFieldError = (meta, fieldName) => {
+    return meta.error || this.getConnectionError(fieldName);
+  }
+
+  getConnectionError(fieldName) {
+    const { failureReason } = this.state;
+
+    if (!failureReason) {
+      return;
+    }
+
+    switch (failureReason) {
+    case ERROR_REASONS.CONTACT_POINT_UNAVAILABLE:
+      return [ 'zeebeContactpointSelfHosted', 'zeebeContactPointOauth' ].includes(fieldName) &&
+        CONNECTION_ERROR_MESSAGES[failureReason];
+    case ERROR_REASONS.CLUSTER_UNAVAILABLE:
+      return fieldName === 'camundaCloudClusterId' && CONNECTION_ERROR_MESSAGES[failureReason];
+    case ERROR_REASONS.UNAUTHORIZED:
+    case ERROR_REASONS.FORBIDDEN:
+      return [
+        'oauthClientId',
+        'oauthClientSecret',
+        'camundaCloudClientId',
+        'camundaCloudClientSecret'
+      ].includes(fieldName) && CONNECTION_ERROR_MESSAGES[failureReason];
+    case ERROR_REASONS.OAUTH_URL:
+      return fieldName === 'oauthURL' && CONNECTION_ERROR_MESSAGES[failureReason];
+    case ERROR_REASONS.UNKNOWN:
+      return [
+        'zeebeContactpointSelfHosted',
+        'zeebeContactPointOauth',
+        'camundaCloudClusterId'
+      ].includes(fieldName) && CONNECTION_ERROR_MESSAGES[failureReason];
+    }
   }
 
   shouldCheckConnection = () => {
@@ -292,8 +329,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
       isValidating,
       connectionValidationSuccessful,
       isDeploying,
-      valuesInitiated,
-      failureReason
+      valuesInitiated
     } = this.state;
 
     const {
@@ -350,14 +386,6 @@ export default class DeploymentPluginModal extends React.PureComponent {
                         { ENDPOINT_CONFIGURATION_TITLE }
                       </legend>
 
-                      <ConnectionFeedback
-                        renderWaitingState={ this.renderWaitingState }
-                        isValidating={ isValidating }
-                        validationResult={ validationResult }
-                        connectionValidationSuccessful={ connectionValidationSuccessful }
-                        failureReason={ failureReason }
-                      />
-
                       <div className="fields">
                         <Field
                           name="endpoint.connectionMethod"
@@ -385,7 +413,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 name="endpoint.zeebeContactpointSelfHosted"
                                 component={ TextInput }
                                 label={ CONTACT_POINT }
-                                fieldError={ this.fieldError }
+                                fieldError={ this.endpointConfigurationFieldError }
                                 hint={ CONTACT_POINT_HINT }
                                 autoFocus
                               />
@@ -399,7 +427,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 name="endpoint.zeebeContactPointOauth"
                                 component={ TextInput }
                                 label={ CONTACT_POINT }
-                                fieldError={ this.fieldError }
+                                fieldError={ this.endpointConfigurationFieldError }
                                 validate={ validatorFunctionsByFieldNames.zeebeContactPointOauth }
                                 hint={ CONTACT_POINT_HINT_OAUTH }
                                 autoFocus
@@ -408,14 +436,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 name="endpoint.oauthClientId"
                                 component={ TextInput }
                                 label={ CLIENT_ID }
-                                fieldError={ this.fieldError }
+                                fieldError={ this.endpointConfigurationFieldError }
                                 validate={ validatorFunctionsByFieldNames.oauthClientId }
                               />
                               <Field
                                 name="endpoint.oauthClientSecret"
                                 component={ TextInput }
                                 label={ CLIENT_SECRET }
-                                fieldError={ this.fieldError }
+                                fieldError={ this.endpointConfigurationFieldError }
                                 validate={ validatorFunctionsByFieldNames.oauthClientSecret }
                                 type="password"
                               />
@@ -423,14 +451,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 name="endpoint.oauthURL"
                                 component={ TextInput }
                                 label={ OAUTH_URL }
-                                fieldError={ this.fieldError }
+                                fieldError={ this.endpointConfigurationFieldError }
                                 validate={ validatorFunctionsByFieldNames.oauthURL }
                               />
                               <Field
                                 name="endpoint.audience"
                                 component={ TextInput }
                                 label={ AUDIENCE }
-                                fieldError={ this.fieldError }
+                                fieldError={ this.endpointConfigurationFieldError }
                                 validate={ validatorFunctionsByFieldNames.audience }
                               />
                             </React.Fragment>
@@ -443,7 +471,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 name="endpoint.camundaCloudClientId"
                                 component={ TextInput }
                                 label={ CLIENT_ID }
-                                fieldError={ this.fieldError }
+                                fieldError={ this.endpointConfigurationFieldError }
                                 validate={ validatorFunctionsByFieldNames.camundaCloudClientId }
                                 autoFocus
                               />
@@ -451,7 +479,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 name="endpoint.camundaCloudClientSecret"
                                 component={ TextInput }
                                 label={ CLIENT_SECRET }
-                                fieldError={ this.fieldError }
+                                fieldError={ this.endpointConfigurationFieldError }
                                 validate={ validatorFunctionsByFieldNames.camundaCloudClientSecret }
                                 type="password"
                               />
@@ -459,7 +487,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 name="endpoint.camundaCloudClusterId"
                                 component={ TextInput }
                                 label={ CLUSTER_ID }
-                                fieldError={ this.fieldError }
+                                fieldError={ this.endpointConfigurationFieldError }
                                 validate={ validatorFunctionsByFieldNames.camundaCloudClusterId }
                               />
                             </React.Fragment>
