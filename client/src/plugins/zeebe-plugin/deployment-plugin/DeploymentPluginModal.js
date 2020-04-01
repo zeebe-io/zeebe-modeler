@@ -21,13 +21,11 @@ import { Modal } from '../../../app/primitives';
 
 import {
   MODAL_TITLE,
-  INTRO,
-  DEPLOYMENT_DETAILS_TITLE,
   ENDPOINT_CONFIGURATION_TITLE,
   CANCEL,
   DEPLOY,
   START,
-  NAME,
+  DEPLOYMENT_NAME,
   METHOD,
   SELF_HOSTED_TEXT,
   OAUTH_TEXT,
@@ -56,10 +54,10 @@ import {
 } from 'formik';
 
 import {
-  Select,
-  TextInput,
+  CheckBox,
   ConnectionFeedback,
-  CheckBox
+  Radio,
+  TextInput
 } from './ui';
 
 import {
@@ -306,7 +304,6 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
     return (
       <Modal className={ css.DeploymentPluginModal } onClose={ onClose }>
-        <Modal.Title> { MODAL_TITLE } </Modal.Title>
         <Formik initialValues={ initialValues || defaultValues } enableReinitialize={ true }>
           {
             form => {
@@ -335,20 +332,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
               return (
                 <form onSubmit={ this.handleFormSubmit }>
+                  <Modal.Title> { MODAL_TITLE } </Modal.Title>
                   <Modal.Body>
-                    <p className="intro">
-                      { INTRO }
-                    </p>
                     <fieldset>
-                      <legend>
-                        { DEPLOYMENT_DETAILS_TITLE }
-                      </legend>
-
                       <div className="fields">
                         <Field
                           name="deployment.name"
                           component={ TextInput }
-                          label={ NAME }
+                          label={ DEPLOYMENT_NAME }
                           hint={ DEPLOYMENT_NAME_HINT }
                           autoFocus
                         />
@@ -370,7 +361,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                       <div className="fields">
                         <Field
                           name="endpoint.connectionMethod"
-                          component={ Select }
+                          component={ Radio }
                           label={ METHOD }
                           onChange={ event => form.setValues({
                             ...form.values,
@@ -379,11 +370,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
                               connectionMethod: event.target.value
                             }
                           }) }
-                        >
-                          <option value={ SELF_HOSTED } defaultValue>{ SELF_HOSTED_TEXT }</option>
-                          <option value={ OAUTH }>{ OAUTH_TEXT }</option>
-                          <option value={ CAMUNDA_CLOUD }>{ CAMUNDA_CLOUD_TEXT }</option>
-                        </Field>
+                          values={
+                            [
+                              { value: SELF_HOSTED, label: SELF_HOSTED_TEXT },
+                              { value: OAUTH, label: OAUTH_TEXT },
+                              { value: CAMUNDA_CLOUD, label: CAMUNDA_CLOUD_TEXT }
+                            ]
+                          }
+                        />
                         {
                           form.values.endpoint.connectionMethod === SELF_HOSTED && (
                             <React.Fragment>

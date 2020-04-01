@@ -10,6 +10,6 @@
 
 export { default as TextInput } from './TextInput';
 export { default as CheckBox } from './CheckBox';
-export { default as Select } from './Select';
+export { default as Radio } from './Radio';
 export { default as ConnectionFeedback } from './ConnectionFeedback';
 export { default as KeyboardInteractionTrap } from './KeyboardInteractionTrap';
