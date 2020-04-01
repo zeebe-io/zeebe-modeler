@@ -5,7 +5,7 @@ A list of things to perform with every Zeebe Modeler release.
 __Hint:__ Create a release issue and copy the template below into it.
 
 ```markdown
-* [ ] put up code freeze appointment in calendar (include `modeling`, `qa`, `sre`, `zeebe` and `Team-Support`)
+* [ ] put up code freeze appointment in calendar (include `modeling`, `qa`, `infra`, `zeebe` and `Team-Support`)
 * [ ] make sure dependencies are released (`rm -rf node_modules && npm i && npm run all` works)
     * `bpmn-js`, `*-properties-panel`, `*-moddle`, ...
 * [ ] close all issues which are solved by dependency updates
