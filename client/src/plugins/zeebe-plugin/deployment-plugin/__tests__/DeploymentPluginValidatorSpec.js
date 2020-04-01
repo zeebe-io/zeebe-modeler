@@ -13,7 +13,7 @@
 import DeploymentPluginValidator from '../DeploymentPluginValidator';
 
 import {
-  CONTACTPOINT_MUST_NOT_BE_EMPTY,
+  CONTACT_POINT_MUST_NOT_BE_EMPTY,
   OAUTH_URL_MUST_NOT_BE_EMPTY,
   AUDIENCE_MUST_NOT_BE_EMPTY,
   CLIENT_ID_MUST_NOT_BE_EMPTY,
@@ -40,7 +40,7 @@ describe('<DeploymentPluginValidator>', () => {
       const validZeebeContactPoint = 'validZeebeContactPoint';
 
       // then
-      expect(validator.validateZeebeContactPoint(nonValidZeebeContactPoint)).to.eql(CONTACTPOINT_MUST_NOT_BE_EMPTY);
+      expect(validator.validateZeebeContactPoint(nonValidZeebeContactPoint)).to.eql(CONTACT_POINT_MUST_NOT_BE_EMPTY);
       expect(validator.validateZeebeContactPoint(validZeebeContactPoint)).to.not.exist;
     });
 
