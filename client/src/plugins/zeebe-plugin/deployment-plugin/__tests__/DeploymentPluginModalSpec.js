@@ -23,6 +23,20 @@ describe('<DeploymentPluginModal>', () => {
   });
 
 
+  it('should set tab name as default deployment name', async () => {
+
+    // given
+    const tabName = 'foo';
+    const { instance } = createDeploymentPluginModal({ tabName });
+
+    // when
+    await instance.componentDidMount();
+
+    // then
+    expect(instance.initialValues.deploymentName).to.eql(tabName);
+  });
+
+
   it('should get stored config on start', async () => {
 
     // given
