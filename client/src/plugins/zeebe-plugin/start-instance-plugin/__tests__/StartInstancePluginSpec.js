@@ -16,7 +16,8 @@ import { shallow } from 'enzyme';
 
 import StartInstancePlugin from '../StartInstancePlugin';
 
-const DEPLOYMENT_CONFIG_KEY = 'DEPLOYMENT_CONFIG';
+const DEPLOYMENT_CONFIG_KEY = 'deployment-tool';
+const ZEEBE_ENDPOINTS_CONFIG_KEY = 'zeebeEndpoints';
 
 describe('<StartInstancePlugin>', () => {
 
@@ -196,10 +197,23 @@ describe('<StartInstancePlugin>', () => {
   it('should skip deployment dialog if deployment configuration existent', async () => {
 
     // given
-    const getConfigResult = { test: true };
+    const savedTabConfiguration = {
+      endpointId: 'foo',
+      deployment: { name: 'test ' }
+    };
+
+    const savedEndpoints = [ { id: 'foo' } ];
+
     const connectionValidated = true;
+
     const deployFirstSpy = sinon.spy();
-    const { instance } = createStartInstancePlugin({ getConfigResult, connectionValidated });
+
+    const { instance } = createStartInstancePlugin({
+      savedTabConfiguration,
+      savedEndpoints,
+      connectionValidated
+    });
+
     instance.deployFirst = deployFirstSpy;
 
     // when
@@ -214,9 +228,21 @@ describe('<StartInstancePlugin>', () => {
 
     // given
     const deploySpy = sinon.spy();
-    const getConfigResult = { test: true };
+    const savedTabConfiguration = {
+      endpointId: 'foo',
+      deployment: { name: 'test ' }
+    };
+
+    const savedEndpoints = [ { id: 'foo' } ];
+
     const connectionValidated = true;
-    const { instance } = createStartInstancePlugin({ getConfigResult, connectionValidated, deploySpy });
+
+    const { instance } = createStartInstancePlugin({
+      savedTabConfiguration,
+      savedEndpoints,
+      connectionValidated,
+      deploySpy
+    });
 
     // when
     await instance.onIconClicked();
@@ -229,10 +255,23 @@ describe('<StartInstancePlugin>', () => {
   it('should open deployment dialog if connection not validated', async () => {
 
     // given
-    const getConfigResult = { test: true };
-    const connectionValidated = false;
     const deployFirstSpy = sinon.spy();
-    const { instance } = createStartInstancePlugin({ getConfigResult, connectionValidated });
+
+    const savedTabConfiguration = {
+      endpointId: 'foo',
+      deployment: { name: 'test ' }
+    };
+
+    const savedEndpoints = [ { id: 'foo' } ];
+
+    const connectionValidated = false;
+
+    const { instance } = createStartInstancePlugin({
+      savedTabConfiguration,
+      savedEndpoints,
+      connectionValidated
+    });
+
     instance.deployFirst = deployFirstSpy;
 
     // when
@@ -246,12 +285,20 @@ describe('<StartInstancePlugin>', () => {
   it('should emit deploymentFailure message if deployment fails', async () => {
 
     // given
-    const getConfigResult = { test: true };
+    const savedTabConfiguration = {
+      endpointId: 'foo',
+      deployment: { name: 'test ' }
+    };
+
+    const savedEndpoints = [ { id: 'foo' } ];
+
     const connectionValidated = true;
     const deploymentSuccessful = false;
     const broadcastMessageSpy = sinon.spy();
+
     const { instance } = createStartInstancePlugin({
-      getConfigResult,
+      savedTabConfiguration,
+      savedEndpoints,
       connectionValidated,
       deploymentSuccessful,
       broadcastMessageSpy
@@ -268,12 +315,20 @@ describe('<StartInstancePlugin>', () => {
   it('should start process instance if every check is ok', async () => {
 
     // given
-    const getConfigResult = { test: true };
+    const savedTabConfiguration = {
+      endpointId: 'foo',
+      deployment: { name: 'test ' }
+    };
+
+    const savedEndpoints = [ { id: 'foo' } ];
+
     const connectionValidated = true;
     const deploymentSuccessful = true;
     const startProcessInstanceSpy = sinon.spy();
+
     const { instance } = createStartInstancePlugin({
-      getConfigResult,
+      savedTabConfiguration,
+      savedEndpoints,
       connectionValidated,
       deploymentSuccessful
     });
@@ -338,14 +393,16 @@ const createStartInstancePlugin = (params = {}) => {
     }
   };
   const config = {
-    get: (key) => {
+    getForFile: (file, key) => {
       if (params.getConfigSpy) {
         params.getConfigSpy(key);
       }
-      if (params.getConfigResult) {
-        return params.getConfigResult;
+      return params.savedTabConfiguration || null;
+    },
+    get: (key) => {
+      if (key === ZEEBE_ENDPOINTS_CONFIG_KEY) {
+        return params.savedEndpoints || [];
       }
-      return;
     },
     set: () => {
 

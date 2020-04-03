@@ -16,6 +16,9 @@ import { shallow } from 'enzyme';
 
 import DeploymentPlugin from '../DeploymentPlugin';
 
+const DEPLOYMENT_CONFIG_KEY = 'deployment-tool';
+const ZEEBE_ENDPOINTS_CONFIG_KEY = 'zeebeEndpoints';
+
 describe('<DeploymentPlugin>', () => {
 
   it('should render', () => {
@@ -83,45 +86,100 @@ describe('<DeploymentPlugin>', () => {
   });
 
 
-  it('should return empty object if there is no stored config', async () => {
+  it('should return empty object if there is no stored tab config', async () => {
 
     // given
     const { instance } = createDeploymentPlugin();
 
     // when
-    const config = await instance.getConfig();
+    const config = await instance.getSavedConfiguration();
 
     // then
     expect(config).to.eql({});
   });
 
 
-  it('should return stored configurations', async () => {
+  it('should return stored tab configuration', async () => {
 
     // given
-    const storedConfig = { test: 'true' };
-    const { instance } = createDeploymentPlugin({ storedConfig });
+    const storedTabConfiguration = { deployment: { name: 'foo' } };
+    const { instance } = createDeploymentPlugin({ storedTabConfiguration });
 
     // when
-    const config = await instance.getConfig();
+    const config = await instance.getSavedConfiguration();
 
     // then
-    expect(config).to.eql(storedConfig);
+    expect(config.deployment).to.eql(storedTabConfiguration.deployment);
   });
 
 
-  it('should store configurations', () => {
+  it('should retrieve stored endpoint configuration', async () => {
 
     // given
-    const config = { test: 'true' };
-    const setConfigSpy = sinon.spy();
-    const { instance } = createDeploymentPlugin({ setConfigSpy });
+    const storedTabConfiguration = {
+      deployment: { name: 'foo' },
+      endpointId: 'bar'
+    };
+
+    const storedEndpoints = [{ id: 'bar' }];
+
+    const { instance } = createDeploymentPlugin({ storedTabConfiguration, storedEndpoints });
 
     // when
-    instance.setConfig(config);
+    const config = await instance.getSavedConfiguration();
 
     // then
-    expect(setConfigSpy).to.have.been.calledWith('DEPLOYMENT_CONFIG', config);
+    expect(config.endpoint).to.eql(storedEndpoints[0]);
+  });
+
+
+  it('should save tab configuration', async () => {
+
+    // given
+    const endpointId = 'bar';
+
+    const configuration = {
+      deployment: { test: 'true' },
+      endpoint: {
+        id: endpointId
+      }
+    };
+
+    const setTabConfigSpy = sinon.spy();
+
+    const { instance } = createDeploymentPlugin({ setTabConfigSpy });
+
+    // when
+    await instance.saveConfiguration(configuration);
+
+    // then
+    expect(setTabConfigSpy).to.have.been.calledWith(DEPLOYMENT_CONFIG_KEY, {
+      deployment: configuration.deployment,
+      endpointId
+    });
+  });
+
+
+  it('should save endpoint', async () => {
+
+    // given
+    const endpoint = { id: 'bar' };
+
+    const configuration = {
+      deployment: { test: 'true' },
+      endpoint
+    };
+
+    const setEndpointsSpy = sinon.spy();
+
+    const { instance } = createDeploymentPlugin({ setEndpointsSpy });
+
+    // when
+    await instance.saveConfiguration(configuration);
+
+    // then
+    expect(setEndpointsSpy)
+      .to.have.been.calledWith(ZEEBE_ENDPOINTS_CONFIG_KEY, [ endpoint ]);
   });
 
 
@@ -318,7 +376,6 @@ describe('<DeploymentPlugin>', () => {
   });
 });
 
-
 const createDeploymentPlugin = (params = {}) => {
   const subscribe = (type, callback) => {
     if (type === 'app.activeTabChanged') {
@@ -346,14 +403,22 @@ const createDeploymentPlugin = (params = {}) => {
   };
   const config = {
     get: (key) => {
-      if (key === 'DEPLOYMENT_CONFIG') {
-        return params.storedConfig || null;
+      if (key === ZEEBE_ENDPOINTS_CONFIG_KEY) {
+        return params.storedEndpoints || [];
       }
     },
     set: (key, value) => {
-      if (params.setConfigSpy) {
-        params.setConfigSpy(key, value);
+      if (key === ZEEBE_ENDPOINTS_CONFIG_KEY) {
+        return params.setEndpointsSpy && params.setEndpointsSpy(key, value);
       }
+    },
+    getForFile: (file, key) => {
+      if (key === DEPLOYMENT_CONFIG_KEY) {
+        return params.storedTabConfiguration || null;
+      }
+    },
+    setForFile: (file, key, value) => {
+      return params.setTabConfigSpy && params.setTabConfigSpy(key, value);
     }
   };
   const displayNotification = (notificationParams) => {

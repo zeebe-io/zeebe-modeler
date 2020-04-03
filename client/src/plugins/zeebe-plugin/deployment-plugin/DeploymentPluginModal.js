@@ -12,7 +12,9 @@ import React from 'react';
 
 import {
   omit,
-  find
+  find,
+  keys,
+  forEach
 } from 'min-dash';
 
 import { Modal } from '../../../app/primitives';
@@ -60,6 +62,10 @@ import {
   CheckBox
 } from './ui';
 
+import {
+  generateId
+} from '../../../util';
+
 import css from './DeploymentPluginModal.less';
 
 export default class DeploymentPluginModal extends React.PureComponent {
@@ -74,20 +80,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
       valuesInitiated: false
     };
 
-    this.defaultValues = {
-      deploymentName: props.tabName,
-      connectionMethod: SELF_HOSTED,
-      zeebeContactpointSelfHosted: '0.0.0.0:26500',
-      zeebeContactPointOauth: '',
-      oauthURL: '',
-      audience: '',
-      oauthClientId: '',
-      oauthClientSecret: '',
-      camundaCloudClientId: '',
-      camundaCloudClientSecret: '',
-      camundaCloudClusterId: '',
-      rememberCredentials: false
-    };
+    this.defaultValues = this.getDefaultValues(props);
 
     const { validator } = props;
 
@@ -112,16 +105,71 @@ export default class DeploymentPluginModal extends React.PureComponent {
   }
 
   componentDidMount = async () => {
-    const storedConfig = await this.props.getConfig();
-
-    this.initialValues = {};
-    for (let key in this.defaultValues) {
-      this.initialValues[key] = storedConfig[key] || this.defaultValues[key];
-    }
+    this.initialValues = await this.getInitialValues();
 
     this.setState({
       valuesInitiated: true
     });
+  }
+
+  getDefaultValues = (props) => {
+    const deployment = {
+      name: props.tabName
+    };
+
+    const endpoint = {
+      id: generateId(),
+      connectionMethod: SELF_HOSTED,
+      zeebeContactpointSelfHosted: '0.0.0.0:26500',
+      zeebeContactPointOauth: '',
+      oauthURL: '',
+      audience: '',
+      oauthClientId: '',
+      oauthClientSecret: '',
+      camundaCloudClientId: '',
+      camundaCloudClientSecret: '',
+      camundaCloudClusterId: '',
+      rememberCredentials: false
+    };
+
+    return {
+      deployment,
+      endpoint
+    };
+
+  }
+
+  getInitialValues = async () => {
+    const {
+      deployment: defaultDeployment,
+      endpoint: defaultEndpoint
+    } = this.defaultValues;
+
+    const savedConfiguration = await this.props.getConfig();
+
+    const {
+      deployment: savedDeployment,
+      endpoint: savedEndpoint
+    } = savedConfiguration;
+
+    let deployment = defaultDeployment;
+    if (savedDeployment) {
+      forEach(keys(defaultDeployment), key => {
+        deployment[key] = savedDeployment[key] || defaultDeployment[key];
+      });
+    }
+
+    let endpoint = defaultEndpoint;
+    if (savedEndpoint) {
+      forEach(keys(defaultEndpoint), key => {
+        endpoint[key] = savedEndpoint[key] || defaultEndpoint[key];
+      });
+    }
+
+    return {
+      deployment,
+      endpoint
+    };
   }
 
   fieldError = (meta) => {
@@ -152,6 +200,10 @@ export default class DeploymentPluginModal extends React.PureComponent {
       return;
     }
 
+    const {
+      endpoint
+    } = formValues;
+
     this.lastCheckedFormValues = JSON.stringify(formValues);
     this.renderWaitingState = false;
 
@@ -159,7 +211,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
       isValidating: true
     });
 
-    const validationResult = await this.props.validator.validateConnection(formValues);
+    const validationResult = await this.props.validator.validateConnection(endpoint);
 
     this.setState({
       isValidating: false,
@@ -169,22 +221,59 @@ export default class DeploymentPluginModal extends React.PureComponent {
   }
 
   saveConfig = (formValuesParsed) => {
+    const {
+      setConfig
+    } = this.props;
 
-    if (formValuesParsed.rememberCredentials) {
-      this.props.setConfig(formValuesParsed);
+    const {
+      endpoint
+    } = formValuesParsed;
+
+    if (endpoint.rememberCredentials) {
+      setConfig(formValuesParsed);
     } else {
-      this.props.setConfig(omit(formValuesParsed, ['oauthClientId', 'oauthClientSecret', 'camundaCloudClientId', 'camundaCloudClientSecret']));
+      setConfig({
+        ...formValuesParsed,
+        endpoint: this.removeCredentials(formValuesParsed.endpoint)
+      });
     }
+  }
+
+  removeCredentials = (endpointConfiguration) => {
+    return omit(endpointConfiguration, [
+      'oauthClientId',
+      'oauthClientSecret',
+      'camundaCloudClientId',
+      'camundaCloudClientSecret'
+    ]);
   }
 
   handleFormSubmit = () => {
     const lastCheckValuesParsed = JSON.parse(this.lastCheckedFormValues);
-    const { rememberCredentials, deploymentName } = this.formValues;
+
+    const {
+      deployment,
+      endpoint
+    } = this.formValues;
+
+    const {
+      rememberCredentials
+    } = endpoint;
+
+    const {
+      name
+    } = deployment;
 
     const formValuesParsed = {
       ...lastCheckValuesParsed,
-      rememberCredentials,
-      deploymentName
+      endpoint: {
+        ...lastCheckValuesParsed.endpoint,
+        rememberCredentials
+      },
+      deployment: {
+        ...lastCheckValuesParsed.deployment,
+        name
+      }
     };
 
     this.saveConfig(formValuesParsed);
@@ -257,7 +346,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
                       <div className="fields">
                         <Field
-                          name="deploymentName"
+                          name="deployment.name"
                           component={ TextInput }
                           label={ NAME }
                           hint={ DEPLOYMENT_NAME_HINT }
@@ -280,12 +369,15 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
                       <div className="fields">
                         <Field
-                          name="connectionMethod"
+                          name="endpoint.connectionMethod"
                           component={ Select }
                           label={ METHOD }
                           onChange={ event => form.setValues({
                             ...form.values,
-                            connectionMethod: event.target.value
+                            endpoint: {
+                              ...form.values.endpoint,
+                              connectionMethod: event.target.value
+                            }
                           }) }
                         >
                           <option value={ SELF_HOSTED } defaultValue>{ SELF_HOSTED_TEXT }</option>
@@ -293,10 +385,10 @@ export default class DeploymentPluginModal extends React.PureComponent {
                           <option value={ CAMUNDA_CLOUD }>{ CAMUNDA_CLOUD_TEXT }</option>
                         </Field>
                         {
-                          form.values.connectionMethod === SELF_HOSTED && (
+                          form.values.endpoint.connectionMethod === SELF_HOSTED && (
                             <React.Fragment>
                               <Field
-                                name="zeebeContactpointSelfHosted"
+                                name="endpoint.zeebeContactpointSelfHosted"
                                 component={ TextInput }
                                 label={ CONTACT_POINT }
                                 fieldError={ this.fieldError }
@@ -307,10 +399,10 @@ export default class DeploymentPluginModal extends React.PureComponent {
                           )
                         }
                         {
-                          form.values.connectionMethod === OAUTH && (
+                          form.values.endpoint.connectionMethod === OAUTH && (
                             <React.Fragment>
                               <Field
-                                name="zeebeContactPointOauth"
+                                name="endpoint.zeebeContactPointOauth"
                                 component={ TextInput }
                                 label={ CONTACT_POINT }
                                 fieldError={ this.fieldError }
@@ -319,14 +411,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 autoFocus
                               />
                               <Field
-                                name="oauthClientId"
+                                name="endpoint.oauthClientId"
                                 component={ TextInput }
                                 label={ CLIENT_ID }
                                 fieldError={ this.fieldError }
                                 validate={ validatorFunctionsByFieldNames.oauthClientId }
                               />
                               <Field
-                                name="oauthClientSecret"
+                                name="endpoint.oauthClientSecret"
                                 component={ TextInput }
                                 label={ CLIENT_SECRET }
                                 fieldError={ this.fieldError }
@@ -334,14 +426,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 type="password"
                               />
                               <Field
-                                name="oauthURL"
+                                name="endpoint.oauthURL"
                                 component={ TextInput }
                                 label={ OAUTH_URL }
                                 fieldError={ this.fieldError }
                                 validate={ validatorFunctionsByFieldNames.oauthURL }
                               />
                               <Field
-                                name="audience"
+                                name="endpoint.audience"
                                 component={ TextInput }
                                 label={ AUDIENCE }
                                 fieldError={ this.fieldError }
@@ -351,10 +443,10 @@ export default class DeploymentPluginModal extends React.PureComponent {
                           )
                         }
                         {
-                          form.values.connectionMethod === CAMUNDA_CLOUD && (
+                          form.values.endpoint.connectionMethod === CAMUNDA_CLOUD && (
                             <React.Fragment>
                               <Field
-                                name="camundaCloudClientId"
+                                name="endpoint.camundaCloudClientId"
                                 component={ TextInput }
                                 label={ CLIENT_ID }
                                 fieldError={ this.fieldError }
@@ -362,7 +454,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 autoFocus
                               />
                               <Field
-                                name="camundaCloudClientSecret"
+                                name="endpoint.camundaCloudClientSecret"
                                 component={ TextInput }
                                 label={ CLIENT_SECRET }
                                 fieldError={ this.fieldError }
@@ -370,7 +462,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 type="password"
                               />
                               <Field
-                                name="camundaCloudClusterId"
+                                name="endpoint.camundaCloudClusterId"
                                 component={ TextInput }
                                 label={ CLUSTER_ID }
                                 fieldError={ this.fieldError }
@@ -380,9 +472,9 @@ export default class DeploymentPluginModal extends React.PureComponent {
                           )
                         }
                         {
-                          (form.values.connectionMethod === OAUTH || form.values.connectionMethod === CAMUNDA_CLOUD) &&
+                          (form.values.endpoint.connectionMethod === OAUTH || form.values.endpoint.connectionMethod === CAMUNDA_CLOUD) &&
                           <Field
-                            name="rememberCredentials"
+                            name="endpoint.rememberCredentials"
                             component={ CheckBox }
                             type="checkbox"
                             label={ REMEMBER_CREDENTIALS }
