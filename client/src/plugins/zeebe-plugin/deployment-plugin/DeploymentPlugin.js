@@ -141,7 +141,7 @@ export default class DeploymentPlugin extends PureComponent {
       modalVisible
     } = this.state;
 
-    this.setState({ modalVisible: !modalVisible });
+    this.setState({ modalVisible: !modalVisible, isStart: false });
 
     this.props.broadcastMessage('deploymentInitiated');
 

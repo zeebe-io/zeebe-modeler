@@ -236,6 +236,19 @@ describe('<DeploymentPlugin>', () => {
   });
 
 
+  it('should be in isStart:false state when deploy icon clicked', () => {
+
+    // given
+    const { instance } = createDeploymentPlugin();
+
+    // when
+    instance.onIconClicked();
+
+    // then
+    expect(instance.state.isStart).to.be.false;
+  });
+
+
   it('should subscribe to messaging when mounted', () => {
 
     // given
