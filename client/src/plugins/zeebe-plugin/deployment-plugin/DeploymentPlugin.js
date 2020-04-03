@@ -23,7 +23,8 @@ import DeploymentPluginValidator from './DeploymentPluginValidator';
 
 import KeyboardInteractionTrap from './ui/KeyboardInteractionTrap';
 
-const DEPLOYMENT_CONFIG_KEY = 'DEPLOYMENT_CONFIG';
+const DEPLOYMENT_CONFIG_KEY = 'deployment-tool';
+const ZEEBE_ENDPOINTS_CONFIG_KEY = 'zeebeEndpoints';
 
 export default class DeploymentPlugin extends PureComponent {
 
@@ -64,13 +65,70 @@ export default class DeploymentPlugin extends PureComponent {
     this.props.unsubscribeFromMessaging('deploymentPlugin');
   }
 
-  getConfig = async () => {
-    const storedConfig = await this.props.config.get(DEPLOYMENT_CONFIG_KEY);
-    return storedConfig || {};
+  saveConfiguration = async (configuration) => {
+
+    const {
+      endpoint,
+      deployment
+    } = configuration;
+
+    await this.saveEndpoint(endpoint);
+
+    const tabConfiguration = {
+      deployment,
+      endpointId: endpoint.id
+    };
+
+    await this.setTabConfiguration(this.activeTab, tabConfiguration);
+
+    return configuration;
   }
 
-  setConfig = (config) => {
-    this.props.config.set(DEPLOYMENT_CONFIG_KEY, config);
+  getSavedConfiguration = async () => {
+
+    const tabConfig = await this.getTabConfiguration(this.activeTab);
+
+    if (!tabConfig) {
+      return {};
+    }
+
+    const {
+      deployment,
+      endpointId
+    } = tabConfig;
+
+    const endpoints = await this.getEndpoints();
+
+    return {
+      deployment,
+      endpoint: endpoints.find(endpoint => endpoint.id === endpointId)
+    };
+  }
+
+  async saveEndpoint(endpoint) {
+    const existingEndpoints = await this.getEndpoints();
+
+    const updatedEndpoints = addOrUpdateById(existingEndpoints, endpoint);
+
+    await this.setEndpoints(updatedEndpoints);
+
+    return endpoint;
+  }
+
+  getEndpoints() {
+    return this.props.config.get(ZEEBE_ENDPOINTS_CONFIG_KEY, []);
+  }
+
+  setEndpoints(endpoints) {
+    return this.props.config.set(ZEEBE_ENDPOINTS_CONFIG_KEY, endpoints);
+  }
+
+  getTabConfiguration(tab) {
+    return this.props.config.getForFile(tab.file, DEPLOYMENT_CONFIG_KEY);
+  }
+
+  setTabConfiguration(tab, configuration) {
+    return this.props.config.setForFile(tab.file, DEPLOYMENT_CONFIG_KEY, configuration);
   }
 
   onDeploymentSuccess = (response) => {
@@ -173,8 +231,8 @@ export default class DeploymentPlugin extends PureComponent {
             onClose={ this.closeModal }
             validator={ this.validator }
             onDeploy={ this.onDeploy }
-            getConfig={ this.getConfig }
-            setConfig={ this.setConfig }
+            getConfig={ this.getSavedConfiguration }
+            setConfig={ this.saveConfiguration }
             tabName={ withoutExtension(this.activeTab.name) }
             isStart={ isStart }
           />
@@ -188,4 +246,22 @@ export default class DeploymentPlugin extends PureComponent {
 
 function withoutExtension(name) {
   return name.replace(/\.[^.]+$/, '');
+}
+
+function addOrUpdateById(collection, element) {
+
+  const index = collection.findIndex(el => el.id === element.id);
+
+  if (index !== -1) {
+    return [
+      ...collection.slice(0, index),
+      element,
+      ...collection.slice(index + 1)
+    ];
+  }
+
+  return [
+    ...collection,
+    element
+  ];
 }

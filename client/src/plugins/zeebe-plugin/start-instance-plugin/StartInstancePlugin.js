@@ -20,7 +20,8 @@ import css from './StartInstancePlugin.less';
 
 import ZeebeConnectionValidator from '../shared/ZeebeConnectionValidator';
 
-const DEPLOYMENT_CONFIG_KEY = 'DEPLOYMENT_CONFIG';
+const DEPLOYMENT_CONFIG_KEY = 'deployment-tool';
+const ZEEBE_ENDPOINTS_CONFIG_KEY = 'zeebeEndpoints';
 
 export default class StartInstancePlugin extends PureComponent {
 
@@ -71,29 +72,51 @@ export default class StartInstancePlugin extends PureComponent {
     });
   }
 
+  async getSavedDeploymentConfig() {
+    const tabConfig = await this.props.config.getForFile(this.activeTab.file, DEPLOYMENT_CONFIG_KEY);
+
+    if (!tabConfig) {
+      return {};
+    }
+
+    const {
+      deployment,
+      endpointId
+    } = tabConfig;
+
+    const endpoints = await this.props.config.get(ZEEBE_ENDPOINTS_CONFIG_KEY, []);
+
+    return {
+      deployment,
+      endpoint: endpoints.find(endpoint => endpoint.id === endpointId)
+    };
+  }
+
   onIconClicked = async () => {
     const saveResult = await this.props.triggerAction('save', { tab: this.activeTab });
     const path = saveResult.file.path;
 
-    const deploymentConfig = await this.props.config.get(DEPLOYMENT_CONFIG_KEY);
+    const deploymentConfig = await this.getSavedDeploymentConfig();
 
-    if (!deploymentConfig) {
-      this.deployFirst();
-      return;
+    const {
+      endpoint
+    } = deploymentConfig;
+
+    if (!endpoint) {
+      return this.deployFirst();
     }
 
     const zeebeAPI = this.props._getGlobal('zeebeAPI');
 
-    const connectionResult = await this.zeebeConnectionValidator.validateConnection(deploymentConfig);
+    const connectionResult = await this.zeebeConnectionValidator.validateConnection(endpoint);
 
     if (!connectionResult.isSuccessful) {
-      this.deployFirst();
-      return;
+      return this.deployFirst();
     }
 
     const deploymentResult = await zeebeAPI.deploy({
       filePath: path,
-      name: deploymentConfig.deploymentName || withoutExtension(this.activeTab.name)
+      name: deploymentConfig.deployment.name || withoutExtension(this.activeTab.name)
     });
 
     if (!deploymentResult.success) {

@@ -27,24 +27,65 @@ describe('<DeploymentPluginModal>', () => {
 
     // given
     const tabName = 'foo';
+
     const { instance } = createDeploymentPluginModal({ tabName });
 
     // when
     await instance.componentDidMount();
 
+    const {
+      initialValues: { deployment }
+    } = instance;
+
     // then
-    expect(instance.initialValues.deploymentName).to.eql(tabName);
+    expect(deployment.name).to.eql(tabName);
   });
 
 
-  it('should get stored config on start', async () => {
+  it('should get stored tab config on start', async () => {
 
     // given
-    const storedConfig = { oauthClientId: 'test' };
+    const storedConfig = {
+      deployment: {
+        name: 'foo'
+      }
+    };
+
     const { instance } = createDeploymentPluginModal({ storedConfig });
+
     const expected = {
       ...instance.defaultValues,
-      ...storedConfig
+      deployment: {
+        ...instance.defaultValues.deployment,
+        ...storedConfig.deployment
+      }
+    };
+
+    // when
+    await instance.componentDidMount();
+
+    // then
+    expect(instance.initialValues).to.eql(expected);
+  });
+
+
+  it('should get stored endpoint config on start', async () => {
+
+    // given
+    const storedConfig = {
+      endpoint: {
+        oauthClientId: 'test'
+      }
+    };
+
+    const { instance } = createDeploymentPluginModal({ storedConfig });
+
+    const expected = {
+      ...instance.defaultValues,
+      endpoint: {
+        ...instance.defaultValues.endpoint,
+        ...storedConfig.endpoint
+      }
     };
 
     // when
@@ -165,12 +206,15 @@ describe('<DeploymentPluginModal>', () => {
   });
 
 
-  it('should save configurations on deploy', async () => {
+  it('should save configuration on deploy', async () => {
 
     // given
     const setConfigSpy = sinon.spy();
     const { wrapper, instance } = createDeploymentPluginModal({ setConfigSpy });
-    const config = { test: true };
+    const config = {
+      endpoint: { connectionMethod: 'foo' }
+    };
+
     instance.lastCheckedFormValues = JSON.stringify(config);
 
     // when
@@ -179,12 +223,16 @@ describe('<DeploymentPluginModal>', () => {
     wrapper.update();
     wrapper.find('form').simulate('submit');
 
+    const expected = {
+      ...instance.formValues,
+      endpoint: {
+        ...config.endpoint,
+        rememberCredentials: false
+      }
+    };
+
     // then
-    expect(setConfigSpy).to.have.been.calledWith({
-      ...config,
-      rememberCredentials: false,
-      deploymentName: 'test'
-    });
+    expect(setConfigSpy).to.have.been.calledWith(expected);
   });
 
 
@@ -202,6 +250,7 @@ describe('<DeploymentPluginModal>', () => {
     expect(setConfigSpy).to.not.have.been.called;
   });
 
+
   it('should close when pressed on secondary button', async () => {
 
     // given
@@ -217,50 +266,58 @@ describe('<DeploymentPluginModal>', () => {
   });
 
 
-  it('should not save credentials if checkbox is unchecked', async () => {
+  it('should not save credentials if selected', async () => {
 
     // given
     const setConfigSpy = sinon.spy();
     const { instance } = createDeploymentPluginModal({ setConfigSpy });
-    const confs = {
-      testProp: 'test',
-      oauthClientId: 'test',
-      oauthClientSecret: 'test',
-      camundaCloudClientId: 'test',
-      camundaCloudClientSecret: 'test',
-      rememberCredentials: false
+    const config = {
+      endpoint: {
+        testProp: 'test',
+        oauthClientId: 'test',
+        oauthClientSecret: 'test',
+        camundaCloudClientId: 'test',
+        camundaCloudClientSecret: 'test',
+        rememberCredentials: false
+      }
     };
 
     // when
-    instance.saveConfig(confs);
+    instance.saveConfig(config);
+
+    const expected = {
+      endpoint: {
+        rememberCredentials: false,
+        testProp: 'test'
+      }
+    };
 
     // then
-    expect(setConfigSpy).to.have.been.calledWith({
-      testProp: 'test',
-      rememberCredentials: false
-    });
+    expect(setConfigSpy).to.have.been.calledWith(expected);
   });
 
 
-  it('should save credentials if checkbox is unchecked', async () => {
+  it('should save credentials if selected', async () => {
 
     // given
     const setConfigSpy = sinon.spy();
     const { instance } = createDeploymentPluginModal({ setConfigSpy });
-    const confs = {
-      testProp: 'test',
-      oauthClientId: 'test',
-      oauthClientSecret: 'test',
-      camundaCloudClientId: 'test',
-      camundaCloudClientSecret: 'test',
-      rememberCredentials: true
+    const config = {
+      endpoint: {
+        testProp: 'test',
+        oauthClientId: 'test',
+        oauthClientSecret: 'test',
+        camundaCloudClientId: 'test',
+        camundaCloudClientSecret: 'test',
+        rememberCredentials: true
+      }
     };
 
     // when
-    instance.saveConfig(confs);
+    instance.saveConfig(config);
 
     // then
-    expect(setConfigSpy).to.have.been.calledWith(confs);
+    expect(setConfigSpy).to.have.been.calledWith(config);
   });
 });
 
@@ -271,9 +328,7 @@ const createDeploymentPluginModal = (params = {}) => {
   };
   const validator = {
     validateConnection: () => {
-      if (params.validateConnectionSpy) {
-        params.validateConnectionSpy();
-      }
+      return params.validateConnectionSpy ? params.validateConnectionSpy() : {};
     }
   };
   const onDeploy = () => {

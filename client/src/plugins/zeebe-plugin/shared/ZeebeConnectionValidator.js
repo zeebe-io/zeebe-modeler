@@ -22,24 +22,33 @@ export default class ZeebeConnectionValidator {
 
   validateConnection = async (values) => {
     const {
-      connectionMethod
+      audience,
+      camundaCloudClientId,
+      camundaCloudClientSecret,
+      camundaCloudClusterId,
+      connectionMethod,
+      oauthClientId,
+      oauthClientSecret,
+      oauthURL,
+      zeebeContactPointOauth,
+      zeebeContactpointSelfHosted
     } = values;
 
     if (connectionMethod === SELF_HOSTED) {
-      return await this.validateSelfHostedConnection(values.zeebeContactpointSelfHosted);
+      return await this.validateSelfHostedConnection(zeebeContactpointSelfHosted);
     } else if (connectionMethod === OAUTH) {
       return await this.validateOauthConnection(
-        values.zeebeContactPointOauth,
-        values.oauthURL,
-        values.audience,
-        values.oauthClientId,
-        values.oauthClientSecret
+        zeebeContactPointOauth,
+        oauthURL,
+        audience,
+        oauthClientId,
+        oauthClientSecret
       );
     } else if (connectionMethod === CAMUNDA_CLOUD) {
       return await this.validateCamundaCloudConnection(
-        values.camundaCloudClientId,
-        values.camundaCloudClientSecret,
-        values.camundaCloudClusterId
+        camundaCloudClientId,
+        camundaCloudClientSecret,
+        camundaCloudClusterId
       );
     }
   }
