@@ -169,16 +169,19 @@ export default class DeploymentPlugin extends PureComponent {
   }
 
   onDeploy = async (parameters) => {
-
     this.closeModal();
 
-    const saveResult = await this.props.triggerAction('save', { tab: this.activeTab });
-    const path = saveResult.file.path;
+    const {
+      file: tabFile,
+      name: tabName
+    } = this.activeTab;
+
+    const path = tabFile.path;
 
     const zeebeAPI = this.props._getGlobal('zeebeAPI');
     const deploymentResult = await zeebeAPI.deploy({
       filePath: path,
-      name: parameters.deploymentName || withoutExtension(this.activeTab.name)
+      name: parameters.deploymentName || withoutExtension(tabName)
     });
 
     const { response, success } = deploymentResult;
@@ -194,12 +197,22 @@ export default class DeploymentPlugin extends PureComponent {
     this.setState({ modalVisible: false });
   }
 
-  onIconClicked = () => {
+  onIconClicked = async () => {
     const {
       modalVisible
     } = this.state;
 
-    this.setState({ modalVisible: !modalVisible, isStart: false });
+    const savedTab = await this.props.triggerAction('save', { tab: this.activeTab });
+
+    // cancel action if save modal got canceled
+    if (!savedTab) {
+      return;
+    }
+
+    this.setState({
+      modalVisible: !modalVisible,
+      isStart: false
+    });
 
     this.props.broadcastMessage('deploymentInitiated');
 

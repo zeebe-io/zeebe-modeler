@@ -19,10 +19,30 @@ import DeploymentPlugin from '../DeploymentPlugin';
 const DEPLOYMENT_CONFIG_KEY = 'deployment-tool';
 const ZEEBE_ENDPOINTS_CONFIG_KEY = 'zeebeEndpoints';
 
+const NOOP_TAB = {
+  file: {
+    path: 'testPath'
+  }
+};
+
 describe('<DeploymentPlugin>', () => {
 
   it('should render', () => {
     createDeploymentPlugin();
+  });
+
+
+  it('should save tab before deploy', async () => {
+
+    // given
+    const saveSpy = sinon.spy();
+    const { instance } = createDeploymentPlugin({ saveSpy });
+
+    // when
+    await instance.onIconClicked();
+
+    // then
+    expect(saveSpy).to.have.been.called;
   });
 
 
@@ -46,40 +66,40 @@ describe('<DeploymentPlugin>', () => {
   });
 
 
-  it('should be in modalVisible:true state when clicking on icon', () => {
+  it('should be in modalVisible:true state when clicking on icon', async () => {
 
     // given
     const { wrapper, instance } = createDeploymentPlugin();
 
     // when
-    instance.onIconClicked();
+    await instance.onIconClicked();
 
     // then
     expect(wrapper.state('modalVisible')).to.be.true;
   });
 
 
-  it('should be in modalVisible:false state when clicking on icon twice', () => {
+  it('should be in modalVisible:false state when clicking on icon twice', async () => {
 
     // given
     const { wrapper, instance } = createDeploymentPlugin();
 
     // when
-    instance.onIconClicked();
-    instance.onIconClicked();
+    await instance.onIconClicked();
+    await instance.onIconClicked();
 
     // then
     expect(wrapper.state('modalVisible')).to.be.false;
   });
 
 
-  it('should be in modalVisible:false state when closed', () => {
+  it('should be in modalVisible:false state when closed', async () => {
 
     // given
     const { wrapper, instance } = createDeploymentPlugin();
 
     // when
-    instance.closeModal();
+    await instance.closeModal();
 
     // then
     expect(wrapper.state('modalVisible')).to.be.false;
@@ -183,20 +203,6 @@ describe('<DeploymentPlugin>', () => {
   });
 
 
-  it('should save tab on deploy', async () => {
-
-    // given
-    const saveSpy = sinon.spy();
-    const { instance } = createDeploymentPlugin({ saveSpy });
-
-    // when
-    await instance.onDeploy({ deploymentName: 'testName' });
-
-    // then
-    expect(saveSpy).to.have.been.called;
-  });
-
-
   it('should display notification on deployment success', async () => {
 
     // given
@@ -205,6 +211,8 @@ describe('<DeploymentPlugin>', () => {
       deploymentSuccessful: true,
       displayNotificationSpy
     });
+
+    instance.activeTab = NOOP_TAB;
 
     // when
     await instance.onDeploy({ deploymentName: 'testName' });
@@ -223,6 +231,8 @@ describe('<DeploymentPlugin>', () => {
     // given
     const displayNotificationSpy = sinon.spy();
     const { instance } = createDeploymentPlugin({ displayNotificationSpy });
+
+    instance.activeTab = NOOP_TAB;
 
     // when
     await instance.onDeploy({ deploymentName: 'testName' });
@@ -243,6 +253,9 @@ describe('<DeploymentPlugin>', () => {
     const displayLogSpy = sinon.spy();
     const { instance } = createDeploymentPlugin({ displayLogSpy });
 
+    instance.activeTab = NOOP_TAB;
+
+
     // when
     await instance.onDeploy({ deploymentName: 'testName' });
 
@@ -254,14 +267,14 @@ describe('<DeploymentPlugin>', () => {
   });
 
 
-  it('should broadcast deploymentInitiated message when clicked on icon', () => {
+  it('should broadcast deploymentInitiated message when clicked on icon', async () => {
 
     // given
     const broadcastMessageSpy = sinon.spy();
     const { instance } = createDeploymentPlugin({ broadcastMessageSpy });
 
     // when
-    instance.onIconClicked();
+    await instance.onIconClicked();
 
     // then
     expect(broadcastMessageSpy).to.have.been.calledWith('deploymentInitiated');
@@ -294,13 +307,13 @@ describe('<DeploymentPlugin>', () => {
   });
 
 
-  it('should be in isStart:false state when deploy icon clicked', () => {
+  it('should be in isStart:false state when deploy icon clicked', async () => {
 
     // given
     const { instance } = createDeploymentPlugin();
 
     // when
-    instance.onIconClicked();
+    await instance.onIconClicked();
 
     // then
     expect(instance.state.isStart).to.be.false;
@@ -345,14 +358,14 @@ describe('<DeploymentPlugin>', () => {
   });
 
 
-  it('should have skipNotificationOnSuccess:false after clicking on icon', () => {
+  it('should have skipNotificationOnSuccess:false after clicking on icon', async () => {
 
     // given
     const { instance } = createDeploymentPlugin();
     instance.skipNotificationOnSuccess = true;
 
     // when
-    instance.onIconClicked();
+    await instance.onIconClicked();
 
     // then
     expect(instance.skipNotificationOnSuccess).to.be.false;
@@ -436,11 +449,7 @@ const createDeploymentPlugin = (params = {}) => {
       if (params.saveSpy) {
         params.saveSpy(value);
       }
-      return {
-        file: {
-          path: 'testPath'
-        }
-      };
+      return NOOP_TAB;
     }
   };
   const broadcastMessage = (msg) => {
