@@ -19,6 +19,14 @@ import StartInstancePlugin from '../StartInstancePlugin';
 const DEPLOYMENT_CONFIG_KEY = 'deployment-tool';
 const ZEEBE_ENDPOINTS_CONFIG_KEY = 'zeebeEndpoints';
 
+const SAVE_CANCEL_OPERATION = 'cancel';
+
+const NOOP_TAB = {
+  file: {
+    path: 'testPath'
+  }
+};
+
 describe('<StartInstancePlugin>', () => {
 
   it('should render', () => {
@@ -150,17 +158,33 @@ describe('<StartInstancePlugin>', () => {
   });
 
 
-  it('should save when icon clicked', () => {
+  it('should save when icon clicked', async () => {
 
     // given
     const triggerActionSpy = sinon.spy();
     const { instance } = createStartInstancePlugin({ triggerActionSpy });
 
     // when
-    instance.onIconClicked();
+    await instance.onIconClicked();
 
     // then
     expect(triggerActionSpy).to.have.been.calledWith('save');
+  });
+
+
+  it('should cancel if save was not successfull', async () => {
+
+    // given
+    const getConfigSpy = sinon.spy();
+    const saveActionResult = SAVE_CANCEL_OPERATION;
+
+    const { instance } = createStartInstancePlugin({ getConfigSpy, saveActionResult });
+
+    // when
+    await instance.onIconClicked();
+
+    // then
+    expect(getConfigSpy).to.not.have.been.called;
   });
 
 
@@ -419,11 +443,7 @@ const createStartInstancePlugin = (params = {}) => {
       params.triggerActionSpy(key);
     }
     if (key === 'save') {
-      return {
-        file: {
-          path: 'testPath'
-        }
-      };
+      return params.saveActionResult === SAVE_CANCEL_OPERATION ? null : NOOP_TAB;
     }
   };
   const subscribeToMessaging = (key) => {

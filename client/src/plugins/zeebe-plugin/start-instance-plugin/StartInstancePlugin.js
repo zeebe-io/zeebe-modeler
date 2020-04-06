@@ -93,8 +93,19 @@ export default class StartInstancePlugin extends PureComponent {
   }
 
   onIconClicked = async () => {
-    const saveResult = await this.props.triggerAction('save', { tab: this.activeTab });
-    const path = saveResult.file.path;
+    const savedTab = await this.props.triggerAction('save', { tab: this.activeTab });
+
+    // cancel action if save modal got canceled
+    if (!savedTab) {
+      return;
+    }
+
+    const {
+      file: tabFile,
+      name: tabName
+    } = savedTab;
+
+    const path = tabFile.path;
 
     const deploymentConfig = await this.getSavedDeploymentConfig();
 
@@ -116,7 +127,7 @@ export default class StartInstancePlugin extends PureComponent {
 
     const deploymentResult = await zeebeAPI.deploy({
       filePath: path,
-      name: deploymentConfig.deployment.name || withoutExtension(this.activeTab.name)
+      name: deploymentConfig.deployment.name || withoutExtension(tabName)
     });
 
     if (!deploymentResult.success) {
