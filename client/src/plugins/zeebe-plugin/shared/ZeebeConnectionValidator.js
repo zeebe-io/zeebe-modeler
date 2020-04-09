@@ -10,9 +10,10 @@
 
 import {
   SELF_HOSTED,
-  OAUTH,
   CAMUNDA_CLOUD
-} from './ZeebeConnectionTypes';
+} from './ZeebeTargetTypes';
+
+import { AUTH_TYPES } from './ZeebeAuthTypes';
 
 export default class ZeebeConnectionValidator {
 
@@ -22,29 +23,31 @@ export default class ZeebeConnectionValidator {
 
   validateConnection = async (values) => {
     const {
+      authType,
       audience,
+      targetType,
+      clientId,
+      clientSecret,
+      oauthURL,
+      contactPoint,
       camundaCloudClientId,
       camundaCloudClientSecret,
-      camundaCloudClusterId,
-      connectionMethod,
-      oauthClientId,
-      oauthClientSecret,
-      oauthURL,
-      zeebeContactPointOauth,
-      zeebeContactpointSelfHosted
+      camundaCloudClusterId
     } = values;
 
-    if (connectionMethod === SELF_HOSTED) {
-      return await this.validateSelfHostedConnection(zeebeContactpointSelfHosted);
-    } else if (connectionMethod === OAUTH) {
-      return await this.validateOauthConnection(
-        zeebeContactPointOauth,
-        oauthURL,
-        audience,
-        oauthClientId,
-        oauthClientSecret
-      );
-    } else if (connectionMethod === CAMUNDA_CLOUD) {
+    if (targetType === SELF_HOSTED) {
+      if (authType === AUTH_TYPES.NONE) {
+        return await this.validateSelfHostedConnection(contactPoint);
+      } else if (authType === AUTH_TYPES.OAUTH) {
+        return await this.validateOauthConnection(
+          contactPoint,
+          oauthURL,
+          audience,
+          clientId,
+          clientSecret
+        );
+      }
+    } else if (targetType === CAMUNDA_CLOUD) {
       return await this.validateCamundaCloudConnection(
         camundaCloudClientId,
         camundaCloudClientSecret,
@@ -63,22 +66,22 @@ export default class ZeebeConnectionValidator {
     return this.zeebeAPI.checkConnectivity(params);
   }
 
-  validateOauthConnection = (contactpoint, oauthURL, audience, oauthClientId, oauthClientSecret) => {
+  validateOauthConnection = (contactpoint, oauthURL, audience, clientId, clientSecret) => {
     const params = {
-      type: OAUTH,
+      type: 'oauth',
       url: contactpoint || '',
       oauthURL: oauthURL || '',
       audience: audience || '',
-      clientId: oauthClientId || '',
-      clientSecret: oauthClientSecret || ''
+      clientId: clientId || '',
+      clientSecret: clientSecret || ''
     };
     return this.zeebeAPI.checkConnectivity(params);
   }
 
-  validateSelfHostedConnection = (contactpoint) => {
+  validateSelfHostedConnection = (contactPoint) => {
     const params = {
       type: SELF_HOSTED,
-      url: contactpoint || '',
+      url: contactPoint || '',
     };
     return this.zeebeAPI.checkConnectivity(params);
   }

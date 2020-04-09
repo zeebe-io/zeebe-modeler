@@ -55,6 +55,7 @@ export default function Radio(props) {
                       className="custom-control-input"
                       id={ id }
                       tabIndex={ 0 }
+                      onChange={ field.onChange }
                       { ...restProps } />
                     <label
                       htmlFor={ id }

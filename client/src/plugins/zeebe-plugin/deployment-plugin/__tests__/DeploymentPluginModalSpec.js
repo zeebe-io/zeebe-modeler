@@ -74,7 +74,7 @@ describe('<DeploymentPluginModal>', () => {
     // given
     const storedConfig = {
       endpoint: {
-        oauthClientId: 'test'
+        clientId: 'test'
       }
     };
 
@@ -274,8 +274,8 @@ describe('<DeploymentPluginModal>', () => {
     const config = {
       endpoint: {
         testProp: 'test',
-        oauthClientId: 'test',
-        oauthClientSecret: 'test',
+        clientId: 'test',
+        clientSecret: 'test',
         camundaCloudClientId: 'test',
         camundaCloudClientSecret: 'test',
         rememberCredentials: false
@@ -305,8 +305,8 @@ describe('<DeploymentPluginModal>', () => {
     const config = {
       endpoint: {
         testProp: 'test',
-        oauthClientId: 'test',
-        oauthClientSecret: 'test',
+        clientId: 'test',
+        clientSecret: 'test',
         camundaCloudClientId: 'test',
         camundaCloudClientSecret: 'test',
         rememberCredentials: true

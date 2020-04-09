@@ -12,7 +12,6 @@ import React from 'react';
 
 import {
   omit,
-  find,
   keys,
   forEach
 } from 'min-dash';
@@ -26,14 +25,13 @@ import {
   DEPLOY,
   START,
   DEPLOYMENT_NAME,
-  METHOD,
   SELF_HOSTED_TEXT,
   OAUTH_TEXT,
+  NONE,
   CAMUNDA_CLOUD_TEXT,
   CONTACT_POINT,
   DEPLOYMENT_NAME_HINT,
   CONTACT_POINT_HINT,
-  CONTACT_POINT_HINT_OAUTH,
   OAUTH_URL,
   AUDIENCE,
   CLIENT_ID,
@@ -44,11 +42,12 @@ import {
   CONNECTION_ERROR_MESSAGES
 } from './DeploymentPluginConstants';
 
+import { AUTH_TYPES } from './../shared/ZeebeAuthTypes';
+
 import {
   SELF_HOSTED,
-  OAUTH,
   CAMUNDA_CLOUD
-} from '../shared/ZeebeConnectionTypes';
+} from '../shared/ZeebeTargetTypes';
 
 import {
   Formik,
@@ -84,20 +83,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
     const { validator } = props;
 
     this.validatorFunctionsByFieldNames = {
-      zeebeContactPointOauth: validator.validateZeebeContactPoint,
+      contactPoint: validator.validateZeebeContactPoint,
       oauthURL: validator.validateOAuthURL,
       audience: validator.validateAudience,
-      oauthClientId: validator.validateClientId,
-      oauthClientSecret: validator.validateClientSecret,
+      clientId: validator.validateClientId,
+      clientSecret: validator.validateClientSecret,
       camundaCloudClientId: validator.validateClientId,
       camundaCloudClientSecret: validator.validateClientSecret,
       camundaCloudClusterId: validator.validateClusterId
-    };
-
-    this.fieldsByConnectionsMethod = {
-      [ SELF_HOSTED ]: [],
-      [ OAUTH ]: [ 'oauthURL', 'audience', 'oauthClientId', 'oauthClientSecret' ],
-      [ CAMUNDA_CLOUD ]: [ 'camundaCloudClientId', 'camundaCloudClientSecret', 'camundaCloudClusterId' ]
     };
 
     this.validationResultCache = null;
@@ -118,13 +111,13 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
     const endpoint = {
       id: generateId(),
-      connectionMethod: SELF_HOSTED,
-      zeebeContactpointSelfHosted: '0.0.0.0:26500',
-      zeebeContactPointOauth: '',
+      targetType: SELF_HOSTED,
+      authType: AUTH_TYPES.NONE,
+      contactPoint: '0.0.0.0:26500',
       oauthURL: '',
       audience: '',
-      oauthClientId: '',
-      oauthClientSecret: '',
+      clientId: '',
+      clientSecret: '',
       camundaCloudClientId: '',
       camundaCloudClientSecret: '',
       camundaCloudClusterId: '',
@@ -188,15 +181,15 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
     switch (failureReason) {
     case ERROR_REASONS.CONTACT_POINT_UNAVAILABLE:
-      return [ 'zeebeContactpointSelfHosted', 'zeebeContactPointOauth' ].includes(fieldName) &&
+      return fieldName === 'contactPoint' &&
         CONNECTION_ERROR_MESSAGES[failureReason];
     case ERROR_REASONS.CLUSTER_UNAVAILABLE:
       return fieldName === 'camundaCloudClusterId' && CONNECTION_ERROR_MESSAGES[failureReason];
     case ERROR_REASONS.UNAUTHORIZED:
     case ERROR_REASONS.FORBIDDEN:
       return [
-        'oauthClientId',
-        'oauthClientSecret',
+        'clientId',
+        'clientSecret',
         'camundaCloudClientId',
         'camundaCloudClientSecret'
       ].includes(fieldName) && CONNECTION_ERROR_MESSAGES[failureReason];
@@ -204,8 +197,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
       return fieldName === 'oauthURL' && CONNECTION_ERROR_MESSAGES[failureReason];
     case ERROR_REASONS.UNKNOWN:
       return [
-        'zeebeContactpointSelfHosted',
-        'zeebeContactPointOauth',
+        'contactPoint',
         'camundaCloudClusterId'
       ].includes(fieldName) && CONNECTION_ERROR_MESSAGES[failureReason];
     }
@@ -224,13 +216,34 @@ export default class DeploymentPluginModal extends React.PureComponent {
   }
 
   validateVisibleFields = (formValues) => {
-    const mandatoryFields = this.fieldsByConnectionsMethod[formValues.connectionMethod];
+    const { endpoint } = formValues;
+    const {
+      authType,
+      targetType
+    } = endpoint;
+
+    let mandatoryFields;
+
+    if (targetType === CAMUNDA_CLOUD) {
+      mandatoryFields = [
+        'camundaCloudClientId',
+        'camundaCloudClientSecret',
+        'camundaCloudClusterId'
+      ];
+    } else {
+      if (authType === AUTH_TYPES.OAUTH) {
+        mandatoryFields = [ 'audience', 'oauthURL', 'clientId', 'clientSecret' ];
+      } else if (authType === AUTH_TYPES.NONE) {
+        mandatoryFields = [];
+      }
+    }
     return !find(mandatoryFields, (fieldName) => {
       return this.validatorFunctionsByFieldNames[fieldName] && this.validatorFunctionsByFieldNames[fieldName](formValues[fieldName]);
     });
   }
 
   checkConnection = async (formValues) => {
+
     if (!this.shouldCheckConnection() || this.state.isValidating) {
       return;
     }
@@ -276,8 +289,8 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
   removeCredentials = (endpointConfiguration) => {
     return omit(endpointConfiguration, [
-      'oauthClientId',
-      'oauthClientSecret',
+      'clientId',
+      'clientSecret',
       'camundaCloudClientId',
       'camundaCloudClientSecret'
     ]);
@@ -388,63 +401,58 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
                       <div className="fields">
                         <Field
-                          name="endpoint.connectionMethod"
+                          name="endpoint.targetType"
                           component={ Radio }
-                          label={ METHOD }
-                          onChange={ event => form.setValues({
-                            ...form.values,
-                            endpoint: {
-                              ...form.values.endpoint,
-                              connectionMethod: event.target.value
-                            }
-                          }) }
+                          label={ 'Target' }
                           values={
                             [
                               { value: SELF_HOSTED, label: SELF_HOSTED_TEXT },
-                              { value: OAUTH, label: OAUTH_TEXT },
                               { value: CAMUNDA_CLOUD, label: CAMUNDA_CLOUD_TEXT }
                             ]
                           }
                         />
                         {
-                          form.values.endpoint.connectionMethod === SELF_HOSTED && (
+                          form.values.endpoint.targetType === SELF_HOSTED && (
                             <React.Fragment>
                               <Field
-                                name="endpoint.zeebeContactpointSelfHosted"
+                                name="endpoint.contactPoint"
                                 component={ TextInput }
                                 label={ CONTACT_POINT }
                                 fieldError={ this.endpointConfigurationFieldError }
                                 hint={ CONTACT_POINT_HINT }
                                 autoFocus
                               />
+                              <Field
+                                name="endpoint.authType"
+                                component={ Radio }
+                                label={ 'Authentication' }
+                                values={
+                                  [
+                                    { value: AUTH_TYPES.NONE, label: NONE },
+                                    { value: AUTH_TYPES.OAUTH, label: OAUTH_TEXT }
+                                  ]
+                                }
+                              />
                             </React.Fragment>
                           )
                         }
                         {
-                          form.values.endpoint.connectionMethod === OAUTH && (
+                          form.values.endpoint.targetType === SELF_HOSTED &&
+                          form.values.endpoint.authType === AUTH_TYPES.OAUTH && (
                             <React.Fragment>
                               <Field
-                                name="endpoint.zeebeContactPointOauth"
-                                component={ TextInput }
-                                label={ CONTACT_POINT }
-                                fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.zeebeContactPointOauth }
-                                hint={ CONTACT_POINT_HINT_OAUTH }
-                                autoFocus
-                              />
-                              <Field
-                                name="endpoint.oauthClientId"
+                                name="endpoint.clientId"
                                 component={ TextInput }
                                 label={ CLIENT_ID }
                                 fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.oauthClientId }
+                                validate={ validatorFunctionsByFieldNames.clientId }
                               />
                               <Field
-                                name="endpoint.oauthClientSecret"
+                                name="endpoint.clientSecret"
                                 component={ TextInput }
                                 label={ CLIENT_SECRET }
                                 fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.oauthClientSecret }
+                                validate={ validatorFunctionsByFieldNames.clientSecret }
                                 type="password"
                               />
                               <Field
@@ -465,15 +473,22 @@ export default class DeploymentPluginModal extends React.PureComponent {
                           )
                         }
                         {
-                          form.values.endpoint.connectionMethod === CAMUNDA_CLOUD && (
+                          form.values.endpoint.targetType === CAMUNDA_CLOUD && (
                             <React.Fragment>
+                              <Field
+                                name="endpoint.camundaCloudClusterId"
+                                component={ TextInput }
+                                label={ CLUSTER_ID }
+                                fieldError={ this.endpointConfigurationFieldError }
+                                validate={ validatorFunctionsByFieldNames.camundaCloudClusterId }
+                                autoFocus
+                              />
                               <Field
                                 name="endpoint.camundaCloudClientId"
                                 component={ TextInput }
                                 label={ CLIENT_ID }
                                 fieldError={ this.endpointConfigurationFieldError }
                                 validate={ validatorFunctionsByFieldNames.camundaCloudClientId }
-                                autoFocus
                               />
                               <Field
                                 name="endpoint.camundaCloudClientSecret"
@@ -483,18 +498,11 @@ export default class DeploymentPluginModal extends React.PureComponent {
                                 validate={ validatorFunctionsByFieldNames.camundaCloudClientSecret }
                                 type="password"
                               />
-                              <Field
-                                name="endpoint.camundaCloudClusterId"
-                                component={ TextInput }
-                                label={ CLUSTER_ID }
-                                fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.camundaCloudClusterId }
-                              />
                             </React.Fragment>
                           )
                         }
                         {
-                          (form.values.endpoint.connectionMethod === OAUTH || form.values.endpoint.connectionMethod === CAMUNDA_CLOUD) &&
+                          (form.values.endpoint.authType !== AUTH_TYPES.NONE || form.values.endpoint.targetType === CAMUNDA_CLOUD) &&
                           <Field
                             name="endpoint.rememberCredentials"
                             component={ CheckBox }
