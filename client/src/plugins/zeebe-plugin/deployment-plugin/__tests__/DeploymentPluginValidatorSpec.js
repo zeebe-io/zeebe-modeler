@@ -23,9 +23,11 @@ import {
 
 import {
   SELF_HOSTED,
-  OAUTH,
   CAMUNDA_CLOUD
-} from '../../shared/ZeebeConnectionTypes';
+} from '../../shared/ZeebeTargetTypes';
+
+import { AUTH_TYPES } from '../../shared/ZeebeAuthTypes';
+
 
 describe('<DeploymentPluginValidator>', () => {
 
@@ -114,8 +116,9 @@ describe('<DeploymentPluginValidator>', () => {
       const contactPoint = 'contactPoint';
       const checkConnectivitySpy = sinon.spy();
       const params = {
-        connectionMethod: SELF_HOSTED,
-        zeebeContactpointSelfHosted: contactPoint
+        targetType: SELF_HOSTED,
+        authType: AUTH_TYPES.NONE,
+        contactPoint
       };
       const validator = getValidator(checkConnectivitySpy);
 
@@ -135,19 +138,21 @@ describe('<DeploymentPluginValidator>', () => {
       // given
       const checkConnectivitySpy = sinon.spy();
       const validator = getValidator(checkConnectivitySpy);
-      const connectionMethod = OAUTH;
-      const zeebeContactPointOauth = 'contactPoint';
+      const targetType = SELF_HOSTED;
+      const authType = AUTH_TYPES.OAUTH;
+      const contactPoint = 'contactPoint';
       const oauthURL = 'oauthURL';
       const audience = 'audience';
-      const oauthClientId = 'oauthClientId';
-      const oauthClientSecret = 'oauthClientSecret';
+      const clientId = 'oauthClientId';
+      const clientSecret = 'oauthClientSecret';
       const params = {
-        connectionMethod,
-        zeebeContactPointOauth,
+        targetType,
+        authType,
+        contactPoint,
         oauthURL,
         audience,
-        oauthClientId,
-        oauthClientSecret
+        clientId,
+        clientSecret
       };
 
       // when
@@ -155,12 +160,12 @@ describe('<DeploymentPluginValidator>', () => {
 
       // then
       expect(checkConnectivitySpy).to.have.been.calledWith({
-        type: OAUTH,
-        url: zeebeContactPointOauth,
+        type: 'oauth',
+        url: contactPoint,
         oauthURL,
         audience,
-        clientId: oauthClientId,
-        clientSecret: oauthClientSecret
+        clientId,
+        clientSecret
       });
     });
 
@@ -170,12 +175,12 @@ describe('<DeploymentPluginValidator>', () => {
       // given
       const checkConnectivitySpy = sinon.spy();
       const validator = getValidator(checkConnectivitySpy);
-      const connectionMethod = CAMUNDA_CLOUD;
+      const targetType = CAMUNDA_CLOUD;
       const camundaCloudClientId = 'camundaCloudClientId';
       const camundaCloudClientSecret = 'camundaCloudClientSecret';
       const camundaCloudClusterId = 'camundaCloudClusterId';
       const params = {
-        connectionMethod,
+        targetType,
         camundaCloudClientId,
         camundaCloudClientSecret,
         camundaCloudClusterId

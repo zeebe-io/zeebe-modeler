@@ -9,11 +9,9 @@
  */
 
 const SELF_HOSTED = 'selfHosted';
-const OAUTH = 'oauth';
 const CAMUNDA_CLOUD = 'camundaCloud';
 
 export {
   SELF_HOSTED,
-  OAUTH,
   CAMUNDA_CLOUD
 };
