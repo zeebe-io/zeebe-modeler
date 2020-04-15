@@ -172,12 +172,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
     return meta.error || this.getConnectionError(fieldName);
   }
 
-  getConnectionError(fieldName) {
+  getConnectionError(rawFieldName) {
     const { failureReason } = this.state;
 
     if (!failureReason) {
       return;
     }
+
+    const fieldName = rawFieldName.replace('endpoint.', '');
 
     switch (failureReason) {
     case ERROR_REASONS.CONTACT_POINT_UNAVAILABLE:
