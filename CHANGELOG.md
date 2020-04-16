@@ -6,6 +6,17 @@ All notable changes to the [Zeebe Modeler](https://github.com/zeebe-io/zeebe-mod
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.9.0
+
+* `FEAT`: add support for error end events ([#162](https://github.com/zeebe-io/zeebe-modeler/issues/162))
+* `FEAT`: remove support for modeling collapsed sub processes ([#94](https://github.com/zeebe-io/zeebe-modeler/issues/94))
+* `FEAT`: ability to set correlation key for message event sub processes ([#151](https://github.com/zeebe-io/zeebe-modeler/issues/151))
+* `FEAT`: deploy diagrams from the Modeler ([#53](https://github.com/zeebe-io/zeebe-modeler/issues/53))
+* `FEAT`: start process instances from the Modeler ([#177](https://github.com/zeebe-io/zeebe-modeler/issues/177))
+* `FIX`: align timer event definition options in the properties panel ([#156](https://github.com/zeebe-io/zeebe-modeler/issues/156))
+* `CHORE`: notarize application artifacts ([#148](https://github.com/zeebe-io/zeebe-modeler/issues/148))
+* `CHORE`: update foundation to Camunda Modeler `v4-alpha.1` ([#187](https://github.com/zeebe-io/zeebe-modeler/issues/187))
+
 ## 0.8.0
 
 * `FEAT`: add support for non-execution relevant BPMN symbols ([#112](https://github.com/zeebe-io/zeebe-modeler/issues/112))
