@@ -66,15 +66,22 @@ import {
 
 import css from './DeploymentPluginModal.less';
 
+
+const CONNECTION_STATE = {
+  INITIAL: 'initial',
+  INVALID_ENDPOINT: 'invalidEndpoint',
+  ERROR: 'error',
+  CONNECTED: 'connected'
+};
+
 export default class DeploymentPluginModal extends React.PureComponent {
 
   constructor(props) {
     super(props);
 
     this.state = {
-      isValidating: false,
       isDeploying: false,
-      connectionValidationSuccessful: false,
+      connectionState: { type: CONNECTION_STATE.INITIAL },
       valuesInitiated: false
     };
 
@@ -93,15 +100,23 @@ export default class DeploymentPluginModal extends React.PureComponent {
       camundaCloudClusterId: validator.validateClusterId
     };
 
-    this.validationResultCache = null;
+    this.connectionChecker = validator.createConnectionChecker();
   }
 
-  componentDidMount = async () => {
+  async componentDidMount() {
     this.initialValues = await this.getInitialValues();
+
+    this.connectionChecker.subscribe({
+      onComplete: this.handleConnectionCheckResult
+    });
 
     this.setState({
       valuesInitiated: true
     });
+  }
+
+  componentWillUnmount() {
+    this.connectionChecker.unsubscribe();
   }
 
   getDefaultValues = (props) => {
@@ -128,7 +143,6 @@ export default class DeploymentPluginModal extends React.PureComponent {
       deployment,
       endpoint
     };
-
   }
 
   getInitialValues = async () => {
@@ -164,22 +178,20 @@ export default class DeploymentPluginModal extends React.PureComponent {
     };
   }
 
-  fieldError = (meta) => {
-    return meta.error;
-  }
-
   endpointConfigurationFieldError = (meta, fieldName) => {
-    return meta.error || this.getConnectionError(fieldName);
+    return meta.touched && (meta.error || this.getConnectionError(fieldName));
   }
 
   getConnectionError(rawFieldName) {
-    const { failureReason } = this.state;
+    const { connectionState } = this.state;
 
-    if (!failureReason) {
+    // no connection error
+    if (connectionState.type !== CONNECTION_STATE.ERROR) {
       return;
     }
 
     const fieldName = rawFieldName.replace('endpoint.', '');
+    const { failureReason } = connectionState;
 
     switch (failureReason) {
     case ERROR_REASONS.CONTACT_POINT_UNAVAILABLE:
@@ -205,69 +217,29 @@ export default class DeploymentPluginModal extends React.PureComponent {
     }
   }
 
-  shouldCheckConnection = () => {
-    if (!this.lastCheckedFormValues || this.renderWaitingState) {
-      return true;
-    }
-
-    const omitFields = ['rememberCredentials', 'deploymentName'];
-    const lastCheckFormValuesOmitted = omit(JSON.parse(this.lastCheckedFormValues), omitFields);
-    const formValuesOmitted = omit(this.formValues, omitFields);
-
-    return JSON.stringify(lastCheckFormValuesOmitted) !== JSON.stringify(formValuesOmitted);
+  scheduleConnectionCheck = formValues => {
+    this.connectionChecker.check(formValues.endpoint);
   }
 
-  validateVisibleFields = (formValues) => {
-    const { endpoint } = formValues;
-    const {
-      authType,
-      targetType
-    } = endpoint;
+  handleConnectionCheckResult = result => {
+    const { connectionResult, endpointErrors } = result;
 
-    let mandatoryFields;
-
-    if (targetType === CAMUNDA_CLOUD) {
-      mandatoryFields = [
-        'camundaCloudClientId',
-        'camundaCloudClientSecret',
-        'camundaCloudClusterId'
-      ];
-    } else {
-      if (authType === AUTH_TYPES.OAUTH) {
-        mandatoryFields = [ 'audience', 'oauthURL', 'clientId', 'clientSecret' ];
-      } else if (authType === AUTH_TYPES.NONE) {
-        mandatoryFields = [];
-      }
+    if (endpointErrors) {
+      return this.setConnectionState({ type: CONNECTION_STATE.INVALID_ENDPOINT });
     }
-    return !find(mandatoryFields, (fieldName) => {
-      return this.validatorFunctionsByFieldNames[fieldName] && this.validatorFunctionsByFieldNames[fieldName](formValues[fieldName]);
-    });
+
+    if (!connectionResult.isSuccessful) {
+      return this.setConnectionState({
+        type: CONNECTION_STATE.ERROR,
+        failureReason: connectionResult.reason
+      });
+    }
+
+    return this.setConnectionState({ type: CONNECTION_STATE.CONNECTED });
   }
 
-  checkConnection = async (formValues) => {
-
-    if (!this.shouldCheckConnection() || this.state.isValidating) {
-      return;
-    }
-
-    const {
-      endpoint
-    } = formValues;
-
-    this.lastCheckedFormValues = JSON.stringify(formValues);
-    this.renderWaitingState = false;
-
-    this.setState({
-      isValidating: true
-    });
-
-    const validationResult = await this.props.validator.validateConnection(endpoint);
-
-    this.setState({
-      isValidating: false,
-      connectionValidationSuccessful: validationResult.isSuccessful,
-      failureReason: validationResult.reason
-    });
+  setConnectionState(connectionState) {
+    this.setState({ connectionState });
   }
 
   saveConfig = (formValuesParsed) => {
@@ -298,39 +270,12 @@ export default class DeploymentPluginModal extends React.PureComponent {
     ]);
   }
 
-  handleFormSubmit = () => {
-    const lastCheckValuesParsed = JSON.parse(this.lastCheckedFormValues);
-
-    const {
-      deployment,
-      endpoint
-    } = this.formValues;
-
-    const {
-      rememberCredentials
-    } = endpoint;
-
-    const {
-      name
-    } = deployment;
-
-    const formValuesParsed = {
-      ...lastCheckValuesParsed,
-      endpoint: {
-        ...lastCheckValuesParsed.endpoint,
-        rememberCredentials
-      },
-      deployment: {
-        ...lastCheckValuesParsed.deployment,
-        name
-      }
-    };
-
-    this.saveConfig(formValuesParsed);
+  handleFormSubmit = values => {
+    this.saveConfig(values);
 
     this.setState({ isDeploying: true });
 
-    this.props.onDeploy(formValuesParsed);
+    this.props.onDeploy(values);
   }
 
   render() {
@@ -341,8 +286,6 @@ export default class DeploymentPluginModal extends React.PureComponent {
     } = this.props;
 
     const {
-      isValidating,
-      connectionValidationSuccessful,
       isDeploying,
       valuesInitiated
     } = this.state;
@@ -355,191 +298,171 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
     return (
       <Modal className={ css.DeploymentPluginModal } onClose={ onClose }>
-        <Formik initialValues={ initialValues || defaultValues } enableReinitialize={ true }>
+        <Formik
+          initialValues={ initialValues || defaultValues }
+          enableReinitialize={ true }
+          onSubmit={ this.handleFormSubmit }
+          validate={ this.scheduleConnectionCheck }
+          validateOnMount
+        >
           {
-            form => {
+            form => (
+              <form onSubmit={ form.handleSubmit }>
+                <Modal.Title> { MODAL_TITLE } </Modal.Title>
+                <Modal.Body>
+                  <fieldset>
+                    <div className="fields">
+                      <Field
+                        name="deployment.name"
+                        component={ TextInput }
+                        label={ DEPLOYMENT_NAME }
+                        hint={ DEPLOYMENT_NAME_HINT }
+                        autoFocus
+                      />
+                    </div>
+                  </fieldset>
+                  <fieldset>
+                    <legend>
+                      { ENDPOINT_CONFIGURATION_TITLE }
+                    </legend>
 
-              this.formValues = {
-                ...form.values
-              };
-
-              if (this.timeoutID !== undefined) {
-                clearTimeout(this.timeoutID);
-              }
-
-              const validationResult = this.validateVisibleFields(this.formValues);
-
-              if (validationResult) {
-                this.timeoutID = setTimeout(() => {
-                  this.checkConnection(this.formValues);
-                }, (this.timeoutID === undefined ? 0 : 350));
-              }
-
-              if (validationResult && validationResult !== this.validationResultCache) {
-                this.renderWaitingState = true;
-              }
-
-              this.validationResultCache = validationResult;
-
-              return (
-                <form onSubmit={ this.handleFormSubmit }>
-                  <Modal.Title> { MODAL_TITLE } </Modal.Title>
-                  <Modal.Body>
-                    <fieldset>
-                      <div className="fields">
-                        <Field
-                          name="deployment.name"
-                          component={ TextInput }
-                          label={ DEPLOYMENT_NAME }
-                          hint={ DEPLOYMENT_NAME_HINT }
-                          autoFocus
-                        />
-                      </div>
-                    </fieldset>
-                    <fieldset>
-                      <legend>
-                        { ENDPOINT_CONFIGURATION_TITLE }
-                      </legend>
-
-                      <div className="fields">
-                        <Field
-                          name="endpoint.targetType"
-                          component={ Radio }
-                          label={ 'Target' }
-                          values={
-                            [
-                              { value: SELF_HOSTED, label: SELF_HOSTED_TEXT },
-                              { value: CAMUNDA_CLOUD, label: CAMUNDA_CLOUD_TEXT }
-                            ]
-                          }
-                        />
-                        {
-                          form.values.endpoint.targetType === SELF_HOSTED && (
-                            <React.Fragment>
-                              <Field
-                                name="endpoint.contactPoint"
-                                component={ TextInput }
-                                label={ CONTACT_POINT }
-                                fieldError={ this.endpointConfigurationFieldError }
-                                hint={ CONTACT_POINT_HINT }
-                                autoFocus
-                              />
-                              <Field
-                                name="endpoint.authType"
-                                component={ Radio }
-                                label={ 'Authentication' }
-                                values={
-                                  [
-                                    { value: AUTH_TYPES.NONE, label: NONE },
-                                    { value: AUTH_TYPES.OAUTH, label: OAUTH_TEXT }
-                                  ]
-                                }
-                              />
-                            </React.Fragment>
-                          )
+                    <div className="fields">
+                      <Field
+                        name="endpoint.targetType"
+                        component={ Radio }
+                        label={ 'Target' }
+                        values={
+                          [
+                            { value: SELF_HOSTED, label: SELF_HOSTED_TEXT },
+                            { value: CAMUNDA_CLOUD, label: CAMUNDA_CLOUD_TEXT }
+                          ]
                         }
-                        {
-                          form.values.endpoint.targetType === SELF_HOSTED &&
+                      />
+                      {
+                        form.values.endpoint.targetType === SELF_HOSTED && (
+                          <React.Fragment>
+                            <Field
+                              name="endpoint.contactPoint"
+                              component={ TextInput }
+                              label={ CONTACT_POINT }
+                              fieldError={ this.endpointConfigurationFieldError }
+                              hint={ CONTACT_POINT_HINT }
+                              autoFocus
+                            />
+                            <Field
+                              name="endpoint.authType"
+                              component={ Radio }
+                              label={ 'Authentication' }
+                              values={
+                                [
+                                  { value: AUTH_TYPES.NONE, label: NONE },
+                                  { value: AUTH_TYPES.OAUTH, label: OAUTH_TEXT }
+                                ]
+                              }
+                            />
+                          </React.Fragment>
+                        )
+                      }
+                      {
+                        form.values.endpoint.targetType === SELF_HOSTED &&
                           form.values.endpoint.authType === AUTH_TYPES.OAUTH && (
-                            <React.Fragment>
-                              <Field
-                                name="endpoint.clientId"
-                                component={ TextInput }
-                                label={ CLIENT_ID }
-                                fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.clientId }
-                              />
-                              <Field
-                                name="endpoint.clientSecret"
-                                component={ TextInput }
-                                label={ CLIENT_SECRET }
-                                fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.clientSecret }
-                                type="password"
-                              />
-                              <Field
-                                name="endpoint.oauthURL"
-                                component={ TextInput }
-                                label={ OAUTH_URL }
-                                fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.oauthURL }
-                              />
-                              <Field
-                                name="endpoint.audience"
-                                component={ TextInput }
-                                label={ AUDIENCE }
-                                fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.audience }
-                              />
-                            </React.Fragment>
-                          )
-                        }
-                        {
-                          form.values.endpoint.targetType === CAMUNDA_CLOUD && (
-                            <React.Fragment>
-                              <Field
-                                name="endpoint.camundaCloudClusterId"
-                                component={ TextInput }
-                                label={ CLUSTER_ID }
-                                fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.camundaCloudClusterId }
-                                autoFocus
-                              />
-                              <Field
-                                name="endpoint.camundaCloudClientId"
-                                component={ TextInput }
-                                label={ CLIENT_ID }
-                                fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.camundaCloudClientId }
-                              />
-                              <Field
-                                name="endpoint.camundaCloudClientSecret"
-                                component={ TextInput }
-                                label={ CLIENT_SECRET }
-                                fieldError={ this.endpointConfigurationFieldError }
-                                validate={ validatorFunctionsByFieldNames.camundaCloudClientSecret }
-                                type="password"
-                              />
-                            </React.Fragment>
-                          )
-                        }
-                        {
-                          (form.values.endpoint.authType !== AUTH_TYPES.NONE || form.values.endpoint.targetType === CAMUNDA_CLOUD) &&
+                          <React.Fragment>
+                            <Field
+                              name="endpoint.clientId"
+                              component={ TextInput }
+                              label={ CLIENT_ID }
+                              fieldError={ this.endpointConfigurationFieldError }
+                              validate={ validatorFunctionsByFieldNames.clientId }
+                            />
+                            <Field
+                              name="endpoint.clientSecret"
+                              component={ TextInput }
+                              label={ CLIENT_SECRET }
+                              fieldError={ this.endpointConfigurationFieldError }
+                              validate={ validatorFunctionsByFieldNames.clientSecret }
+                              type="password"
+                            />
+                            <Field
+                              name="endpoint.oauthURL"
+                              component={ TextInput }
+                              label={ OAUTH_URL }
+                              fieldError={ this.endpointConfigurationFieldError }
+                              validate={ validatorFunctionsByFieldNames.oauthURL }
+                            />
+                            <Field
+                              name="endpoint.audience"
+                              component={ TextInput }
+                              label={ AUDIENCE }
+                              fieldError={ this.endpointConfigurationFieldError }
+                              validate={ validatorFunctionsByFieldNames.audience }
+                            />
+                          </React.Fragment>
+                        )
+                      }
+                      {
+                        form.values.endpoint.targetType === CAMUNDA_CLOUD && (
+                          <React.Fragment>
+                            <Field
+                              name="endpoint.camundaCloudClusterId"
+                              component={ TextInput }
+                              label={ CLUSTER_ID }
+                              fieldError={ this.endpointConfigurationFieldError }
+                              validate={ validatorFunctionsByFieldNames.camundaCloudClusterId }
+                              autoFocus
+                            />
+                            <Field
+                              name="endpoint.camundaCloudClientId"
+                              component={ TextInput }
+                              label={ CLIENT_ID }
+                              fieldError={ this.endpointConfigurationFieldError }
+                              validate={ validatorFunctionsByFieldNames.camundaCloudClientId }
+                            />
+                            <Field
+                              name="endpoint.camundaCloudClientSecret"
+                              component={ TextInput }
+                              label={ CLIENT_SECRET }
+                              fieldError={ this.endpointConfigurationFieldError }
+                              validate={ validatorFunctionsByFieldNames.camundaCloudClientSecret }
+                              type="password"
+                            />
+                          </React.Fragment>
+                        )
+                      }
+                      {
+                        (form.values.endpoint.authType !== AUTH_TYPES.NONE || form.values.endpoint.targetType === CAMUNDA_CLOUD) &&
                           <Field
                             name="endpoint.rememberCredentials"
                             component={ CheckBox }
                             type="checkbox"
                             label={ REMEMBER_CREDENTIALS }
                           />
-                        }
-                      </div>
-                    </fieldset>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <div className="form-submit">
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={ onClose }
-                      >
-                        { CANCEL }
-                      </button>
-                      <button
-                        type="submit"
-                        className="btn btn-primary"
-                        disabled={ !valuesInitiated || isValidating || !connectionValidationSuccessful || isDeploying || !validationResult }
-                      >
-                        { isStart ? START : DEPLOY }
-                      </button>
+                      }
                     </div>
-                  </Modal.Footer>
-                </form>
-              );
-            }
+                  </fieldset>
+                </Modal.Body>
+                <Modal.Footer>
+                  <div className="form-submit">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={ onClose }
+                    >
+                      { CANCEL }
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={ !valuesInitiated || isDeploying }
+                    >
+                      { isStart ? START : DEPLOY }
+                    </button>
+                  </div>
+                </Modal.Footer>
+              </form>
+            )
           }
         </Formik>
       </Modal>
     );
   }
-
 }
