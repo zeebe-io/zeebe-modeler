@@ -21,7 +21,7 @@ __Hint:__ Create a release issue and copy the template below into it.
     * [ ] Works on Windows
 * [ ] trigger QA for fuzzy testing
 * [ ] Publish release on [Github Releases](https://github.com/zeebe-io/zeebe-modeler/releases)
-* [ ] write blog post on _?_
+* [ ] write blog post on [Zeebe Blog](https://github.com/zeebe-io/zeebe.io/tree/master/content/blog), if applicable
 * [ ] spread the word
     * [ ] send [release notice email](https://github.com/bpmn-io/internal-docs/blob/master/camunda-modeler/README.md#release-notice-email)
     * [ ] tweet
