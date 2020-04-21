@@ -54,10 +54,6 @@ import {
   TextInput
 } from './ui';
 
-import {
-  generateId
-} from '../../../util';
-
 import css from './DeploymentPluginModal.less';
 
 
@@ -74,11 +70,8 @@ export default class DeploymentPluginModal extends React.PureComponent {
     super(props);
 
     this.state = {
-      isDeploying: false,
       connectionState: { type: CONNECTION_STATE.INITIAL }
     };
-
-    this.defaultValues = this.getDefaultValues(props);
 
     const { validator } = props;
 
@@ -104,32 +97,6 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
   componentWillUnmount() {
     this.connectionChecker.unsubscribe();
-  }
-
-  getDefaultValues = (props) => {
-    const deployment = {
-      name: props.tabName
-    };
-
-    const endpoint = {
-      id: generateId(),
-      targetType: SELF_HOSTED,
-      authType: AUTH_TYPES.NONE,
-      contactPoint: '0.0.0.0:26500',
-      oauthURL: '',
-      audience: '',
-      clientId: '',
-      clientSecret: '',
-      camundaCloudClientId: '',
-      camundaCloudClientSecret: '',
-      camundaCloudClusterId: '',
-      rememberCredentials: false
-    };
-
-    return {
-      deployment,
-      endpoint
-    };
   }
 
   endpointConfigurationFieldError = (meta, fieldName) => {
@@ -182,7 +149,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
       return this.setConnectionState({ type: CONNECTION_STATE.INVALID_ENDPOINT });
     }
 
-    if (!connectionResult.isSuccessful) {
+    if (!connectionResult.success) {
       return this.setConnectionState({
         type: CONNECTION_STATE.ERROR,
         failureReason: connectionResult.reason
@@ -196,8 +163,14 @@ export default class DeploymentPluginModal extends React.PureComponent {
     this.setState({ connectionState });
   }
 
-  handleFormSubmit = values => {
-    this.setState({ isDeploying: true });
+  handleFormSubmit = async (values, { setSubmitting }) => {
+
+    // check connection
+    const { connectionResult } = await this.connectionChecker.check(values.endpoint);
+
+    if (!connectionResult.success) {
+      return setSubmitting(false);
+    }
 
     this.props.onDeploy(values);
   }
@@ -205,14 +178,12 @@ export default class DeploymentPluginModal extends React.PureComponent {
   render() {
 
     const {
-      onClose,
-      configuration,
+      onClose: closeModal,
+      config,
       isStart
     } = this.props;
 
-    const {
-      isDeploying
-    } = this.state;
+    const onClose = () => closeModal();
 
     const {
       validatorFunctionsByFieldNames
@@ -221,7 +192,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
     return (
       <Modal className={ css.DeploymentPluginModal } onClose={ onClose }>
         <Formik
-          initialValues={ configuration }
+          initialValues={ config }
           onSubmit={ this.handleFormSubmit }
           validate={ this.scheduleConnectionCheck }
           validateOnMount
@@ -373,7 +344,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                     <button
                       type="submit"
                       className="btn btn-primary"
-                      disabled={ isDeploying }
+                      disabled={ form.isSubmitting }
                     >
                       { isStart ? START : DEPLOY }
                     </button>

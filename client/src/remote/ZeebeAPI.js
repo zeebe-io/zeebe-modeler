@@ -17,15 +17,62 @@ export default class ZeebeAPI {
     this.backend = backend;
   }
 
-  checkConnectivity(parameters) {
-    return this.backend.send('zeebe:checkConnectivity', parameters);
+  checkConnectivity(rawEndpoint) {
+    const endpoint = this.extractEndpoint({ endpoint: rawEndpoint });
+
+    return this.backend.send('zeebe:checkConnectivity', { endpoint });
   }
 
   deploy(parameters) {
-    return this.backend.send('zeebe:deploy', parameters);
+    const endpoint = this.extractEndpoint(parameters);
+
+    return this.backend.send('zeebe:deploy', { ...parameters, endpoint });
   }
 
   run(parameters) {
-    return this.backend.send('zeebe:run', parameters);
+    const endpoint = this.extractEndpoint(parameters);
+
+    return this.backend.send('zeebe:run', { ...parameters, endpoint });
+  }
+
+  extractEndpoint(parameters) {
+    const {
+      authType,
+      audience,
+      targetType,
+      clientId,
+      clientSecret,
+      oauthURL,
+      contactPoint,
+      camundaCloudClientId,
+      camundaCloudClientSecret,
+      camundaCloudClusterId
+    } = parameters.endpoint;
+
+    if (targetType === 'selfHosted') {
+      if (authType === 'none') {
+        return {
+          type: 'selfHosted',
+          url: contactPoint || '',
+        };
+      } else if (authType === 'oauth') {
+        return {
+          type: 'oauth',
+          url: contactPoint,
+          oauthURL,
+          audience,
+          clientId,
+          clientSecret
+        };
+      }
+    } else if (targetType === 'camundaCloud') {
+      return {
+        type: 'camundaCloud',
+        clientId: camundaCloudClientId,
+        clientSecret: camundaCloudClientSecret,
+        clusterId: camundaCloudClusterId
+      };
+    }
+
   }
 }

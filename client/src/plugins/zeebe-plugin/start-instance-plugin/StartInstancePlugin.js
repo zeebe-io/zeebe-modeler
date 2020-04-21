@@ -18,10 +18,8 @@ import { Button } from '../../../app/primitives';
 
 import css from './StartInstancePlugin.less';
 
-import ZeebeConnectionValidator from '../shared/ZeebeConnectionValidator';
+import pDefer from 'p-defer';
 
-const DEPLOYMENT_CONFIG_KEY = 'deployment-tool';
-const ZEEBE_ENDPOINTS_CONFIG_KEY = 'zeebeEndpoints';
 
 export default class StartInstancePlugin extends PureComponent {
 
@@ -31,39 +29,33 @@ export default class StartInstancePlugin extends PureComponent {
     this.state = {
       hasActiveTab: false
     };
-
-    this.zeebeConnectionValidator = new ZeebeConnectionValidator(props._getGlobal('zeebeAPI'));
   }
 
   componentDidMount() {
-    this.props.subscribeToMessaging('startInstancePlugin', this.onMessageReceived);
-
     this.props.subscribe('app.activeTabChanged', ({ activeTab }) => {
-      this.activeTab = activeTab;
       this.setState({
         hasActiveTab: activeTab && activeTab.type !== 'empty'
       });
     });
   }
 
-  componentWillUnmount() {
-    this.props.unsubscribeFromMessaging('startInstancePlugin');
+
+  async startInstance() {
+    const { deploymentResult, endpoint } = await this.deployActiveTab();
+
+    // cancel on deployment error or deployment cancelled
+    if (!deploymentResult || !deploymentResult.success) {
+      return;
+    }
+
+    return this.startProcessInstance(
+      deploymentResult.response.workflows[0].bpmnProcessId, endpoint);
   }
 
-  onMessageReceived = (msg, body) => {
-    if (msg === 'deploymentInitiated') {
-      this.waitForDeployment = false;
-    }
-    if (msg === 'deploymentSucceeded' && this.waitForDeployment) {
-      this.startProcessInstance(body);
-      this.waitForDeployment = false;
-    }
-  }
-
-  startProcessInstance = async (processId) => {
+  startProcessInstance = async (processId, endpoint) => {
     const zeebeAPI = this.props._getGlobal('zeebeAPI');
 
-    zeebeAPI.run({ processId });
+    await zeebeAPI.run({ processId, endpoint });
 
     this.props.displayNotification({
       type: 'success',
@@ -72,74 +64,21 @@ export default class StartInstancePlugin extends PureComponent {
     });
   }
 
-  async getSavedDeploymentConfig() {
-    const tabConfig = await this.props.config.getForFile(this.activeTab.file, DEPLOYMENT_CONFIG_KEY);
-
-    if (!tabConfig) {
-      return {};
-    }
-
-    const {
-      deployment,
-      endpointId
-    } = tabConfig;
-
-    const endpoints = await this.props.config.get(ZEEBE_ENDPOINTS_CONFIG_KEY, []);
-
-    return {
-      deployment,
-      endpoint: endpoints.find(endpoint => endpoint.id === endpointId)
-    };
-  }
-
   onIconClicked = async () => {
-    const savedTab = await this.props.triggerAction('save', { tab: this.activeTab });
-
-    // cancel action if save modal got canceled
-    if (!savedTab) {
-      return;
-    }
-
-    const {
-      file: tabFile,
-      name: tabName
-    } = savedTab;
-
-    const path = tabFile.path;
-
-    const deploymentConfig = await this.getSavedDeploymentConfig();
-
-    const {
-      endpoint
-    } = deploymentConfig;
-
-    if (!endpoint) {
-      return this.deployFirst();
-    }
-
-    const zeebeAPI = this.props._getGlobal('zeebeAPI');
-
-    const connectionResult = await this.zeebeConnectionValidator.validateConnection(endpoint);
-
-    if (!connectionResult.isSuccessful) {
-      return this.deployFirst();
-    }
-
-    const deploymentResult = await zeebeAPI.deploy({
-      filePath: path,
-      name: deploymentConfig.deployment.name || withoutExtension(tabName)
-    });
-
-    if (!deploymentResult.success) {
-      this.props.broadcastMessage('deploymentFailure', deploymentResult.response);
-    } else {
-      this.startProcessInstance(deploymentResult.response.workflows[0].bpmnProcessId);
-    }
+    this.startInstance();
   }
 
-  deployFirst = () => {
-    this.waitForDeployment = true;
-    this.props.broadcastMessage('forceDeploy');
+  deployActiveTab() {
+    const deferred = pDefer();
+    const body = {
+      isStart: true,
+      skipNotificationOnSuccess: true,
+      done: deferred.resolve
+    };
+
+    this.props.broadcastMessage('deploy', body);
+
+    return deferred.promise;
   }
 
   render() {
@@ -163,10 +102,4 @@ export default class StartInstancePlugin extends PureComponent {
       }
     </React.Fragment>;
   }
-}
-
-// helpers //////////
-
-function withoutExtension(name) {
-  return name.replace(/\.[^.]+$/, '');
 }

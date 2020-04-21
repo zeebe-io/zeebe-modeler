@@ -23,340 +23,102 @@ describe('<DeploymentPluginModal>', () => {
   });
 
 
-  it('should set tab name as default deployment name', async () => {
-
-    // given
-    const tabName = 'foo';
-
-    const { instance } = createDeploymentPluginModal({ tabName });
-
-    // when
-    await instance.componentDidMount();
-
-    const {
-      initialValues: { deployment }
-    } = instance;
-
-    // then
-    expect(deployment.name).to.eql(tabName);
-  });
-
-
-  it('should get stored tab config on start', async () => {
-
-    // given
-    const storedConfig = {
-      deployment: {
-        name: 'foo'
-      }
-    };
-
-    const { instance } = createDeploymentPluginModal({ storedConfig });
-
-    const expected = {
-      ...instance.defaultValues,
-      deployment: {
-        ...instance.defaultValues.deployment,
-        ...storedConfig.deployment
-      }
-    };
-
-    // when
-    await instance.componentDidMount();
-
-    // then
-    expect(instance.initialValues).to.eql(expected);
-  });
-
-
-  it('should get stored endpoint config on start', async () => {
-
-    // given
-    const storedConfig = {
-      endpoint: {
-        clientId: 'test'
-      }
-    };
-
-    const { instance } = createDeploymentPluginModal({ storedConfig });
-
-    const expected = {
-      ...instance.defaultValues,
-      endpoint: {
-        ...instance.defaultValues.endpoint,
-        ...storedConfig.endpoint
-      }
-    };
-
-    // when
-    await instance.componentDidMount();
-
-    // then
-    expect(instance.initialValues).to.eql(expected);
-  });
-
-
-  it('should not check connection if values are not changed', async () => {
-
-    // given
-    const validateConnectionSpy = sinon.spy();
-    const { instance } = createDeploymentPluginModal({ validateConnectionSpy });
-
-    instance.lastCheckedFormValues = JSON.stringify(instance.formValues);
-    instance.renderWaitingState = false;
-
-    // when
-    await instance.checkConnection(instance.formValues);
-
-    // then
-    expect(validateConnectionSpy).to.not.have.been.called;
-  });
-
-
-  it('should not check connection if in isValidating state', async () => {
-
-    // given
-    const validateConnectionSpy = sinon.spy();
-    const { instance } = createDeploymentPluginModal({ validateConnectionSpy });
-
-    instance.setState({ isValidating: true });
-
-    // when
-    await instance.checkConnection(instance.formValues);
-
-    // then
-    expect(validateConnectionSpy).to.not.have.been.called;
-  });
-
-
   it('should check connection initially', (done) => {
 
     // given
-    const validateConnectionSpy = sinon.spy();
-    createDeploymentPluginModal({ validateConnectionSpy });
+    const spy = sinon.spy();
+    const validator = {
+      createConnectionChecker: () => createConnectionChecker({ check: spy })
+    };
+    createDeploymentPluginModal({ validator });
 
     // then
     setTimeout(() => {
-      expect(validateConnectionSpy).to.have.been.called;
+      expect(spy).to.have.been.called;
       done();
     }, 500);
   });
 
 
-  it('should not be able to deploy when in isValidating state', async () => {
+  it('should deploy', done => {
 
     // given
-    const { wrapper, instance } = createDeploymentPluginModal();
+    const { wrapper } = createDeploymentPluginModal({ onDeploy });
 
     // when
-    await instance.componentDidMount();
-    instance.setState({ isDeploying: false, isValidating: true });
-    wrapper.update();
+    const form = wrapper.find('form');
+    form.simulate('submit');
 
     // then
-    expect(wrapper.find('.btn-primary').props().disabled).to.be.true;
-  });
-
-
-  it('should not be able to deploy when in isDeploying state', async () => {
-
-    // given
-    const { wrapper, instance } = createDeploymentPluginModal();
-
-    // when
-    await instance.componentDidMount();
-    instance.setState({ isValidating: false, validationSuccessful: true, isDeploying: true });
-    wrapper.update();
-
-    // then
-    expect(wrapper.find('.btn-primary').props().disabled).to.be.true;
-  });
-
-
-  it('should not be able to deploy when in validationSuccessful:false state', async () => {
-
-    // given
-    const { wrapper, instance } = createDeploymentPluginModal();
-
-    // when
-    await instance.componentDidMount();
-    instance.setState({ isValidating: false, validationSuccessful: false, isDeploying: false });
-    wrapper.update();
-
-    // then
-    expect(wrapper.find('.btn-primary').props().disabled).to.be.true;
-  });
-
-
-  it('should deploy', async () => {
-
-    // given
-    const onDeploySpy = sinon.spy();
-    const { wrapper, instance } = createDeploymentPluginModal({ onDeploySpy });
-    instance.lastCheckedFormValues = JSON.stringify({});
-
-    // when
-    await instance.componentDidMount();
-    instance.setState({ isValidating: false, validationSuccessful: true, isDeploying: false });
-    wrapper.update();
-    wrapper.find('form').simulate('submit');
-
-    // then
-    expect(onDeploySpy).to.have.been.called;
-  });
-
-
-  it('should save configuration on deploy', async () => {
-
-    // given
-    const setConfigSpy = sinon.spy();
-    const { wrapper, instance } = createDeploymentPluginModal({ setConfigSpy });
-    const config = {
-      endpoint: { connectionMethod: 'foo' }
-    };
-
-    instance.lastCheckedFormValues = JSON.stringify(config);
-
-    // when
-    await instance.componentDidMount();
-    instance.setState({ isValidating: false, validationSuccessful: true, isDeploying: false });
-    wrapper.update();
-    wrapper.find('form').simulate('submit');
-
-    const expected = {
-      ...instance.formValues,
-      endpoint: {
-        ...config.endpoint,
-        rememberCredentials: false
-      }
-    };
-
-    // then
-    expect(setConfigSpy).to.have.been.calledWith(expected);
-  });
-
-
-  it('should not save configurations on cancel', async () => {
-
-    // given
-    const setConfigSpy = sinon.spy();
-    const { wrapper, instance } = createDeploymentPluginModal({ setConfigSpy });
-
-    // when
-    await instance.componentDidMount();
-    wrapper.find('.btn-secondary').simulate('click');
-
-    // then
-    expect(setConfigSpy).to.not.have.been.called;
+    function onDeploy() {
+      done();
+    }
   });
 
 
   it('should close when pressed on secondary button', async () => {
 
     // given
-    const onCloseSpy = sinon.spy();
-    const { wrapper, instance } = createDeploymentPluginModal({ onCloseSpy });
+    const onClose = sinon.spy();
+    const { wrapper, instance } = createDeploymentPluginModal({ onClose });
 
     // when
     await instance.componentDidMount();
     wrapper.find('.btn-secondary').simulate('click');
 
     // then
-    expect(onCloseSpy).to.have.been.called;
-  });
-
-
-  it('should not save credentials if selected', async () => {
-
-    // given
-    const setConfigSpy = sinon.spy();
-    const { instance } = createDeploymentPluginModal({ setConfigSpy });
-    const config = {
-      endpoint: {
-        testProp: 'test',
-        clientId: 'test',
-        clientSecret: 'test',
-        camundaCloudClientId: 'test',
-        camundaCloudClientSecret: 'test',
-        rememberCredentials: false
-      }
-    };
-
-    // when
-    instance.saveConfig(config);
-
-    const expected = {
-      endpoint: {
-        rememberCredentials: false,
-        testProp: 'test'
-      }
-    };
-
-    // then
-    expect(setConfigSpy).to.have.been.calledWith(expected);
-  });
-
-
-  it('should save credentials if selected', async () => {
-
-    // given
-    const setConfigSpy = sinon.spy();
-    const { instance } = createDeploymentPluginModal({ setConfigSpy });
-    const config = {
-      endpoint: {
-        testProp: 'test',
-        clientId: 'test',
-        clientSecret: 'test',
-        camundaCloudClientId: 'test',
-        camundaCloudClientSecret: 'test',
-        rememberCredentials: true
-      }
-    };
-
-    // when
-    instance.saveConfig(config);
-
-    // then
-    expect(setConfigSpy).to.have.been.calledWith(config);
+    expect(onClose).to.have.been.called;
   });
 });
 
 
-const createDeploymentPluginModal = (params = {}) => {
-  const getConfig = () => {
-    return params.storedConfig || {};
-  };
-  const validator = {
-    validateConnection: () => {
-      return params.validateConnectionSpy ? params.validateConnectionSpy() : {};
-    }
-  };
-  const onDeploy = () => {
-    if (params.onDeploySpy) {
-      params.onDeploySpy();
-    }
-  };
-  const onClose = () => {
-    if (params.onCloseSpy) {
-      params.onCloseSpy();
-    }
-  };
-  const setConfig = (config) => {
-    if (params.setConfigSpy) {
-      params.setConfigSpy(config);
-    }
-  };
+const createDeploymentPluginModal = ({ ...props } = {}) => {
+
+  const config = createConfig(props.config);
+  const validator = new Validator(props.validator);
 
   const wrapper = mount(<DeploymentPluginModal
-    getConfig={ getConfig }
     validator={ validator }
-    onDeploy={ onDeploy }
-    setConfig={ setConfig }
-    onClose={ onClose }
-    tabName={ params.tabName || 'test' }
+    onDeploy={ noop }
+    onClose={ noop }
+    { ...props }
+    config={ config }
   />);
 
   const instance = wrapper.instance();
 
   return { wrapper, instance };
 };
+
+function Validator({ ...overrides } = {}) {
+  this.createConnectionChecker = createConnectionChecker;
+
+  Object.assign(this, overrides);
+}
+
+function createConfig({ endpoint = {}, deployment = {} } = {}) {
+  return {
+    deployment: {
+      name: 'name',
+      ...deployment
+    },
+    endpoint: {
+      targetType: 'selfHosted',
+      authType: 'none',
+      contactPoint: 'https://google.com',
+      ...endpoint
+    }
+  };
+}
+
+function noop() {}
+
+function createConnectionChecker({ ...overrides } = {}) {
+  return {
+    subscribe: noop,
+    check() {
+      return { connectionResult: { success: true } };
+    },
+    ...overrides
+  };
+}

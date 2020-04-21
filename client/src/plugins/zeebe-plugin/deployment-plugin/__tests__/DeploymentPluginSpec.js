@@ -14,16 +14,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { Config } from '../../../../app/__tests__/mocks';
+
 import DeploymentPlugin from '../DeploymentPlugin';
 
 const DEPLOYMENT_CONFIG_KEY = 'deployment-tool';
 const ZEEBE_ENDPOINTS_CONFIG_KEY = 'zeebeEndpoints';
 
-const NOOP_TAB = {
-  file: {
-    path: 'testPath'
-  }
-};
 
 describe('<DeploymentPlugin>', () => {
 
@@ -32,174 +29,134 @@ describe('<DeploymentPlugin>', () => {
   });
 
 
+  it('should deploy', async () => {
+
+    // given
+    const deploySpy = sinon.spy();
+    const zeebeAPI = new MockZeebeAPI({ deploySpy });
+    const { instance } = createDeploymentPlugin({ zeebeAPI });
+
+    // when
+    await instance.deploy();
+
+    // then
+    expect(deploySpy).to.have.been.calledOnce;
+  });
+
+
   it('should save tab before deploy', async () => {
 
     // given
-    const saveSpy = sinon.spy();
-    const { instance } = createDeploymentPlugin({ saveSpy });
+    const config = { set: sinon.spy() };
+    const { instance } = createDeploymentPlugin({ config });
 
     // when
-    await instance.onIconClicked();
+    await instance.deploy();
 
     // then
-    expect(saveSpy).to.have.been.called;
+    expect(config.set).to.have.been.called;
   });
 
 
-  it('should be in hasActiveTab:false state when there is no active tab', () => {
+  describe('ui', () => {
 
-    // given
-    const { wrapper } = createDeploymentPlugin({ emptyTab: true });
+    it('should display button if there is active tab', () => {
 
-    // then
-    expect(wrapper.state('hasActiveTab')).to.be.false;
+      // given
+      const { wrapper } = createDeploymentPlugin();
+
+      // then
+      expect(wrapper.find('Button')).to.have.lengthOf(1);
+    });
+
+
+    it('should NOT display button if there is no active tab', () => {
+
+      // given
+      const { wrapper } = createDeploymentPlugin({ activeTab: false });
+
+      // then
+      expect(wrapper.find('Button')).to.have.lengthOf(0);
+    });
   });
 
 
-  it('should be in hasActiveTab:true state when there is active tab', () => {
+  it('should use stored endpoint configuration', async () => {
 
     // given
-    const { wrapper } = createDeploymentPlugin();
-
-    // then
-    expect(wrapper.state('hasActiveTab')).to.be.true;
-  });
-
-
-  it('should be in modalVisible:true state when clicking on icon', async () => {
-
-    // given
-    const { wrapper, instance } = createDeploymentPlugin();
-
-    // when
-    await instance.onIconClicked();
-
-    // then
-    expect(wrapper.state('modalVisible')).to.be.true;
-  });
-
-
-  it('should be in modalVisible:false state when clicking on icon twice', async () => {
-
-    // given
-    const { wrapper, instance } = createDeploymentPlugin();
-
-    // when
-    await instance.onIconClicked();
-    await instance.onIconClicked();
-
-    // then
-    expect(wrapper.state('modalVisible')).to.be.false;
-  });
-
-
-  it('should be in modalVisible:false state when closed', async () => {
-
-    // given
-    const { wrapper, instance } = createDeploymentPlugin();
-
-    // when
-    await instance.closeModal();
-
-    // then
-    expect(wrapper.state('modalVisible')).to.be.false;
-  });
-
-
-  it('should return empty object if there is no stored tab config', async () => {
-
-    // given
-    const { instance } = createDeploymentPlugin();
-
-    // when
-    const config = await instance.getSavedConfiguration();
-
-    // then
-    expect(config).to.eql({});
-  });
-
-
-  it('should return stored tab configuration', async () => {
-
-    // given
-    const storedTabConfiguration = { deployment: { name: 'foo' } };
-    const { instance } = createDeploymentPlugin({ storedTabConfiguration });
-
-    // when
-    const config = await instance.getSavedConfiguration();
-
-    // then
-    expect(config.deployment).to.eql(storedTabConfiguration.deployment);
-  });
-
-
-  it('should retrieve stored endpoint configuration', async () => {
-
-    // given
+    const deploySpy = sinon.spy();
+    const zeebeAPI = new MockZeebeAPI({ deploySpy });
     const storedTabConfiguration = {
       deployment: { name: 'foo' },
       endpointId: 'bar'
     };
+    const storedEndpoints = [{ id: storedTabConfiguration.endpointId }];
 
-    const storedEndpoints = [{ id: 'bar' }];
+    const config = {
+      get(key, defaultValue) {
+        return key === ZEEBE_ENDPOINTS_CONFIG_KEY ? storedEndpoints : defaultValue;
+      },
+      getForFile(_, key) {
+        return key === DEPLOYMENT_CONFIG_KEY && storedTabConfiguration;
+      }
+    };
 
-    const { instance } = createDeploymentPlugin({ storedTabConfiguration, storedEndpoints });
+    const { instance } = createDeploymentPlugin({ zeebeAPI, config });
 
     // when
-    const config = await instance.getSavedConfiguration();
+    await instance.deploy();
 
     // then
-    expect(config.endpoint).to.eql(storedEndpoints[0]);
+    expect(deploySpy).to.have.been.calledOnce;
+    expect(deploySpy.args[0][0].endpoint).to.have.property('id', storedEndpoints[0].id);
   });
 
 
   it('should save tab configuration', async () => {
 
     // given
-    const endpointId = 'bar';
+    const setConfigSpy = sinon.spy();
+    const activeTab = createTab();
 
-    const configuration = {
-      deployment: { test: 'true' },
-      endpoint: {
-        id: endpointId
-      }
-    };
-
-    const setTabConfigSpy = sinon.spy();
-
-    const { instance } = createDeploymentPlugin({ setTabConfigSpy });
+    const { instance } = createDeploymentPlugin({ activeTab, config: { setForFile: setConfigSpy } });
 
     // when
-    await instance.saveConfiguration(configuration);
+    await instance.deploy();
 
     // then
-    expect(setTabConfigSpy).to.have.been.calledWith(DEPLOYMENT_CONFIG_KEY, {
-      deployment: configuration.deployment,
-      endpointId
-    });
+    expect(setConfigSpy).to.have.been.calledOnce;
+    expect(setConfigSpy.args[0][0]).to.eql(activeTab.file);
   });
 
 
   it('should save endpoint', async () => {
 
     // given
-    const endpoint = { id: 'bar' };
+    const setEndpointsSpy = sinon.spy();
+    const storedTabConfiguration = {
+      deployment: { name: 'foo' },
+      endpointId: 'bar'
+    };
+    const storedEndpoints = [{ id: storedTabConfiguration.endpointId }];
 
-    const configuration = {
-      deployment: { test: 'true' },
-      endpoint
+    const config = {
+      set: setEndpointsSpy,
+      get(key, defaultValue) {
+        return key === ZEEBE_ENDPOINTS_CONFIG_KEY ? storedEndpoints : defaultValue;
+      },
+      getForFile(_, key) {
+        return key === DEPLOYMENT_CONFIG_KEY && storedTabConfiguration;
+      }
     };
 
-    const setEndpointsSpy = sinon.spy();
-
-    const { instance } = createDeploymentPlugin({ setEndpointsSpy });
+    const { instance } = createDeploymentPlugin({ config });
 
     // when
-    await instance.saveConfiguration(configuration);
+    await instance.deploy();
 
     // then
-    expect(setEndpointsSpy)
-      .to.have.been.calledWith(ZEEBE_ENDPOINTS_CONFIG_KEY, [ endpoint ]);
+    expect(setEndpointsSpy).to.have.been.calledOnce;
+    expect(setEndpointsSpy.args[0][1][0]).to.have.property('id', storedTabConfiguration.endpointId);
   });
 
 
@@ -208,14 +165,11 @@ describe('<DeploymentPlugin>', () => {
     // given
     const displayNotificationSpy = sinon.spy();
     const { instance } = createDeploymentPlugin({
-      deploymentSuccessful: true,
-      displayNotificationSpy
+      displayNotification: displayNotificationSpy
     });
 
-    instance.activeTab = NOOP_TAB;
-
     // when
-    await instance.onDeploy({ deploymentName: 'testName' });
+    await instance.deploy();
 
     // then
     expect(displayNotificationSpy).to.have.been.calledWith({
@@ -230,12 +184,14 @@ describe('<DeploymentPlugin>', () => {
 
     // given
     const displayNotificationSpy = sinon.spy();
-    const { instance } = createDeploymentPlugin({ displayNotificationSpy });
-
-    instance.activeTab = NOOP_TAB;
+    const zeebeAPI = new MockZeebeAPI({ deploymentResult: { success: false, response: {} } });
+    const { instance } = createDeploymentPlugin({
+      displayNotification: displayNotificationSpy,
+      zeebeAPI
+    });
 
     // when
-    await instance.onDeploy({ deploymentName: 'testName' });
+    await instance.deploy();
 
     // then
     expect(displayNotificationSpy).to.have.been.calledWith({
@@ -247,240 +203,256 @@ describe('<DeploymentPlugin>', () => {
   });
 
 
-  it('should print log on deployment failure', async () => {
+  it('should allow to deploy via message', done => {
 
     // given
-    const displayLogSpy = sinon.spy();
-    const { instance } = createDeploymentPlugin({ displayLogSpy });
-
-    instance.activeTab = NOOP_TAB;
-
+    const subscribeToMessaging = (_, callback) => {
+      callback('deploy', { done: doneCallback });
+    };
 
     // when
-    await instance.onDeploy({ deploymentName: 'testName' });
+    createDeploymentPlugin({ subscribeToMessaging });
 
     // then
-    expect(displayLogSpy).to.have.been.calledWith({
-      category: 'deploy-error',
-      message: 'details'
-    });
+    function doneCallback() {
+      done();
+    }
   });
 
 
-  it('should broadcast deploymentInitiated message when clicked on icon', async () => {
+  it('should pass deploymentResult=null if tab was not saved', done => {
 
     // given
-    const broadcastMessageSpy = sinon.spy();
-    const { instance } = createDeploymentPlugin({ broadcastMessageSpy });
+    const subscribeToMessaging = (_, callback) => {
+      callback('deploy', { done: doneCallback });
+    };
 
     // when
-    await instance.onIconClicked();
+    createDeploymentPlugin({ subscribeToMessaging, triggerAction: noop });
 
     // then
-    expect(broadcastMessageSpy).to.have.been.calledWith('deploymentInitiated');
+    function doneCallback(result) {
+      let error;
+
+      try {
+        expect(result).to.eql({
+          deploymentResult: null
+        });
+      } catch (err) {
+        error = err;
+      } finally {
+        done(error);
+      }
+    }
   });
 
 
-  it('should show modal when forceDeploy message is received', () => {
+  it('should pass deploymentResult=null if config was not provided', done => {
 
     // given
-    const { instance } = createDeploymentPlugin();
+    const subscribeToMessaging = (_, callback) => {
+      callback('deploy', { done: doneCallback });
+    };
 
     // when
-    instance.onMessageReceived('forceDeploy');
+    createDeploymentPlugin({ subscribeToMessaging, userAction: 'cancel' });
 
     // then
-    expect(instance.state.modalVisible).to.be.true;
+    function doneCallback(result) {
+      let error;
+
+      try {
+        expect(result).to.eql({
+          deploymentResult: null
+        });
+      } catch (err) {
+        error = err;
+      } finally {
+        done(error);
+      }
+    }
   });
 
 
-  it('should be in isStart:true state when forceDeploy message is received', () => {
+  it('should pass both the deployment result and endpoint config', done => {
 
     // given
-    const { instance } = createDeploymentPlugin();
+    const deploySpy = sinon.spy();
+    const deploymentResult = { success: true, response: {} };
+    const zeebeAPI = new MockZeebeAPI({ deploySpy, deploymentResult });
+    const subscribeToMessaging = (_, callback) => {
+      callback('deploy', { done: doneCallback });
+    };
 
     // when
-    instance.onMessageReceived('forceDeploy');
+    createDeploymentPlugin({ subscribeToMessaging, zeebeAPI });
 
     // then
-    expect(instance.state.isStart).to.be.true;
-  });
+    function doneCallback(result) {
+      let error;
 
-
-  it('should be in isStart:false state when deploy icon clicked', async () => {
-
-    // given
-    const { instance } = createDeploymentPlugin();
-
-    // when
-    await instance.onIconClicked();
-
-    // then
-    expect(instance.state.isStart).to.be.false;
+      try {
+        expect(result).to.eql({
+          deploymentResult,
+          endpoint: deploySpy.args[0][0].endpoint
+        });
+      } catch (err) {
+        error = err;
+      } finally {
+        done(error);
+      }
+    }
   });
 
 
   it('should subscribe to messaging when mounted', () => {
 
     // given
-    const subscribeToMessagingSpy = sinon.spy();
-    createDeploymentPlugin({ subscribeToMessagingSpy });
+    const subscribeToMessaging = sinon.spy();
+    createDeploymentPlugin({ subscribeToMessaging });
 
     // then
-    expect(subscribeToMessagingSpy).to.have.been.calledWith('deploymentPlugin');
+    expect(subscribeToMessaging).to.have.been.calledWith('deploymentPlugin');
   });
 
 
   it('should unsubscribe from messaging when unmounted', () => {
 
     // given
-    const unsubscribeFromMessagingSpy = sinon.spy();
-    const { wrapper } = createDeploymentPlugin({ unsubscribeFromMessagingSpy });
+    const unsubscribeFromMessaging = sinon.spy();
+    const { wrapper } = createDeploymentPlugin({ unsubscribeFromMessaging });
 
     // when
     wrapper.unmount();
 
     // then
-    expect(unsubscribeFromMessagingSpy).to.have.been.calledWith('deploymentPlugin');
+    expect(unsubscribeFromMessaging).to.have.been.calledWith('deploymentPlugin');
   });
 
 
-  it('should have skipNotificationOnSuccess:true after receiving forceDeploy message', () => {
-
-    // given
-    const { instance } = createDeploymentPlugin();
-
-    // when
-    instance.onMessageReceived('forceDeploy');
-
-    // then
-    expect(instance.skipNotificationOnSuccess).to.be.true;
-  });
-
-
-  it('should have skipNotificationOnSuccess:false after clicking on icon', async () => {
-
-    // given
-    const { instance } = createDeploymentPlugin();
-    instance.skipNotificationOnSuccess = true;
-
-    // when
-    await instance.onIconClicked();
-
-    // then
-    expect(instance.skipNotificationOnSuccess).to.be.false;
-  });
-
-
-  it('should not display notification if skipNotificationOnSuccess is true', () => {
+  it('should not display notification if skipNotificationOnSuccess is true', async () => {
 
     // given
     const displayNotificationSpy = sinon.spy();
-    const { instance } = createDeploymentPlugin();
-    instance.skipNotificationOnSuccess = true;
-
-    // when
-    instance.onDeploymentSuccess({
-      workflows: [ { bpmnProcessId: 'test' } ]
+    const { instance } = createDeploymentPlugin({
+      displayNotification: displayNotificationSpy
     });
 
+    // when
+    await instance.deploy({ skipNotificationOnSuccess: true });
+
     // then
-    expect(displayNotificationSpy).to.not.have.been.called;
+    expect(displayNotificationSpy).not.to.have.been.called;
   });
 });
 
-const createDeploymentPlugin = (params = {}) => {
+class TestDeploymentPlugin extends DeploymentPlugin {
+
+  /**
+   * @param {object} props
+   * @param {'cancel'|'deploy'} [props.userAction='deploy'] user action in configuration modal
+   * @param {object} [props.endpoint] overrides for endpoint configuration
+   * @param {object} [props.deployment] overrides for deployment configuration
+   */
+  constructor(props) {
+    super(props);
+  }
+
+  // closes automatically when modal is opened
+  componentDidUpdate(...args) {
+    super.componentDidUpdate && super.componentDidUpdate(...args);
+
+    const { modalState } = this.state;
+    const {
+      userAction,
+      endpoint,
+      deployment
+    } = this.props;
+
+    if (modalState) {
+      const action = userAction || 'deploy';
+
+      const config = action !== 'cancel' && {
+        endpoint: {
+          ...modalState.config.endpoint,
+          ...endpoint
+        },
+        deployment: {
+          ...modalState.config.deployment,
+          ...deployment
+        }
+      };
+
+      modalState.onClose(config);
+    }
+  }
+}
+
+
+function createDeploymentPlugin({
+  zeebeAPI = new MockZeebeAPI(),
+  activeTab = createTab(),
+  ...props
+} = {}) {
   const subscribe = (type, callback) => {
     if (type === 'app.activeTabChanged') {
-      callback(params.emptyTab ? {
-        activeTab: { type: 'empty', name: 'testName' }
-      } : {
-        activeTab: { type: 'nonEmpty', name: 'testName' }
+      callback({
+        activeTab: activeTab || { type: 'empty', name: 'testName' }
       });
     }
   };
-  const _getGlobal = (key) => {
-    if (key === 'zeebeAPI') {
-      return {
-        deploy: () => {
-          return new Promise((resolve, reject) => {
-            if (!params.deploymentSuccessful) {
-              resolve({ response: { details: 'details' } });
-            } else {
-              resolve({ success: true, response: { workflows: [ { bpmnProcessId: 'test' } ] } });
-            }
-          });
-        }
-      };
-    }
-  };
-  const config = {
-    get: (key) => {
-      if (key === ZEEBE_ENDPOINTS_CONFIG_KEY) {
-        return params.storedEndpoints || [];
-      }
-    },
-    set: (key, value) => {
-      if (key === ZEEBE_ENDPOINTS_CONFIG_KEY) {
-        return params.setEndpointsSpy && params.setEndpointsSpy(key, value);
-      }
-    },
-    getForFile: (file, key) => {
-      if (key === DEPLOYMENT_CONFIG_KEY) {
-        return params.storedTabConfiguration || null;
-      }
-    },
-    setForFile: (file, key, value) => {
-      return params.setTabConfigSpy && params.setTabConfigSpy(key, value);
-    }
-  };
-  const displayNotification = (notificationParams) => {
-    if (params.displayNotificationSpy) {
-      params.displayNotificationSpy(notificationParams);
-    }
-  };
-  const log = (logParams) => {
-    if (params.displayLogSpy) {
-      params.displayLogSpy(logParams);
-    }
-  };
-  const triggerAction = (action, value) => {
-    if (action === 'save') {
-      if (params.saveSpy) {
-        params.saveSpy(value);
-      }
-      return NOOP_TAB;
-    }
-  };
-  const broadcastMessage = (msg) => {
-    if (params.broadcastMessageSpy) {
-      params.broadcastMessageSpy(msg);
-    }
-  };
-  const subscribeToMessaging = (key) => {
-    if (params.subscribeToMessagingSpy) {
-      params.subscribeToMessagingSpy(key);
-    }
-  };
-  const unsubscribeFromMessaging = (key) => {
-    if (params.unsubscribeFromMessagingSpy) {
-      params.unsubscribeFromMessagingSpy(key);
-    }
-  };
 
-  const wrapper = shallow(<DeploymentPlugin
+  const config = new Config({
+    get: (_, defaultValue) => defaultValue,
+    ...props.config
+  });
+
+  const wrapper = shallow(<TestDeploymentPlugin
+    broadcastMessage={ noop }
+    subscribeToMessaging={ noop }
+    unsubscribeFromMessaging={ noop }
+    triggerAction={ action => action === 'save' && activeTab }
+    log={ noop }
+    displayNotification={ noop }
+    _getGlobal={ key => key === 'zeebeAPI' && zeebeAPI }
     subscribe={ subscribe }
-    _getGlobal={ _getGlobal }
+    { ...props }
     config={ config }
-    displayNotification={ displayNotification }
-    log={ log }
-    triggerAction={ triggerAction }
-    subscribeToMessaging={ subscribeToMessaging }
-    unsubscribeFromMessaging={ unsubscribeFromMessaging }
-    broadcastMessage={ broadcastMessage }
   />);
 
   const instance = wrapper.instance();
 
   return { wrapper, instance };
-};
+}
+
+function noop() {
+  return null;
+}
+
+function MockZeebeAPI({ deploySpy, deploymentResult } = {}) {
+  this.deploy = (...args) => {
+    if (deploySpy) {
+      deploySpy(...args);
+    }
+
+    const result = deploymentResult ||
+      { success: true, response: { workflows: [ { bpmnProcessId: 'test' } ] } };
+
+    return Promise.resolve(result);
+  };
+}
+
+function createTab(overrides = {}) {
+  return {
+    id: 42,
+    name: 'foo.bar',
+    type: 'bar',
+    title: 'unsaved',
+    file: {
+      name: 'foo.bar',
+      contents: '',
+      path: null
+    },
+    ...overrides
+  };
+}
