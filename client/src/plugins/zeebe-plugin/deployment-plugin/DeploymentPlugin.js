@@ -10,12 +10,24 @@
 
 import React, { PureComponent } from 'react';
 
+import {
+  omit
+} from 'min-dash';
+
 import { Fill } from '../../../app/slot-fill';
 
 import {
   Button,
   Icon
 } from '../../../app/primitives';
+
+import {
+  generateId
+} from '../../../util';
+
+import { AUTH_TYPES } from './../shared/ZeebeAuthTypes';
+
+import { SELF_HOSTED } from '../shared/ZeebeTargetTypes';
 
 import DeploymentPluginModal from './DeploymentPluginModal';
 
@@ -65,23 +77,58 @@ export default class DeploymentPlugin extends PureComponent {
     this.props.unsubscribeFromMessaging('deploymentPlugin');
   }
 
-  saveConfiguration = async (configuration) => {
-
+  saveConfiguration = async configuration => {
     const {
       endpoint,
       deployment
     } = configuration;
 
-    await this.saveEndpoint(endpoint);
+    const endpointToSave = endpoint.rememberCredentials ? endpoint : withoutCredentials(endpoint);
+
+    await this.saveEndpoint(endpointToSave);
 
     const tabConfiguration = {
       deployment,
-      endpointId: endpoint.id
+      endpointId: endpointToSave.id
     };
 
     await this.setTabConfiguration(this.activeTab, tabConfiguration);
 
     return configuration;
+  }
+
+  async getConfiguration() {
+    const savedConfiguration = await this.getSavedConfiguration();
+
+    const deployment = {
+      name: withoutExtension(this.activeTab.name)
+    };
+
+    const endpoint = {
+      id: generateId(),
+      targetType: SELF_HOSTED,
+      authType: AUTH_TYPES.NONE,
+      contactPoint: '0.0.0.0:26500',
+      oauthURL: '',
+      audience: '',
+      clientId: '',
+      clientSecret: '',
+      camundaCloudClientId: '',
+      camundaCloudClientSecret: '',
+      camundaCloudClusterId: '',
+      rememberCredentials: false
+    };
+
+    return {
+      deployment: {
+        ...deployment,
+        ...savedConfiguration.deployment
+      },
+      endpoint: {
+        ...endpoint,
+        ...savedConfiguration.endpoint
+      }
+    };
   }
 
   getSavedConfiguration = async () => {
@@ -168,8 +215,10 @@ export default class DeploymentPlugin extends PureComponent {
     });
   }
 
-  onDeploy = async (parameters) => {
+  onDeploy = async (configuration) => {
     this.closeModal();
+
+    await this.saveConfiguration(configuration);
 
     const {
       file: tabFile,
@@ -181,7 +230,7 @@ export default class DeploymentPlugin extends PureComponent {
     const zeebeAPI = this.props._getGlobal('zeebeAPI');
     const deploymentResult = await zeebeAPI.deploy({
       filePath: path,
-      name: parameters.deploymentName || withoutExtension(tabName)
+      name: configuration.deploymentName || withoutExtension(tabName)
     });
 
     const { response, success } = deploymentResult;
@@ -194,14 +243,10 @@ export default class DeploymentPlugin extends PureComponent {
   }
 
   closeModal = () => {
-    this.setState({ modalVisible: false });
+    this.setState({ modalState: null });
   }
 
   onIconClicked = async () => {
-    const {
-      modalVisible
-    } = this.state;
-
     const savedTab = await this.props.triggerAction('save', { tab: this.activeTab });
 
     // cancel action if save modal got canceled
@@ -209,8 +254,11 @@ export default class DeploymentPlugin extends PureComponent {
       return;
     }
 
+    const modalState = {};
+    modalState.configuration = await this.getConfiguration();
+
     this.setState({
-      modalVisible: !modalVisible,
+      modalState,
       isStart: false
     });
 
@@ -222,7 +270,7 @@ export default class DeploymentPlugin extends PureComponent {
   render() {
 
     const {
-      modalVisible,
+      modalState,
       hasActiveTab,
       isStart
     } = this.state;
@@ -238,16 +286,14 @@ export default class DeploymentPlugin extends PureComponent {
           </Button>
         </Fill>
       }
-      { modalVisible && hasActiveTab &&
+      { modalState && hasActiveTab &&
         <KeyboardInteractionTrap triggerAction={ this.props.triggerAction }>
           <DeploymentPluginModal
             onClose={ this.closeModal }
             validator={ this.validator }
             onDeploy={ this.onDeploy }
-            getConfig={ this.getSavedConfiguration }
-            setConfig={ this.saveConfiguration }
-            tabName={ withoutExtension(this.activeTab.name) }
             isStart={ isStart }
+            configuration={ modalState.configuration }
           />
         </KeyboardInteractionTrap>
       }
@@ -277,4 +323,15 @@ function addOrUpdateById(collection, element) {
     ...collection,
     element
   ];
+}
+
+
+// helper
+function withoutCredentials(endpointConfiguration) {
+  return omit(endpointConfiguration, [
+    'clientId',
+    'clientSecret',
+    'camundaCloudClientId',
+    'camundaCloudClientSecret'
+  ]);
 }

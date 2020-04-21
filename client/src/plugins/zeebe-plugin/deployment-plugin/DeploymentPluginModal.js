@@ -10,12 +10,6 @@
 
 import React from 'react';
 
-import {
-  omit,
-  keys,
-  forEach
-} from 'min-dash';
-
 import { Modal } from '../../../app/primitives';
 
 import {
@@ -81,8 +75,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
     this.state = {
       isDeploying: false,
-      connectionState: { type: CONNECTION_STATE.INITIAL },
-      valuesInitiated: false
+      connectionState: { type: CONNECTION_STATE.INITIAL }
     };
 
     this.defaultValues = this.getDefaultValues(props);
@@ -104,14 +97,8 @@ export default class DeploymentPluginModal extends React.PureComponent {
   }
 
   async componentDidMount() {
-    this.initialValues = await this.getInitialValues();
-
     this.connectionChecker.subscribe({
       onComplete: this.handleConnectionCheckResult
-    });
-
-    this.setState({
-      valuesInitiated: true
     });
   }
 
@@ -138,39 +125,6 @@ export default class DeploymentPluginModal extends React.PureComponent {
       camundaCloudClusterId: '',
       rememberCredentials: false
     };
-
-    return {
-      deployment,
-      endpoint
-    };
-  }
-
-  getInitialValues = async () => {
-    const {
-      deployment: defaultDeployment,
-      endpoint: defaultEndpoint
-    } = this.defaultValues;
-
-    const savedConfiguration = await this.props.getConfig();
-
-    const {
-      deployment: savedDeployment,
-      endpoint: savedEndpoint
-    } = savedConfiguration;
-
-    let deployment = defaultDeployment;
-    if (savedDeployment) {
-      forEach(keys(defaultDeployment), key => {
-        deployment[key] = savedDeployment[key] || defaultDeployment[key];
-      });
-    }
-
-    let endpoint = defaultEndpoint;
-    if (savedEndpoint) {
-      forEach(keys(defaultEndpoint), key => {
-        endpoint[key] = savedEndpoint[key] || defaultEndpoint[key];
-      });
-    }
 
     return {
       deployment,
@@ -242,37 +196,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
     this.setState({ connectionState });
   }
 
-  saveConfig = (formValuesParsed) => {
-    const {
-      setConfig
-    } = this.props;
-
-    const {
-      endpoint
-    } = formValuesParsed;
-
-    if (endpoint.rememberCredentials) {
-      setConfig(formValuesParsed);
-    } else {
-      setConfig({
-        ...formValuesParsed,
-        endpoint: this.removeCredentials(formValuesParsed.endpoint)
-      });
-    }
-  }
-
-  removeCredentials = (endpointConfiguration) => {
-    return omit(endpointConfiguration, [
-      'clientId',
-      'clientSecret',
-      'camundaCloudClientId',
-      'camundaCloudClientSecret'
-    ]);
-  }
-
   handleFormSubmit = values => {
-    this.saveConfig(values);
-
     this.setState({ isDeploying: true });
 
     this.props.onDeploy(values);
@@ -282,25 +206,22 @@ export default class DeploymentPluginModal extends React.PureComponent {
 
     const {
       onClose,
+      configuration,
       isStart
     } = this.props;
 
     const {
-      isDeploying,
-      valuesInitiated
+      isDeploying
     } = this.state;
 
     const {
-      defaultValues,
-      initialValues,
       validatorFunctionsByFieldNames
     } = this;
 
     return (
       <Modal className={ css.DeploymentPluginModal } onClose={ onClose }>
         <Formik
-          initialValues={ initialValues || defaultValues }
-          enableReinitialize={ true }
+          initialValues={ configuration }
           onSubmit={ this.handleFormSubmit }
           validate={ this.scheduleConnectionCheck }
           validateOnMount
@@ -452,7 +373,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
                     <button
                       type="submit"
                       className="btn btn-primary"
-                      disabled={ !valuesInitiated || isDeploying }
+                      disabled={ isDeploying }
                     >
                       { isStart ? START : DEPLOY }
                     </button>
