@@ -8,8 +8,6 @@
  * except in compliance with the MIT License.
  */
 
-/* global sinon */
-
 import DeploymentPluginValidator from '../DeploymentPluginValidator';
 
 import {
@@ -20,13 +18,6 @@ import {
   CLIENT_SECRET_MUST_NOT_BE_EMPTY,
   CLUSTER_ID_MUST_NOT_BE_EMPTY,
 } from '../DeploymentPluginConstants';
-
-import {
-  SELF_HOSTED,
-  CAMUNDA_CLOUD
-} from '../../shared/ZeebeTargetTypes';
-
-import { AUTH_TYPES } from '../../shared/ZeebeAuthTypes';
 
 
 describe('<DeploymentPluginValidator>', () => {
@@ -105,102 +96,25 @@ describe('<DeploymentPluginValidator>', () => {
       expect(validator.validateClusterId(nonValidClusterId)).to.eql(CLUSTER_ID_MUST_NOT_BE_EMPTY);
       expect(validator.validateClusterId(validClusterId)).to.not.exist;
     });
-  });
 
 
-  describe('Connection validation', () => {
-
-    it('should validate self hosted', () => {
+    it('should validate config', () => {
 
       // given
-      const contactPoint = 'contactPoint';
-      const checkConnectivitySpy = sinon.spy();
-      const params = {
-        targetType: SELF_HOSTED,
-        authType: AUTH_TYPES.NONE,
-        contactPoint
-      };
-      const validator = getValidator(checkConnectivitySpy);
-
-      // when
-      validator.validateConnection(params);
-
-      // then
-      expect(checkConnectivitySpy).to.have.been.calledWith({
-        type: SELF_HOSTED,
-        url: contactPoint
-      });
-    });
-
-
-    it('should validate oauth', () => {
-
-      // given
-      const checkConnectivitySpy = sinon.spy();
-      const validator = getValidator(checkConnectivitySpy);
-      const targetType = SELF_HOSTED;
-      const authType = AUTH_TYPES.OAUTH;
-      const contactPoint = 'contactPoint';
-      const oauthURL = 'oauthURL';
-      const audience = 'audience';
-      const clientId = 'oauthClientId';
-      const clientSecret = 'oauthClientSecret';
-      const params = {
-        targetType,
-        authType,
-        contactPoint,
-        oauthURL,
-        audience,
-        clientId,
-        clientSecret
+      const config = {
+        deployment: {
+          name: 'name'
+        },
+        endpoint: {
+          targetType: 'camundaCloud',
+          camundaCloudClientId: 'test',
+          camundaCloudClientSecret: 'test',
+          camundaCloudClusterId: 'test'
+        }
       };
 
-      // when
-      validator.validateConnection(params);
-
       // then
-      expect(checkConnectivitySpy).to.have.been.calledWith({
-        type: 'oauth',
-        url: contactPoint,
-        oauthURL,
-        audience,
-        clientId,
-        clientSecret
-      });
-    });
-
-
-    it('should validate camunda cloud', () => {
-
-      // given
-      const checkConnectivitySpy = sinon.spy();
-      const validator = getValidator(checkConnectivitySpy);
-      const targetType = CAMUNDA_CLOUD;
-      const camundaCloudClientId = 'camundaCloudClientId';
-      const camundaCloudClientSecret = 'camundaCloudClientSecret';
-      const camundaCloudClusterId = 'camundaCloudClusterId';
-      const params = {
-        targetType,
-        camundaCloudClientId,
-        camundaCloudClientSecret,
-        camundaCloudClusterId
-      };
-
-      // when
-      validator.validateConnection(params);
-
-      // then
-      expect(checkConnectivitySpy).to.have.been.calledWith({
-        type: CAMUNDA_CLOUD,
-        clientId: camundaCloudClientId,
-        clientSecret: camundaCloudClientSecret,
-        clusterId: camundaCloudClusterId
-      });
+      expect(Object.keys(validator.validateConfig(config))).to.have.lengthOf(0);
     });
   });
 });
-
-
-// helper
-
-const getValidator = (checkConnectivitySpy) => new DeploymentPluginValidator({ checkConnectivity: checkConnectivitySpy });

@@ -22,16 +22,13 @@ import { AUTH_TYPES } from '../shared/ZeebeAuthTypes';
 
 import { CAMUNDA_CLOUD, SELF_HOSTED } from '../shared/ZeebeTargetTypes';
 
-import ZeebeConnectionValidator from '../shared/ZeebeConnectionValidator';
-
 import pDefer from 'p-defer';
 
 
 export default class DeploymentPluginValidator {
 
   constructor(zeebeAPI) {
-
-    this.zeebeConnectionValidator = new ZeebeConnectionValidator(zeebeAPI);
+    this.zeebeAPI = zeebeAPI;
   }
 
   createConnectionChecker() {
@@ -67,13 +64,24 @@ export default class DeploymentPluginValidator {
   }
 
   validateConnection = (endpoint) => {
-    return this.zeebeConnectionValidator.validateConnection(endpoint);
+    return this.zeebeAPI.checkConnectivity(endpoint);
+  }
+
+  validateConfig = config => {
+    const endpointErrors = this.validateEndpoint(config.endpoint);
+    const deploymentErrors = this.validateDeployment(config.deployment);
+
+    return { ...endpointErrors, ...deploymentErrors };
+  }
+
+  validateDeployment = deployment => {
+    return this.validate(deployment, { name: this.validateNonEmpty });
   }
 
   validateEndpoint = endpoint => {
     const { authType, targetType } = endpoint;
 
-    let validators;
+    let validators = {};
 
     if (targetType === CAMUNDA_CLOUD) {
       validators = {
@@ -206,7 +214,7 @@ class ConnectionChecker {
       hooks
     } = this;
 
-    hooks.onStart && hooks.onStart();
+    hooks && hooks.onStart && hooks.onStart();
   }
 
   scheduleCheck() {

@@ -14,6 +14,8 @@ import {
   omit
 } from 'min-dash';
 
+import pDefer from 'p-defer';
+
 import { Fill } from '../../../app/slot-fill';
 
 import {
@@ -44,44 +46,170 @@ export default class DeploymentPlugin extends PureComponent {
     super(props);
 
     this.state = {
-      modalVisible: false,
-      hasActiveTab: false,
-      isStart: false
+      activeTab: null,
+      modalState: null
     };
     this.validator = new DeploymentPluginValidator(props._getGlobal('zeebeAPI'));
-
-  }
-
-  onMessageReceived = (msg, body) => {
-    if (msg === 'forceDeploy') {
-      this.setState({ modalVisible: true, isStart: true });
-      this.skipNotificationOnSuccess = true;
-    }
-    if (msg === 'deploymentFailure') {
-      this.onDeploymentError(body);
-    }
+    this.connectionChecker = this.validator.createConnectionChecker();
   }
 
   componentDidMount() {
-    this.props.subscribeToMessaging('deploymentPlugin', this.onMessageReceived);
-
     this.props.subscribe('app.activeTabChanged', ({ activeTab }) => {
-      this.activeTab = activeTab;
       this.setState({
-        hasActiveTab: activeTab && activeTab.type !== 'empty'
+        activeTab
       });
     });
+
+    this.props.subscribeToMessaging('deploymentPlugin', this.onMessageReceived);
   }
 
   componentWillUnmount() {
     this.props.unsubscribeFromMessaging('deploymentPlugin');
   }
 
-  saveConfiguration = async configuration => {
+  async deploy(options = {}) {
+    return this.deployTab(this.state.activeTab, options);
+  }
+
+  async deployTab(tab, options) {
+
+    /**
+     * Notify interested parties via optional callback.
+     *
+     * @param {object} result
+     * @param {object|null} result.deploymentResult - null for cancellation
+     * @param {object} [result.endpoint]
+     */
+    function notifyResult(result) {
+      const { done } = options;
+
+      return done && done(result);
+    }
+
+    // (1) save tab
+    const savedTab = await this.saveTab(tab);
+
+    // cancel action if save was cancelled
+    if (!savedTab) {
+      notifyResult({ deploymentResult: null });
+
+      return;
+    }
+
+    // (2) retrieve save config
+    let config = await this.getSavedConfig(tab);
+
+    // (2.1) open modal if config is incomplete
+    const canDeploy = await this.canDeployWithConfig(config, options);
+
+    if (!canDeploy) {
+      config = await this.getConfigFromUser(config, savedTab, options);
+
+      // user canceled
+      if (!config) {
+        notifyResult({ deploymentResult: null });
+
+        return;
+      }
+    }
+
+    // (3) save config
+    await this.saveConfig(savedTab, config);
+
+    // (4) deploy
+    const deploymentResult = await this.deployWithConfig(savedTab, config);
+
+    // (5) notify interested parties
+    notifyResult({ deploymentResult, endpoint: config.endpoint });
+
+    const { response, success } = deploymentResult;
+
+    if (!success) {
+      this.onDeploymentError(response);
+    } else {
+      this.onDeploymentSuccess(response, options);
+    }
+  }
+
+  deployWithConfig(tab, config) {
+    const { file: { path } } = tab;
+    const {
+      deployment: { name },
+      endpoint
+    } = config;
+
+    const zeebeAPI = this.props._getGlobal('zeebeAPI');
+
+    return zeebeAPI.deploy({
+      filePath: path,
+      name,
+      endpoint
+    });
+  }
+
+  saveTab(tab) {
+    return this.props.triggerAction('save', { tab });
+  }
+
+  async canDeployWithConfig(config, options) {
+
+    // always open modal for deployment tool
+    if (!options.isStart) {
+      return false;
+    }
+
+    // return early for missing essential parts
+    if (!config.deployment && !config.endpoint) {
+      return false;
+    }
+
+    const validationResult = this.validator.validateConfig(config);
+    const isConfigValid = Object.keys(validationResult).length === 0;
+
+    if (!isConfigValid) {
+      return false;
+    }
+
+    const { connectionResult } = await this.connectionChecker.check(config.endpoint);
+
+    return connectionResult && connectionResult.success;
+  }
+
+  async getConfigFromUser(savedConfig, tab, options = {}) {
+
+    const p = pDefer();
+
+    const onClose = config => {
+      this.closeModal();
+
+      return p.resolve(config);
+    };
+
+    const modalState = {
+      config: this.getDefaultConfig(savedConfig, tab),
+      isStart: !!options.isStart,
+      onClose
+    };
+
+    // open modal
+    this.setState({
+      modalState
+    });
+
+    return p.promise;
+  }
+
+  onMessageReceived = (msg, body) => {
+    if (msg === 'deploy') {
+      this.deploy(body);
+    }
+  }
+
+  async saveConfig(tab, config) {
     const {
       endpoint,
       deployment
-    } = configuration;
+    } = config;
 
     const endpointToSave = endpoint.rememberCredentials ? endpoint : withoutCredentials(endpoint);
 
@@ -92,16 +220,35 @@ export default class DeploymentPlugin extends PureComponent {
       endpointId: endpointToSave.id
     };
 
-    await this.setTabConfiguration(this.activeTab, tabConfiguration);
+    await this.setTabConfiguration(tab, tabConfiguration);
 
-    return configuration;
+    return config;
   }
 
-  async getConfiguration() {
-    const savedConfiguration = await this.getSavedConfiguration();
+  async getSavedConfig(tab) {
 
+    const tabConfig = await this.getTabConfiguration(tab);
+
+    if (!tabConfig) {
+      return {};
+    }
+
+    const {
+      deployment,
+      endpointId
+    } = tabConfig;
+
+    const endpoints = await this.getEndpoints();
+
+    return {
+      deployment,
+      endpoint: endpoints.find(endpoint => endpoint.id === endpointId)
+    };
+  }
+
+  getDefaultConfig(savedConfig, tab) {
     const deployment = {
-      name: withoutExtension(this.activeTab.name)
+      name: withoutExtension(tab.name)
     };
 
     const endpoint = {
@@ -122,33 +269,12 @@ export default class DeploymentPlugin extends PureComponent {
     return {
       deployment: {
         ...deployment,
-        ...savedConfiguration.deployment
+        ...savedConfig.deployment
       },
       endpoint: {
         ...endpoint,
-        ...savedConfiguration.endpoint
+        ...savedConfig.endpoint
       }
-    };
-  }
-
-  getSavedConfiguration = async () => {
-
-    const tabConfig = await this.getTabConfiguration(this.activeTab);
-
-    if (!tabConfig) {
-      return {};
-    }
-
-    const {
-      deployment,
-      endpointId
-    } = tabConfig;
-
-    const endpoints = await this.getEndpoints();
-
-    return {
-      deployment,
-      endpoint: endpoints.find(endpoint => endpoint.id === endpointId)
     };
   }
 
@@ -178,25 +304,21 @@ export default class DeploymentPlugin extends PureComponent {
     return this.props.config.setForFile(tab.file, DEPLOYMENT_CONFIG_KEY, configuration);
   }
 
-  onDeploymentSuccess = (response) => {
+  onDeploymentSuccess(response, options = {}) {
     const {
-      displayNotification,
-      broadcastMessage
+      displayNotification
     } = this.props;
 
-    if (!this.skipNotificationOnSuccess) {
+    if (!options.skipNotificationOnSuccess) {
       displayNotification({
         type: 'success',
         title: 'Deployment succeeded',
         duration: 4000
       });
     }
-
-    broadcastMessage('deploymentSucceeded', response.workflows[0].bpmnProcessId);
   }
 
-  onDeploymentError = (response) => {
-
+  onDeploymentError(response) {
     const {
       log,
       displayNotification
@@ -215,65 +337,21 @@ export default class DeploymentPlugin extends PureComponent {
     });
   }
 
-  onDeploy = async (configuration) => {
-    this.closeModal();
-
-    await this.saveConfiguration(configuration);
-
-    const {
-      file: tabFile,
-      name: tabName
-    } = this.activeTab;
-
-    const path = tabFile.path;
-
-    const zeebeAPI = this.props._getGlobal('zeebeAPI');
-    const deploymentResult = await zeebeAPI.deploy({
-      filePath: path,
-      name: configuration.deploymentName || withoutExtension(tabName)
-    });
-
-    const { response, success } = deploymentResult;
-
-    if (!success) {
-      this.onDeploymentError(response);
-    } else {
-      this.onDeploymentSuccess(response);
-    }
-  }
-
-  closeModal = () => {
+  closeModal() {
     this.setState({ modalState: null });
   }
 
   onIconClicked = async () => {
-    const savedTab = await this.props.triggerAction('save', { tab: this.activeTab });
-
-    // cancel action if save modal got canceled
-    if (!savedTab) {
-      return;
-    }
-
-    const modalState = {};
-    modalState.configuration = await this.getConfiguration();
-
-    this.setState({
-      modalState,
-      isStart: false
-    });
-
-    this.props.broadcastMessage('deploymentInitiated');
-
-    this.skipNotificationOnSuccess = false;
+    this.deploy();
   }
 
   render() {
-
     const {
       modalState,
-      hasActiveTab,
-      isStart
+      activeTab
     } = this.state;
+
+    const hasActiveTab = activeTab && activeTab.type !== 'empty';
 
     return <React.Fragment>
       { hasActiveTab &&
@@ -289,11 +367,11 @@ export default class DeploymentPlugin extends PureComponent {
       { modalState && hasActiveTab &&
         <KeyboardInteractionTrap triggerAction={ this.props.triggerAction }>
           <DeploymentPluginModal
-            onClose={ this.closeModal }
+            onClose={ modalState.onClose }
             validator={ this.validator }
-            onDeploy={ this.onDeploy }
-            isStart={ isStart }
-            configuration={ modalState.configuration }
+            onDeploy={ modalState.onClose }
+            isStart={ modalState.isStart }
+            config={ modalState.config }
           />
         </KeyboardInteractionTrap>
       }
