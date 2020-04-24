@@ -243,6 +243,32 @@ describe('ZeebeAPI', function() {
       expect(isSameObject).to.be.false;
       expect(closeSpy).to.have.been.calledOnce;
     });
+
+
+    it('should read file as buffer', async () => {
+
+      // given
+      const fs = {
+        readFile: sinon.spy(() => ({}))
+      };
+      const zbAPI = mockZB({ fs });
+      const parameters = {
+        filePath: 'filePath',
+        endpoint: {
+          type: 'selfHosted',
+          url: 'testURL'
+        }
+      };
+
+      // when
+      await zbAPI.deploy(parameters);
+
+      // then
+      expect(fs.readFile).to.have.been.calledOnce;
+      expect(fs.readFile.args).to.eql([
+        [ parameters.filePath, { encoding: false } ]
+      ]);
+    });
   });
 
 
@@ -278,10 +304,8 @@ describe('ZeebeAPI', function() {
 });
 
 function mockZB(parameters = {}) {
-
-
   const fs = {
-    readFileSync: noop
+    readFile: () => ({})
   };
 
   const ZB = {
@@ -295,7 +319,7 @@ function mockZB(parameters = {}) {
     }
   };
 
-  return new ZeebeAPI(fs, ZB);
+  return new ZeebeAPI(parameters.fs || fs, ZB);
 }
 
 function noop() {}

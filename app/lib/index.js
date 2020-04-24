@@ -18,6 +18,8 @@ const {
 
 const path = require('path');
 
+const ZB = require('zeebe-node');
+
 /**
  * Report crashes.
  *
@@ -70,7 +72,8 @@ const {
   flags,
   menu,
   plugins,
-  windowManager
+  windowManager,
+  zeebeAPI
 } = bootstrap();
 
 app.flags = flags;
@@ -198,7 +201,7 @@ renderer.on('file:write', function(filePath, file, options = {}, done) {
 
 renderer.on('zeebe:checkConnectivity', async function(parameters, done) {
   try {
-    const connectivity = await ZeebeAPI.checkConnectivity(parameters);
+    const connectivity = await zeebeAPI.checkConnectivity(parameters);
 
     done(null, connectivity);
   } catch (err) {
@@ -208,7 +211,7 @@ renderer.on('zeebe:checkConnectivity', async function(parameters, done) {
 
 renderer.on('zeebe:deploy', async function(parameters, done) {
   try {
-    const deploymentResult = await ZeebeAPI.deploy(parameters);
+    const deploymentResult = await zeebeAPI.deploy(parameters);
 
     done(null, deploymentResult);
   } catch (err) {
@@ -218,7 +221,7 @@ renderer.on('zeebe:deploy', async function(parameters, done) {
 
 renderer.on('zeebe:run', async function(parameters, done) {
   try {
-    const runResult = await ZeebeAPI.run(parameters);
+    const runResult = await zeebeAPI.run(parameters);
 
     done(null, runResult);
   } catch (err) {
@@ -599,6 +602,8 @@ function bootstrap() {
     paths
   });
 
+  const zeebeAPI = new ZeebeAPI({ readFile }, ZB);
+
   return {
     config,
     dialog,
@@ -606,7 +611,8 @@ function bootstrap() {
     flags,
     menu,
     plugins,
-    windowManager
+    windowManager,
+    zeebeAPI
   };
 }
 

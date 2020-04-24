@@ -101,12 +101,11 @@ module.exports = class ZeebeAPI {
 
     const zeebeClientInstance = this.getZeebeClient(parameters.endpoint);
 
-    const buffer = this.fs.readFileSync(parameters.filePath);
+    const { contents } = this.fs.readFile(parameters.filePath, { encoding: false });
 
     try {
-
       const resp = await zeebeClientInstance.deployWorkflow({
-        definition: buffer,
+        definition: contents,
         name: parameters.name
       });
 
