@@ -10,6 +10,10 @@
 
 'use strict';
 
+const log = require('./log')('app:zeebe-api');
+
+const { pick } = require('min-dash');
+
 const errorReasons = {
   UNKNOWN: 'UNKNOWN',
   CONTACT_POINT_UNAVAILABLE: 'CONTACT_POINT_UNAVAILABLE',
@@ -77,6 +81,8 @@ module.exports = class ZeebeAPI {
       await zeebeClient.topology();
       return { success: true };
     } catch (err) {
+      log.error('Failed to connect with config (secrets omitted):', withoutSecrets(parameters), err);
+
       return {
         success: false,
         reason: getErrorReason(err, endpoint)
@@ -109,6 +115,7 @@ module.exports = class ZeebeAPI {
         response: resp
       };
     } catch (err) {
+      log.error('Failed to deploy with config (secrets omitted):', withoutSecrets(parameters), err);
 
       return {
         success: false,
@@ -139,6 +146,7 @@ module.exports = class ZeebeAPI {
         response: response
       };
     } catch (err) {
+      log.error('Failed to run instance with config (secrets omitted):', withoutSecrets(parameters), err);
 
       return {
         success: false,
@@ -231,4 +239,10 @@ function getErrorReason(error, parameters) {
 
 function isHashEqual(parameter1, parameter2) {
   return JSON.stringify(parameter1) === JSON.stringify(parameter2);
+}
+
+function withoutSecrets(parameters) {
+  const endpoint = pick(parameters.endpoint, [ 'type', 'url', 'clientId', 'oauthURL' ]);
+
+  return { ...parameters, endpoint };
 }
