@@ -21,8 +21,34 @@ const errorReasons = {
 
 /**
  * @typedef {object} ZeebeClientParameters
- * @property {object} endpoint
- * @property {'selfHosted'|'camundaCloud'|'oauth'} endpoint.type
+ * @property {Endpoint} endpoint
+ */
+
+/**
+ * @typedef {SelfHostedNoAuthEndpoint|SelfHostedOAuthEndpoint|CamundaCloudEndpoint} Endpoint
+ */
+
+/**
+ * @typedef {object} SelfHostedNoAuthEndpoint
+ * @property {'selfHosted'} type
+ * @property {string} url
+ */
+
+/**
+ * @typedef {object} SelfHostedOAuthEndpoint
+ * @property {'oauth'} type
+ * @property {string} url
+ * @property {string} audience
+ * @property {string} clientId
+ * @property {string} clientSecret
+ */
+
+/**
+ * @typedef {object} CamundaCloudEndpoint
+ * @property {'camundaCloud'} type
+ * @property {string} clusterId
+ * @property {string} clientId
+ * @property {string} clientSecret
  */
 
 
@@ -32,6 +58,13 @@ module.exports = class ZeebeAPI {
     this.ZB = ZB;
   }
 
+  /**
+   * @public
+   * Check connection with given broker/cluster.
+   *
+   * @param {ZeebeClientParameters} parameters
+   * @returns {{ success: boolean, reason?: string }}
+   */
   async checkConnectivity(parameters) {
 
     const {
@@ -51,6 +84,13 @@ module.exports = class ZeebeAPI {
     }
   }
 
+  /**
+   * @public
+   * Deploy workflow.
+   *
+   * @param {ZeebeClientParameters & { name: string, filePath: string }} parameters
+   * @returns {{ success: boolean, response: object }}
+   */
   async deploy(parameters) {
 
     const zeebeClientInstance = this.getZeebeClient(parameters.endpoint);
@@ -78,10 +118,11 @@ module.exports = class ZeebeAPI {
   }
 
   /**
+   * @public
    * Run process instance.
    *
-   * @public
-   * @param {object} parameters
+   * @param {ZeebeClientParameters & { processId: string }} parameters
+   * @returns {{ success: boolean, response: object }}
    */
   async run(parameters) {
 
