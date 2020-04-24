@@ -10,11 +10,6 @@
 
 'use strict';
 
-const fs = require('fs');
-const ZB = require('zeebe-node');
-
-let zbClientInstance;
-
 const errorReasons = {
   UNKNOWN: 'UNKNOWN',
   CONTACT_POINT_UNAVAILABLE: 'CONTACT_POINT_UNAVAILABLE',
@@ -24,65 +19,143 @@ const errorReasons = {
   OAUTH_URL: 'OAUTH_URL'
 };
 
-module.exports.checkConnectivity = async function(parameters) {
+/**
+ * @typedef {object} ZeebeClientParameters
+ * @property {object} endpoint
+ * @property {'selfHosted'|'camundaCloud'|'oauth'} endpoint.type
+ */
 
-  restartZeebeClient(parameters);
 
-  try {
-    await zbClientInstance.topology();
-    return { isSuccessful: true };
-  } catch (err) {
-    return {
-      isSuccessful: false,
-      reason: getErrorReason(err, parameters)
-    };
+module.exports = class ZeebeAPI {
+  constructor(fs, ZB) {
+    this.fs = fs;
+    this.ZB = ZB;
+  }
+
+  async checkConnectivity(parameters) {
+
+    const {
+      endpoint
+    } = parameters;
+
+    const zeebeClient = this.getZeebeClient(endpoint);
+
+    try {
+      await zeebeClient.topology();
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        reason: getErrorReason(err, endpoint)
+      };
+    }
+  }
+
+  async deploy(parameters) {
+
+    const zeebeClientInstance = this.getZeebeClient(parameters.endpoint);
+
+    const buffer = this.fs.readFileSync(parameters.filePath);
+
+    try {
+
+      const resp = await zeebeClientInstance.deployWorkflow({
+        definition: buffer,
+        name: parameters.name
+      });
+
+      return {
+        success: true,
+        response: resp
+      };
+    } catch (err) {
+
+      return {
+        success: false,
+        response: err
+      };
+    }
+  }
+
+  /**
+   * Run process instance.
+   *
+   * @public
+   * @param {object} parameters
+   */
+  async run(parameters) {
+
+    const client = this.getZeebeClient(parameters.endpoint);
+
+    try {
+
+      const response = await client.createWorkflowInstance({
+        bpmnProcessId: parameters.processId
+      });
+
+      return {
+        success: true,
+        response: response
+      };
+    } catch (err) {
+
+      return {
+        success: false,
+        response: err
+      };
+    }
+  }
+
+  async shutdownClientInstance() {
+    if (this.zbClientInstanceCache) {
+      await this.zbClientInstanceCache.close();
+    }
+  }
+
+  getZeebeClient(endpoint) {
+
+    if (endpoint && isHashEqual(endpoint, this.endpointCache)) {
+      return this.zbClientInstanceCache;
+    }
+
+    this.shutdownClientInstance();
+    this.endpointCache = endpoint;
+
+    if (endpoint.type === 'selfHosted') {
+
+      this.zbClientInstanceCache = new this.ZB.ZBClient(endpoint.url, {
+        retry: false
+      });
+    } else if (endpoint.type === 'oauth') {
+
+      this.zbClientInstanceCache = new this.ZB.ZBClient(endpoint.url, {
+        retry: false,
+        oAuth: {
+          url: endpoint.oauthURL,
+          audience: endpoint.audience,
+          clientId: endpoint.clientId,
+          clientSecret: endpoint.clientSecret,
+          cacheOnDisk: false
+        },
+        useTLS: true
+      });
+    } else if (endpoint.type === 'camundaCloud') {
+
+      this.zbClientInstanceCache = new this.ZB.ZBClient({
+        retry: false,
+        camundaCloud: {
+          clientId: endpoint.clientId,
+          clientSecret: endpoint.clientSecret,
+          clusterId: endpoint.clusterId,
+          cacheOnDisk: false
+        },
+        useTLS: true
+      });
+    }
+
+    return this.zbClientInstanceCache;
   }
 };
-
-module.exports.deploy = async function(parameters) {
-
-  const buffer = fs.readFileSync(parameters.filePath);
-
-  try {
-
-    const resp = await zbClientInstance.deployWorkflow({
-      definition: buffer,
-      name: parameters.name
-    });
-
-    return {
-      success: true,
-      response: resp
-    };
-  } catch (err) {
-
-    return {
-      success: false,
-      response: err
-    };
-  }
-};
-
-module.exports.run = async function(parameters) {
-
-  try {
-
-    const resp = await zbClientInstance.createWorkflowInstance({
-      bpmnProcessId: parameters.processId
-    });
-
-    return resp;
-  } catch (err) {
-    return false;
-  }
-};
-
-async function shutdownClientInstance() {
-  if (zbClientInstance) {
-    await zbClientInstance.close();
-  }
-}
-
 
 function getErrorReason(error, parameters) {
   if (error.code === 14) { // grpc unavailable
@@ -115,56 +188,6 @@ function getErrorReason(error, parameters) {
   return errorReasons.UNKNOWN;
 }
 
-function restartZeebeClient(parameters) {
-  shutdownClientInstance();
-
-  if (parameters.type === 'selfHosted') {
-
-    let url = parameters.url;
-    let port = '26500';
-    if (parameters.url.includes(':')) {
-      const splitted = parameters.url.split(':');
-      url = splitted[0];
-      port = splitted[1];
-    }
-
-    zbClientInstance = new ZB.ZBClient(url, {
-      retry: false,
-      port: port
-    });
-  } else if (parameters.type === 'oauth') {
-
-    let url = parameters.url;
-    let port = '443';
-    if (parameters.url.includes(':')) {
-      const splitted = parameters.url.split(':');
-      url = splitted[0];
-      port = splitted[1];
-    }
-
-    zbClientInstance = new ZB.ZBClient(url, {
-      retry: false,
-      oAuth: {
-        url: parameters.oauthURL,
-        audience: parameters.audience,
-        clientId: parameters.clientId,
-        clientSecret: parameters.clientSecret,
-        cacheOnDisk: false
-      },
-      useTLS: true,
-      port: port
-    });
-  } else if (parameters.type === 'camundaCloud') {
-
-    zbClientInstance = new ZB.ZBClient({
-      retry: false,
-      camundaCloud: {
-        clientId: parameters.clientId,
-        clientSecret: parameters.clientSecret,
-        clusterId: parameters.clusterId,
-        cacheOnDisk: false
-      },
-      useTLS: true
-    });
-  }
+function isHashEqual(parameter1, parameter2) {
+  return JSON.stringify(parameter1) === JSON.stringify(parameter2);
 }
