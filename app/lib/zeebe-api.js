@@ -154,19 +154,17 @@ module.exports = class ZeebeAPI {
     }
   }
 
-  async shutdownClientInstance() {
-    if (this.zbClientInstanceCache) {
-      await this.zbClientInstanceCache.close();
-    }
-  }
-
   getZeebeClient(endpoint) {
+    const cachedInstance = this.zbClientInstanceCache;
 
     if (endpoint && isHashEqual(endpoint, this.endpointCache)) {
-      return this.zbClientInstanceCache;
+      return cachedInstance;
     }
 
-    this.shutdownClientInstance();
+    if (cachedInstance) {
+      this.shutdownClientInstance(cachedInstance);
+    }
+
     this.endpointCache = endpoint;
 
     if (endpoint.type === 'selfHosted') {
@@ -202,6 +200,10 @@ module.exports = class ZeebeAPI {
     }
 
     return this.zbClientInstanceCache;
+  }
+
+  shutdownClientInstance(instance) {
+    instance.close();
   }
 };
 
