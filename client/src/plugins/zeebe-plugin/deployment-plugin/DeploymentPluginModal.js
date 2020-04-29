@@ -100,7 +100,7 @@ export default class DeploymentPluginModal extends React.PureComponent {
   }
 
   endpointConfigurationFieldError = (meta, fieldName) => {
-    return meta.touched && (meta.error || this.getConnectionError(fieldName));
+    return this.getConnectionError(fieldName) || (meta.touched && meta.error);
   }
 
   getConnectionError(rawFieldName) {
