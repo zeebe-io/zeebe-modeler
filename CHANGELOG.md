@@ -6,6 +6,14 @@ All notable changes to the [Zeebe Modeler](https://github.com/zeebe-io/zeebe-mod
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.9.1
+
+* `FIX`: prevent flickering on auth change ([#208](https://github.com/zeebe-io/zeebe-modeler/issues/208))
+* `FIX`: use user-provided deployment name ([#215](https://github.com/zeebe-io/zeebe-modeler/issues/215))
+* `FIX`: fix Camunda Cloud connection error ([#216](https://github.com/zeebe-io/zeebe-modeler/issues/216))
+* `CHORE`: refactor connection checking ([#214](https://github.com/zeebe-io/zeebe-modeler/issues/214))
+* `CHORE`: log Zeebe API errors ([#217](https://github.com/zeebe-io/zeebe-modeler/issues/217))
+
 ## 0.9.0
 
 * `FEAT`: add support for error end events ([#162](https://github.com/zeebe-io/zeebe-modeler/issues/162))
@@ -35,7 +43,7 @@ ___Note:__ Yet to be released changes appear here._
 * `FIX`: fix task definition validation ([`1f115`](https://github.com/zeebe-io/zeebe-modeler/commit/1f115b3e3491320fc1e4f1806d57b20a20b3c7e6))
 * `FIX`: restrict context pad for labels ([#104](https://github.com/zeebe-io/zeebe-modeler/issues/104))
 * `FIX`: draw connections after context pad dragging ([#110](https://github.com/zeebe-io/zeebe-modeler/issues/110))
-* `CHORE`: properly escape HTML entities ([#83](https://github.com/zeebe-io/zeebe-modeler/issues/83)) 
+* `CHORE`: properly escape HTML entities ([#83](https://github.com/zeebe-io/zeebe-modeler/issues/83))
 * `CHORE`: update foundation to Camunda Modeler `v3.3.2` ([#84](https://github.com/zeebe-io/zeebe-modeler/pull/84))
 
 ## 0.6.2
