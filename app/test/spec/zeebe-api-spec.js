@@ -41,7 +41,6 @@ describe('ZeebeAPI', function() {
     it('should set success=false on failure', async () => {
 
       // given
-      // given
       const zbAPI = mockZB({
         ZBClient: function() {
           return {
@@ -65,7 +64,8 @@ describe('ZeebeAPI', function() {
       expect(result).to.have.property('success', false);
     });
 
-    // describe('should return correct error reason on failure');
+    // TODO @barmac: add missing tests
+    describe.skip('should return correct error reason on failure');
   });
 
   describe('#run', function() {
