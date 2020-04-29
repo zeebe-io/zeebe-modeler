@@ -147,7 +147,7 @@ class ConnectionChecker {
       this.checkTimer = null;
     }
 
-    this.endpoint = { __non_existing_endpoint: true };
+    this.endpoint = null;
 
     this.lastCheck = null;
 
