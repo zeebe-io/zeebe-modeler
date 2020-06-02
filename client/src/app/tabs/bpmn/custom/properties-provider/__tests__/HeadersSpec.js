@@ -36,7 +36,7 @@ import coreModule from 'bpmn-js/lib/core';
 import selectionModule from 'diagram-js/lib/features/selection';
 import modelingModule from 'bpmn-js/lib/features/modeling';
 import propertiesProviderModule from '..';
-import zeebeModdleExtensions from '../../zeebe-bpmn-moddle/zeebe';
+import zeebeModdleExtensions from 'zeebe-bpmn-moddle/resources/zeebe';
 
 describe('customs - headers property tab', function() {
 
