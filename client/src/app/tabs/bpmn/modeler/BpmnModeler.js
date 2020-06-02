@@ -34,7 +34,7 @@ import propertiesProviderModule from '../custom/properties-provider';
 
 import zeebeModelingModule from '../custom/modeling';
 
-import zeebeModdleExtension from '../custom/zeebe-bpmn-moddle/zeebe';
+import zeebeModdleExtension from 'zeebe-bpmn-moddle/resources/zeebe';
 
 import zeebeCustoms from '../custom';
 
