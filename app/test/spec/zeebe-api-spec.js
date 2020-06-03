@@ -269,6 +269,126 @@ describe('ZeebeAPI', function() {
         [ parameters.filePath, { encoding: false } ]
       ]);
     });
+
+
+    it('should suffix deployment name with .bpmn if necessary', async () => {
+
+      // given
+      const deployWorkflowSpy = sinon.spy();
+
+      const zbAPI = mockZB({
+        ZBClient: function() {
+          return {
+            deployWorkflow: deployWorkflowSpy,
+          };
+        }
+      });
+
+      // when
+      await zbAPI.deploy({
+        filePath: 'filePath',
+        name: 'not_suffixed',
+        endpoint: {
+          type: 'selfHosted',
+          url: 'testURL'
+        }
+      });
+
+      const { args } = deployWorkflowSpy.getCall(0);
+
+      // then
+      expect(args[0].name).to.eql('not_suffixed.bpmn');
+    });
+
+
+    it('should not suffix deployment name with .bpmn if not necessary', async () => {
+
+      // given
+      const deployWorkflowSpy = sinon.spy();
+
+      const zbAPI = mockZB({
+        ZBClient: function() {
+          return {
+            deployWorkflow: deployWorkflowSpy,
+          };
+        }
+      });
+
+      // when
+      await zbAPI.deploy({
+        filePath: 'filePath',
+        name: 'suffixed.bpmn',
+        endpoint: {
+          type: 'selfHosted',
+          url: 'testURL'
+        }
+      });
+
+      const { args } = deployWorkflowSpy.getCall(0);
+
+      // then
+      expect(args[0].name).to.eql('suffixed.bpmn');
+    });
+
+
+    it('should use file path if deployment name is empty', async () => {
+
+      // given
+      const deployWorkflowSpy = sinon.spy();
+
+      const zbAPI = mockZB({
+        ZBClient: function() {
+          return {
+            deployWorkflow: deployWorkflowSpy,
+          };
+        }
+      });
+
+      // when
+      await zbAPI.deploy({
+        filePath: '/Users/Test/Stuff/Zeebe/process.bpmn',
+        name: '',
+        endpoint: {
+          type: 'selfHosted',
+          url: 'testURL'
+        }
+      });
+
+      const { args } = deployWorkflowSpy.getCall(0);
+
+      // then
+      expect(args[0].name).to.eql('process.bpmn');
+    });
+
+
+    it('should add bpmn suffix to filename if extension is other than bpmn', async () => {
+
+      // given
+      const deployWorkflowSpy = sinon.spy();
+
+      const zbAPI = mockZB({
+        ZBClient: function() {
+          return {
+            deployWorkflow: deployWorkflowSpy,
+          };
+        }
+      });
+
+      // when
+      await zbAPI.deploy({
+        filePath: '/Users/Test/Stuff/Zeebe/xmlFile.xml',
+        name: '',
+        endpoint: {
+          type: 'selfHosted',
+          url: 'testURL'
+        }
+      });
+
+      const { args } = deployWorkflowSpy.getCall(0);
+
+      // then
+      expect(args[0].name).to.eql('xmlFile.bpmn');
+    });
   });
 
 
