@@ -10,6 +10,8 @@
 
 'use strict';
 
+const path = require('path');
+
 const log = require('./log')('app:zeebe-api');
 
 const { pick } = require('min-dash');
@@ -22,6 +24,8 @@ const errorReasons = {
   FORBIDDEN: 'FORBIDDEN',
   OAUTH_URL: 'OAUTH_URL'
 };
+
+const BPMN_SUFFIX = '.bpmn';
 
 /**
  * @typedef {object} ZeebeClientParameters
@@ -101,12 +105,14 @@ module.exports = class ZeebeAPI {
 
     const zeebeClientInstance = this.getZeebeClient(parameters.endpoint);
 
-    const { contents } = this.fs.readFile(parameters.filePath, { encoding: false });
+    const { filePath, name } = parameters;
+
+    const { contents } = this.fs.readFile(filePath, { encoding: false });
 
     try {
       const resp = await zeebeClientInstance.deployWorkflow({
         definition: contents,
-        name: parameters.name
+        name: prepareDeploymentName(name, filePath)
       });
 
       return {
@@ -246,4 +252,31 @@ function withoutSecrets(parameters) {
   const endpoint = pick(parameters.endpoint, [ 'type', 'url', 'clientId', 'oauthURL' ]);
 
   return { ...parameters, endpoint };
+}
+
+// With zeebe-node 0.23.0, the deployment name should end with
+// .bpmn suffix.
+//
+// If name is empty, we'll return the file name. If name is not empty
+// but does not end with .bpmn, we'll add the suffix.
+function prepareDeploymentName(name, filePath) {
+
+  try {
+
+    if (!name || name.length === 0) {
+
+      return path.basename(filePath, path.extname(filePath)) + BPMN_SUFFIX;
+    }
+
+    if (!name.endsWith(BPMN_SUFFIX)) {
+
+      return name + BPMN_SUFFIX;
+    }
+
+  } catch (err) {
+
+    log.error('Error happened preparing deployment name: ', err);
+  }
+
+  return name;
 }
