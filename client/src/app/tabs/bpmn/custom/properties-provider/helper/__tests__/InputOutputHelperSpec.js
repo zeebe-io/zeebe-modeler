@@ -173,6 +173,71 @@ describe('customs - input output helper', function() {
       expect(!!supported).to.be.true;
     });
 
+
+    it('should support StartEvent', function() {
+
+      // given
+      const startEvent = createElement('bpmn:StartEvent');
+
+      // when
+      const supported = areOutputParametersSupported(startEvent);
+
+      // then
+      expect(!!supported).to.be.true;
+    });
+
+
+    it('should support EndEvent', function() {
+
+      // given
+      const endEvent = createElement('bpmn:EndEvent');
+
+      // when
+      const supported = areOutputParametersSupported(endEvent);
+
+      // then
+      expect(!!supported).to.be.true;
+    });
+
+
+    it('should support IntermediateThrowEvent', function() {
+
+      // given
+      const intThrowEvent = createElement('bpmn:IntermediateThrowEvent');
+
+      // when
+      const supported = areOutputParametersSupported(intThrowEvent);
+
+      // then
+      expect(!!supported).to.be.true;
+    });
+
+
+    it('should support IntermediateCatchEvent', function() {
+
+      // given
+      const intCatchEvent = createElement('bpmn:IntermediateCatchEvent');
+
+      // when
+      const supported = areOutputParametersSupported(intCatchEvent);
+
+      // then
+      expect(!!supported).to.be.true;
+    });
+
+
+    it('should support BoundaryEvent', function() {
+
+      // given
+      const boundaryEvent = createElement('bpmn:BoundaryEvent');
+
+      // when
+      const supported = areOutputParametersSupported(boundaryEvent);
+
+      // then
+      expect(!!supported).to.be.true;
+    });
+
   });
 
 });

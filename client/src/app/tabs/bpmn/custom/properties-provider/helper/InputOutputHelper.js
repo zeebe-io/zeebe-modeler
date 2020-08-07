@@ -18,8 +18,6 @@ import {
 
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
-import eventDefinitionHelper from 'bpmn-js-properties-panel/lib/helper/EventDefinitionHelper';
-
 const getElements = (bo, type, prop) => {
   const elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
   return !prop ? elems : (elems[0] || {})[prop] || [];
@@ -125,14 +123,13 @@ export function areInputParametersSupported(element) {
    * @return {boolean} a boolean value
    */
 export function areOutputParametersSupported(element) {
-  const messageEventDefinition = eventDefinitionHelper.getMessageEventDefinition(element);
-
   return isAny(element, [
     'bpmn:ServiceTask',
     'bpmn:SubProcess',
     'bpmn:ReceiveTask',
-    'bpmn:CallActivity'
-  ]) || messageEventDefinition;
+    'bpmn:CallActivity',
+    'bpmn:Event'
+  ]);
 }
 
 
