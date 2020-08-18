@@ -294,7 +294,7 @@ async function excludeFilesFromMerge(options) {
 
         // filter out excluded conflicts
         const includedPaths = (files || []).filter(f => {
-          return c.file.includes(f);
+          return c.file && c.file.includes(f);
         });
 
         // remove if in unrelated files or just 'modify/delete' error
