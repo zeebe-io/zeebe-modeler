@@ -246,14 +246,32 @@ describe('customs - task definition properties', function() {
         expect(isInputInvalid(input)).to.be.true;
       });
 
+    });
 
-      it('on spaces', function() {
+
+    describe('set task definition type field as valid', function() {
+
+      let input;
+
+      beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
+
+        const shape = elementRegistry.get('Task_1');
+        selection.select(shape);
+
+        const container = propertiesPanel._container;
+        input = getInputField(container, 'camunda-taskDefinitionType', 'type');
+
+        // ensure task definition is created
+        triggerValue(input, 'foo', 'change');
+      }));
+
+      it('on FEEL expression', function() {
 
         // when
-        triggerValue(input, 'foo bar', 'change');
+        triggerValue(input, '=if (variable = null) then 1 else variable + 1', 'change');
 
         // then
-        expect(isInputInvalid(input)).to.be.true;
+        expect(isInputInvalid(input)).to.be.false;
       });
 
     });

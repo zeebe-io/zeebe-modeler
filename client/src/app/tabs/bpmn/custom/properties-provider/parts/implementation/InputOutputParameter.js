@@ -61,12 +61,7 @@ export default function(element, bpmnFactory, options = {}) {
       if (bo) {
         const sourceValue = values.source;
 
-        if (sourceValue) {
-          if (utils.containsSpace(sourceValue)) {
-            validation.source = 'Source must not contain spaces';
-          }
-        }
-        else {
+        if (!sourceValue) {
           validation.source = 'Parameter must have a source';
         }
       }

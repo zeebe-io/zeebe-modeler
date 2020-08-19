@@ -851,23 +851,33 @@ describe('customs - input output property tab', function() {
       }));
 
 
-      it('should validate', function() {
+      it('should not allow empty source value', function() {
 
         // when
         triggerValue(parameterSourceInput, '', 'change');
 
         // then
-        expect(domClasses(parameterSourceInput).has('invalid')).to.be.true;
+        expect(isInvalidInput(parameterSourceInput)).to.be.true;
       });
 
 
-      it('should validate with spaces', function() {
+      it('should allow with spaces', function() {
 
         // when
         triggerValue(parameterSourceInput, 'foo bar', 'change');
 
         // then
-        expect(domClasses(parameterSourceInput).has('invalid')).to.be.true;
+        expect(isInvalidInput(parameterSourceInput)).to.be.false;
+      });
+
+
+      it('should allow FEEL expression', function() {
+
+        // when
+        triggerValue(parameterSourceInput, '=if (variable = null) then 1 else variable + 1', 'change');
+
+        // then
+        expect(isInvalidInput(parameterSourceInput)).to.be.false;
       });
 
     });
@@ -967,7 +977,7 @@ describe('customs - input output property tab', function() {
         triggerValue(parameterTargetInput, '', 'change');
 
         // then
-        expect(domClasses(parameterTargetInput).has('invalid')).to.be.true;
+        expect(isInvalidInput(parameterTargetInput)).to.be.true;
       });
 
 
@@ -977,7 +987,7 @@ describe('customs - input output property tab', function() {
         triggerValue(parameterTargetInput, 'foo bar', 'change');
 
         // then
-        expect(domClasses(parameterTargetInput).has('invalid')).to.be.true;
+        expect(isInvalidInput(parameterTargetInput)).to.be.true;
       });
 
     });
@@ -1116,4 +1126,8 @@ const getAddButton = (suffix, container) => {
 
 const getRemoveButton = (suffix, container) => {
   return domQuery('button[id="cam-extensionElements-remove-' + suffix + '"]', getInputOutputTab(container));
+};
+
+const isInvalidInput = (node) => {
+  return domClasses(node).has('invalid');
 };
