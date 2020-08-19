@@ -2,6 +2,10 @@
   display: block !important;
 }
 
+.bjs-powered-by > svg {
+  display: none;
+}
+
 .bjs-powered-by > img {
   display: none;
 }

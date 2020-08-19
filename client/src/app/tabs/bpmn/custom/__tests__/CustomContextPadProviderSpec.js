@@ -193,6 +193,7 @@ describe('customs - context-pad', function() {
 
     it('should provide entries for Groups', function() {
       expect(getContextPadEntries('Group_1')).to.be.eql([
+        'append.text-annotation',
         'delete'
       ]);
     });

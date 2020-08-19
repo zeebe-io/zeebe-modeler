@@ -141,14 +141,6 @@ export class BpmnEditor extends CachedComponent {
     }
   }
 
-  ifMounted = (fn) => {
-    return (...args) => {
-      if (this._isMounted) {
-        fn(...args);
-      }
-    };
-  }
-
   listen(fn) {
     const modeler = this.getModeler();
 
@@ -366,8 +358,21 @@ export class BpmnEditor extends CachedComponent {
 
     const modeler = this.getModeler();
 
-    // TODO(nikku): apply default element templates to initial diagram
-    modeler.importXML(xml, this.ifMounted(this.handleImport));
+
+    let error = null, warnings = null;
+    try {
+
+      const result = await modeler.importXML(xml);
+      warnings = result.warnings;
+    } catch (err) {
+
+      error = err;
+      warnings = err.warnings;
+    }
+
+    if (this._isMounted) {
+      this.handleImport(error, warnings);
+    }
   }
 
   /**
@@ -381,7 +386,7 @@ export class BpmnEditor extends CachedComponent {
     return modeler;
   }
 
-  getXML() {
+  async getXML() {
     const {
       lastXML,
       modeler
@@ -391,29 +396,23 @@ export class BpmnEditor extends CachedComponent {
 
     const stackIdx = commandStack._stackIdx;
 
-    return new Promise((resolve, reject) => {
+    if (!this.isDirty()) {
+      return lastXML || this.props.xml;
+    }
 
-      if (!this.isDirty()) {
-        return resolve(lastXML || this.props.xml);
-      }
+    try {
 
-      modeler.saveXML({ format: true }, (err, xml) => {
-        this.setCached({
-          lastXML: xml,
-          stackIdx
-        });
+      const { xml } = await modeler.saveXML({ format: true });
 
-        if (err) {
-          this.handleError({
-            error: err
-          });
+      this.setCached({ lastXML: xml, stackIdx });
 
-          return reject(err);
-        }
+      return xml;
+    } catch (error) {
 
-        return resolve(xml);
-      });
-    });
+      this.handleError({ error });
+
+      return Promise.reject(error);
+    }
   }
 
   async exportAs(type) {
@@ -426,18 +425,18 @@ export class BpmnEditor extends CachedComponent {
     return generateImage(type, svg);
   }
 
-  exportSVG() {
+  async exportSVG() {
     const modeler = this.getModeler();
 
-    return new Promise((resolve, reject) => {
-      modeler.saveSVG((err, svg) => {
-        if (err) {
-          return reject(err);
-        }
+    try {
 
-        return resolve(svg);
-      });
-    });
+      const { svg } = await modeler.saveSVG();
+
+      return svg;
+    } catch (err) {
+
+      return Promise.reject(err);
+    }
   }
 
   triggerAction = (action, context) => {
@@ -557,14 +556,16 @@ export class BpmnEditor extends CachedComponent {
       onLayoutChanged
     } = this.props;
 
+    const imported = this.getModeler().getDefinitions();
+
     const {
-      importing,
+      importing
     } = this.state;
 
     return (
       <div className={ css.BpmnEditor }>
 
-        <Loader hidden={ !importing } />
+        <Loader hidden={ imported && !importing } />
 
         <Fill slot="toolbar" group="5_color">
           <DropdownButton

@@ -24,9 +24,8 @@ jobs:
     - stage: test
       name: Test on Linux
       script:
-      - |
-        COVERAGE=1 npm run all -- --x64 --no-compress
-        npx codecov
+      - COVERAGE=1 npm run all -- --x64 --no-compress
+      after_success: npx codecov
     - stage: test
       name: Test on Windows
       os: windows
@@ -37,7 +36,7 @@ jobs:
       name: "Create GitHub release"
       os: linux
       script:
-      - sudo apt install hub
+      - sudo snap install hub --classic
       - GITHUB_TOKEN=$GH_TOKEN hub release create --draft --message=$TRAVIS_TAG $TRAVIS_TAG
     - stage: "distro"
       name: "Build Linux distro"

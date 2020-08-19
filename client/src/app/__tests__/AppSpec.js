@@ -22,6 +22,8 @@ import {
 
 import Log from '../Log';
 
+import Flags, { DISABLE_REMOTE_INTERACTION } from '../../util/Flags';
+
 import {
   Backend,
   Cache,
@@ -1574,6 +1576,23 @@ describe('<App>', function() {
         expect(changedSpy).to.have.been.calledTwice;
       });
 
+
+      it('on quit', function() {
+
+        // given
+        const changedSpy = spy(() => {});
+
+        const { app } = createApp({
+          onWorkspaceChanged: changedSpy
+        });
+
+        // when
+        app.quit();
+
+        // then
+        expect(changedSpy).to.have.been.calledOnce;
+      });
+
     });
 
   });
@@ -2639,6 +2658,12 @@ function createApp(options = {}, mountFn=shallow) {
   }
 
   let app;
+
+  const flags = options.flags || {
+    [ DISABLE_REMOTE_INTERACTION ]: true
+  };
+
+  Flags.init(flags);
 
   const cache = options.cache || new Cache();
 

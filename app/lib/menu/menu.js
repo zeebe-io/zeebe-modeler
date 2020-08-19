@@ -22,7 +22,7 @@ class Menu {
 
   /**
    * @param {Object} options - Options.
-   * @param {String} options.platform - Platform.
+   * @param {string} options.platform - Platform.
    */
   constructor(options = {}) {
     const { platform } = options;
@@ -35,6 +35,8 @@ class Menu {
     this.rebuildMenu = this.rebuildMenu.bind(this);
 
     this.updateState = this.updateState.bind(this);
+
+    this.init();
   }
 
   init() {

@@ -39,6 +39,7 @@ import Toolbar from './Toolbar';
 
 import Log from './Log';
 
+import { KeyboardInteractionTrapContext } from './primitives/modal/KeyboardInteractionTrap';
 
 import {
   KeyboardShortcutsModal
@@ -135,7 +136,7 @@ export class App extends PureComponent {
     );
 
     if (process.env.NODE_ENV !== 'test') {
-      this.workspaceChanged = debounce(this.workspaceChanged, 1500);
+      this.workspaceChangedDebounced = debounce(this.workspaceChangedDebounced, 1500);
       this.updateMenu = debounce(this.updateMenu, 50);
       this.resizeTab = debounce(this.resizeTab, 50);
     }
@@ -143,14 +144,14 @@ export class App extends PureComponent {
     this.currentNotificationId = 0;
   }
 
-  createDiagram = async (type = 'bpmn', options) => {
+  createDiagram = async (type = 'bpmn') => {
 
     const {
       tabsProvider
     } = this.props;
 
     const tab = this.addTab(
-      tabsProvider.createTab(type, options)
+      tabsProvider.createTab(type)
     );
 
     await this.showTab(tab);
@@ -362,7 +363,7 @@ export class App extends PureComponent {
    *
    * @param {Tab} tab
    *
-   * @return {Promise<Boolean>} resolved to true if tab is closed
+   * @return {Promise<boolean>} resolved to true if tab is closed
    */
   closeTab = async (tab) => {
     const { file } = tab;
@@ -578,7 +579,7 @@ export class App extends PureComponent {
    * the tab corresponding to the activeFile or the last opened tab.
    *
    * @param {Array<File>} files
-   * @param {File|Boolean} activateFile
+   * @param {File|boolean} activateFile
    *
    * @return {Array<Tab>} all tabs that could be opened from the given files.
    */
@@ -1014,7 +1015,26 @@ export class App extends PureComponent {
     this.handleError(error);
   }
 
-  workspaceChanged = () => {
+  /**
+   * Save workspace debounced.
+   *
+   * @returns {Promise}
+   */
+  workspaceChangedDebounced = () => {
+    return this.workspaceChanged(false);
+  }
+
+  /**
+   * Save workspace. Debounced by default.
+   *
+   * @param {boolean} debounce
+   *
+   * @returns {Promise}
+   */
+  workspaceChanged = (debounce = true) => {
+    if (debounce) {
+      return this.workspaceChangedDebounced();
+    }
 
     const {
       onWorkspaceChanged
@@ -1031,7 +1051,7 @@ export class App extends PureComponent {
       endpoints
     } = this.state;
 
-    onWorkspaceChanged({
+    return onWorkspaceChanged({
       tabs,
       activeTab,
       layout,
@@ -1045,6 +1065,9 @@ export class App extends PureComponent {
    * @param {Tab|string} [categoryOrTab]
    */
   handleError = (error, categoryOrTab) => {
+
+    this.emit('app.error-handled', error);
+
     const {
       onError
     } = this.props;
@@ -1080,9 +1103,9 @@ export class App extends PureComponent {
   /**
    * Open log and add entry.
    *
-   * @param {String} message - Message to be logged.
-   * @param {String} category - Category of message.
-   * @param {String} action - Action to be triggered.
+   * @param {string} message - Message to be logged.
+   * @param {string} category - Category of message.
+   * @param {string} action - Action to be triggered.
    */
   logEntry(message, category, action) {
     this.toggleLog(true);
@@ -1216,10 +1239,10 @@ export class App extends PureComponent {
 
   /**
    * Saves current tab to given location
-   * @param {String} options.encoding
+   * @param {string} options.encoding
    * @param {File} options.originalFile
-   * @param {String} options.savePath
-   * @param {String} options.saveType
+   * @param {string} options.savePath
+   * @param {string} options.saveType
    *
    * @returns {File} saved file.
    */
@@ -1425,9 +1448,9 @@ export class App extends PureComponent {
   /**
    * Exports file to given export type.
    *
-   * @param {String} options.encoding
-   * @param {String} options.exportPath
-   * @param {String} options.exportType
+   * @param {string} options.encoding
+   * @param {string} options.exportPath
+   * @param {string} options.exportType
    * @param {File} options.originalFile
    */
   async exportAsFile(options) {
@@ -1728,6 +1751,12 @@ export class App extends PureComponent {
   }
 
   async quit() {
+    try {
+      await this.workspaceChanged(false);
+    } catch (error) {
+      log('workspace saved error', error);
+    }
+
     const closeResults = await this.triggerAction('close-all-tabs');
 
     return closeResults.every(result => result);
@@ -1794,140 +1823,145 @@ export class App extends PureComponent {
 
         <div className={ css.App }>
 
-          <SlotFillRoot>
+          <KeyboardInteractionTrapContext.Provider value={ this.triggerAction }>
 
-            <Toolbar />
+            <SlotFillRoot>
 
-            <Fill slot="toolbar" group="1_general">
-              <DropdownButton
-                title="Create diagram"
-                items={ [
-                  {
-                    text: 'Create new BPMN diagram',
-                    onClick: this.composeAction('create-bpmn-diagram'),
-                    type: 'bpmn'
-                  }
-                ].filter(entry => tabsProvider.hasProvider(entry.type)) }
-              >
-                <Icon name="new" />
-              </DropdownButton>
+              <Toolbar />
 
-              <Button
-                title="Open diagram"
-                onClick={ this.composeAction('open-diagram') }
-              >
-                <Icon name="open" />
-              </Button>
-            </Fill>
 
-            <Fill slot="toolbar" group="2_save">
-              <Button
-                disabled={ !canSave }
-                onClick={ canSave ? this.composeAction('save') : null }
-                title="Save diagram"
-              >
-                <Icon name="save" />
-              </Button>
-              <Button
-                disabled={ !canSaveAs }
-                onClick={ canSaveAs ? this.composeAction('save-as') : null }
-                title="Save diagram as..."
-              >
-                <Icon name="save-as" />
-              </Button>
-            </Fill>
-
-            <Fill slot="toolbar" group="3_editor">
-              <Button
-                disabled={ !tabState.undo }
-                onClick={ this.composeAction('undo') }
-                title="Undo last action"
-              >
-                <Icon name="undo" />
-              </Button>
-              <Button
-                disabled={ !tabState.redo }
-                onClick={ this.composeAction('redo') }
-                title="Redo last action"
-              >
-                <Icon name="redo" />
-              </Button>
-            </Fill>
-
-            {
-              tabState.exportAs && <Fill slot="toolbar" group="4_export">
-                <Button
-                  title="Export as image"
-                  onClick={ this.composeAction('export-as') }
+              <Fill slot="toolbar" group="1_general">
+                <DropdownButton
+                  title="Create diagram"
+                  items={ [
+                    {
+                      text: 'Create new BPMN diagram',
+                      onClick: this.composeAction('create-bpmn-diagram'),
+                      type: 'bpmn'
+                    }
+                  ].filter(entry => tabsProvider.hasProvider(entry.type)) }
                 >
-                  <Icon name="picture" />
+                  <Icon name="new" />
+                </DropdownButton>
+
+                <Button
+                  title="Open diagram"
+                  onClick={ this.composeAction('open-diagram') }
+                >
+                  <Icon name="open" />
                 </Button>
               </Fill>
-            }
 
-            <div className="tabs">
-              <TabLinks
-                className="primary"
-                tabs={ tabs }
-                dirtyTabs={ dirtyTabs }
-                unsavedTabs={ unsavedTabs }
-                activeTab={ activeTab }
-                onSelect={ this.selectTab }
-                onMoveTab={ this.moveTab }
-                onContextMenu={ this.openTabLinksMenu }
-                onClose={ this.handleCloseTab }
-                placeholder={ {
-                  label: '+',
-                  title: 'New BPMN diagram',
-                  onClick: this.composeAction('create-bpmn-diagram')
-                } }
-                draggable
-                scrollable
+              <Fill slot="toolbar" group="2_save">
+                <Button
+                  disabled={ !canSave }
+                  onClick={ canSave ? this.composeAction('save') : null }
+                  title="Save diagram"
+                >
+                  <Icon name="save" />
+                </Button>
+                <Button
+                  disabled={ !canSaveAs }
+                  onClick={ canSaveAs ? this.composeAction('save-as') : null }
+                  title="Save diagram as..."
+                >
+                  <Icon name="save-as" />
+                </Button>
+              </Fill>
+
+              <Fill slot="toolbar" group="3_editor">
+                <Button
+                  disabled={ !tabState.undo }
+                  onClick={ this.composeAction('undo') }
+                  title="Undo last action"
+                >
+                  <Icon name="undo" />
+                </Button>
+                <Button
+                  disabled={ !tabState.redo }
+                  onClick={ this.composeAction('redo') }
+                  title="Redo last action"
+                >
+                  <Icon name="redo" />
+                </Button>
+              </Fill>
+
+              {
+                tabState.exportAs && <Fill slot="toolbar" group="4_export">
+                  <Button
+                    title="Export as image"
+                    onClick={ this.composeAction('export-as') }
+                  >
+                    <Icon name="picture" />
+                  </Button>
+                </Fill>
+              }
+
+              <div className="tabs">
+                <TabLinks
+                  className="primary"
+                  tabs={ tabs }
+                  dirtyTabs={ dirtyTabs }
+                  unsavedTabs={ unsavedTabs }
+                  activeTab={ activeTab }
+                  onSelect={ this.selectTab }
+                  onMoveTab={ this.moveTab }
+                  onContextMenu={ this.openTabLinksMenu }
+                  onClose={ this.handleCloseTab }
+                  placeholder={ {
+                    label: '+',
+                    title: 'New BPMN diagram',
+                    onClick: this.composeAction('create-bpmn-diagram')
+                  } }
+                  draggable
+                  scrollable
+                />
+
+                <TabContainer className="main">
+                  {
+                    <Tab
+                      key={ activeTab.id }
+                      tab={ activeTab }
+                      layout={ layout }
+                      onChanged={ this.handleTabChanged(activeTab) }
+                      onError={ this.handleTabError(activeTab) }
+                      onWarning={ this.handleTabWarning(activeTab) }
+                      onShown={ this.handleTabShown(activeTab) }
+                      onLayoutChanged={ this.handleLayoutChanged }
+                      onContextMenu={ this.openTabMenu }
+                      onAction={ this.triggerAction }
+                      onModal={ this.openModal }
+                      getConfig={ this.getConfig }
+                      setConfig={ this.setConfig }
+                      getPlugins={ this.getPlugins }
+                      ref={ this.tabRef }
+                    />
+                  }
+                </TabContainer>
+              </div>
+
+              <Log
+                entries={ logEntries }
+                layout={ layout.log }
+                onClear={ this.clearLog }
+                onLayoutChanged={ this.handleLayoutChanged }
+                onUpdateMenu={ this.updateMenu }
               />
 
-              <TabContainer className="main">
-                {
-                  <Tab
-                    key={ activeTab.id }
-                    tab={ activeTab }
-                    layout={ layout }
-                    onChanged={ this.handleTabChanged(activeTab) }
-                    onError={ this.handleTabError(activeTab) }
-                    onWarning={ this.handleTabWarning(activeTab) }
-                    onShown={ this.handleTabShown(activeTab) }
-                    onLayoutChanged={ this.handleLayoutChanged }
-                    onContextMenu={ this.openTabMenu }
-                    onAction={ this.triggerAction }
-                    onModal={ this.openModal }
-                    getConfig={ this.getConfig }
-                    setConfig={ this.setConfig }
-                    getPlugins={ this.getPlugins }
-                    ref={ this.tabRef }
-                  />
-                }
-              </TabContainer>
-            </div>
+              <PluginsRoot
+                app={ this }
+                plugins={ this.plugins }
+              />
 
-            <Log
-              entries={ logEntries }
-              layout={ layout.log }
-              onClear={ this.clearLog }
-              onLayoutChanged={ this.handleLayoutChanged }
-              onUpdateMenu={ this.updateMenu }
-            />
+            </SlotFillRoot>
 
-            <PluginsRoot
-              app={ this }
-              plugins={ this.plugins }
-            />
+            { this.state.currentModal === 'KEYBOARD_SHORTCUTS' ?
+              <KeyboardShortcutsModal
+                getGlobal={ this.getGlobal }
+                onClose={ this.closeModal }
+              /> : null }
 
-          </SlotFillRoot>
-
-          { this.state.currentModal === 'KEYBOARD_SHORTCUTS' ?
-            <KeyboardShortcutsModal
-              getGlobal={ this.getGlobal }
-              onClose={ this.closeModal }
-            /> : null }
+          </KeyboardInteractionTrapContext.Provider>
 
         </div>
 
