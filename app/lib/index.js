@@ -20,13 +20,6 @@ const path = require('path');
 
 const ZB = require('zeebe-node');
 
-/**
- * Report crashes.
- *
- * @see http://electron.atom.io/docs/v0.34.0/api/crash-reporter/
- */
-// TODO(nikku): do we want to do this?
-// require('crash-reporter').start();
 
 const Cli = require('./cli');
 const Config = require('./config');
@@ -321,7 +314,7 @@ app.on('web-contents-created', (event, webContents) => {
 /**
  * Open the given filePaths in the editor.
  *
- * @param {Array<String>} filePaths
+ * @param {Array<string>} filePaths
  */
 app.openFiles = function(filePaths) {
 
@@ -380,8 +373,6 @@ app.createEditorWindow = function() {
   windowManager.manage(mainWindow);
 
   dialog.setActiveWindow(mainWindow);
-
-  menu.init();
 
   let url = 'file://' + path.resolve(__dirname + '/../public/index.html');
 

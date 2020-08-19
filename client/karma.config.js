@@ -49,7 +49,11 @@ var browsers =
       return browser;
     });
 
-var suite = coverage ? 'test/all.js' : 'test/suite.js';
+var suite = 'test/suite.js';
+
+if (coverage) {
+  suite = 'test/all.js';
+}
 
 
 module.exports = function(karma) {
@@ -83,7 +87,7 @@ module.exports = function(karma) {
 
     coverageReporter: {
       reporters: [
-        { type: 'lcov', subdir: '.' }
+        { type: 'lcov', subdir: 'all' }
       ]
     },
 

@@ -5,7 +5,9 @@ All notable changes to the [Zeebe Modeler](https://github.com/zeebe-io/zeebe-mod
 ## Unreleased
 
 ___Note:__ Yet to be released changes appear here._
+
 * `FEAT`: allow configuration of outputMappings for all bpmn:Event shapes ([#242](https://github.com/zeebe-io/zeebe-modeler/issues/242))
+* `CHORE`: update foundation to Camunda Modeler v4.2 ([#241](https://github.com/zeebe-io/zeebe-modeler/issues/241))
 
 ## 0.9.1
 
