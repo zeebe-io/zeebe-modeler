@@ -6,7 +6,14 @@ All notable changes to the [Zeebe Modeler](https://github.com/zeebe-io/zeebe-mod
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.10.0-rc.0
+
+* `FEAT`: disallow non-blank start events inside embedded sub process ([#69](https://github.com/zeebe-io/zeebe-modeler/issues/69))
+* `FEAT`: allow expressions for task definitions ([#240](https://github.com/zeebe-io/zeebe-modeler/pull/240))
 * `FEAT`: allow configuration of outputMappings for all bpmn:Event shapes ([#242](https://github.com/zeebe-io/zeebe-modeler/issues/242))
+* `FEAT`: change application icon ([#220](https://github.com/zeebe-io/zeebe-modeler/issues/220))
+* `CHORE`: migrate to Zeebe node client v0.23 ([#230](https://github.com/zeebe-io/zeebe-modeler/issues/230))
+* `CHORE`: extract Zeebe moddle extension to separate module ([#107](https://github.com/zeebe-io/zeebe-modeler/issues/107))
 * `CHORE`: update foundation to Camunda Modeler v4.2 ([#241](https://github.com/zeebe-io/zeebe-modeler/issues/241))
 
 ## 0.9.1
