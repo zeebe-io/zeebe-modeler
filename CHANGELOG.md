@@ -6,7 +6,7 @@ All notable changes to the [Zeebe Modeler](https://github.com/zeebe-io/zeebe-mod
 
 ___Note:__ Yet to be released changes appear here._
 
-## 0.10.0-rc.0
+## 0.10.0
 
 * `FEAT`: disallow non-blank start events inside embedded sub process ([#69](https://github.com/zeebe-io/zeebe-modeler/issues/69))
 * `FEAT`: allow expressions for task definitions ([#240](https://github.com/zeebe-io/zeebe-modeler/pull/240))
