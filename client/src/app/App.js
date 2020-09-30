@@ -2040,7 +2040,7 @@ function getOpenFileErrorDialog(options) {
     let seperator = '';
 
     if (isLast) {
-      seperator = ' or ';
+      seperator = '';
     } else if (!isFirst) {
       seperator = ', ';
     }
