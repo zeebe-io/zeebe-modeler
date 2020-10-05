@@ -238,7 +238,7 @@ async function excludeFilesFromMerge(options) {
 }
 
 /**
- * $ git merge @upstream/@branch --no-commit --no-ff
+ * $ git merge @upstream/@branch --no-commit --squash
  * Overall syncing procedure
  * @param {object} options
  * @param {string} options.branch
@@ -255,7 +255,7 @@ async function sync(options) {
   // no need do especially declare upstream if tag is selected
   const syncPath = tag ? tag : `${upstream}/${branch}`;
 
-  console.log(`Sync: Execute 'git merge --no-commit --no-ff ${syncPath}'.`);
+  console.log(`Sync: Execute 'git merge --no-commit --squash ${syncPath}'.`);
 
   const _success = async function(response) {
 
@@ -274,7 +274,7 @@ async function sync(options) {
   const mergeCmd = [
     'merge',
     '--no-commit',
-    '--no-ff',
+    '--squash',
     syncPath
   ];
 
