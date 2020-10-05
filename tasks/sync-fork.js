@@ -38,8 +38,7 @@ const {
   },
   default: {
     branch: CAMUNDA_MODELER_BRANCH,
-    help: false,
-    tag: false
+    help: false
   }
 });
 
@@ -241,12 +240,12 @@ async function excludeFilesFromMerge(options) {
 /**
  * $ git merge @upstream/@branch --no-commit --no-ff
  * Overall syncing procedure
- * @param {String} options.branch
- * @param {String} options.tag
- * @param {String} options.upstream
+ * @param {object} options
+ * @param {string} options.branch
+ * @param {string} options.tag
+ * @param {string} options.upstream
  */
 async function sync(options) {
-
   const {
     branch,
     tag,
@@ -254,7 +253,7 @@ async function sync(options) {
   } = options;
 
   // no need do especially declare upstream if tag is selected
-  let syncPath = tag || `${upstream}/${branch}`;
+  const syncPath = tag ? tag : `${upstream}/${branch}`;
 
   console.log(`Sync: Execute 'git merge --no-commit --no-ff ${syncPath}'.`);
 
@@ -327,30 +326,32 @@ async function run(options) {
     tag
   } = options;
 
+  const upstream = CAMUNDA_MODELER_UPSTREAM;
+
   console.log('##### Started syncing #####');
 
   const hasOrigin = await hasUpstream({
-    upstream: CAMUNDA_MODELER_UPSTREAM
+    upstream
   });
 
   if (!hasOrigin) {
     await createUpstream({
       repository: CAMUNDA_MODELER_REPOSITORY,
-      upstream: CAMUNDA_MODELER_UPSTREAM
+      upstream
     });
   }
 
   const originalTags = await listTags();
 
   await fetchUpstream({
-    upstream: CAMUNDA_MODELER_UPSTREAM
+    upstream
   });
 
   try {
     await sync({
       branch,
       tag,
-      upstream: CAMUNDA_MODELER_UPSTREAM
+      upstream
     });
   } catch (e) {
 
