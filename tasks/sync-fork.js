@@ -330,16 +330,13 @@ async function run(options) {
 
   console.log('##### Started syncing #####');
 
-  const hasOrigin = await hasUpstream({
+  await removeUpstream(upstream);
+  await pruneTags();
+
+  await createUpstream({
+    repository: CAMUNDA_MODELER_REPOSITORY,
     upstream
   });
-
-  if (!hasOrigin) {
-    await createUpstream({
-      repository: CAMUNDA_MODELER_REPOSITORY,
-      upstream
-    });
-  }
 
   const originalTags = await listTags();
 
@@ -358,6 +355,8 @@ async function run(options) {
     // todo(pinussilvestrus): catch errors properly
   } finally {
 
+    await removeUpstream(upstream);
+
     const currentTags = await listTags(),
           newTags = currentTags.filter(t => {
             return originalTags.indexOf(t) === -1;
@@ -367,4 +366,34 @@ async function run(options) {
 
     console.log('##### Stopped syncing #####');
   }
+}
+
+async function removeUpstream(upstream) {
+  const hasOrigin = await hasUpstream({
+    upstream
+  });
+
+  if (!hasOrigin) {
+    return;
+  }
+
+  console.log(`Sync: Execute 'git remote remove ${upstream}'.`);
+
+  await git.removeRemote(upstream);
+
+  console.log(`Sync: Removed upstream '${upstream}'.`);
+}
+
+async function pruneTags() {
+  const fetchCmd = [
+    'origin',
+    '--prune',
+    '--prune-tags'
+  ];
+
+  console.log('Sync: Execute \'git fetch origin --prune --prune-tags\'.');
+
+  await git.fetch(fetchCmd);
+
+  console.log('Sync: Pruned tags.');
 }
