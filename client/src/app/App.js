@@ -2040,9 +2040,11 @@ function getOpenFileErrorDialog(options) {
     let seperator = '';
 
     if (isLast) {
-      seperator = '';
+      seperator = ' or ';
     } else if (!isFirst) {
       seperator = ', ';
+    } else if(isLast && providerNames.length === 1) {
+      seperator = ' ';
     }
 
     return `${ string }${ seperator }${ providerName }`;
