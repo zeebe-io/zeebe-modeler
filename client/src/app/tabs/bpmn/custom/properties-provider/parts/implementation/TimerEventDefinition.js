@@ -14,13 +14,13 @@ import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
 import entryFactory from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 
-export default function(group, bpmnFactory, timerEventDefinition, timerOptions) {
+export default function(group, bpmnFactory, timerEventDefinition, timerOptions, translate) {
 
   const selectOptions = timerOptions;
 
-  group.entries.push(entryFactory.selectBox({
+  group.entries.push(entryFactory.selectBox(translate, {
     id: 'timer-event-definition-type',
-    label: 'Timer Definition Type',
+    label: translate('Timer Definition Type'),
     selectOptions: selectOptions,
     emptyParameter: true,
     modelProperty: 'timerDefinitionType',
@@ -56,9 +56,9 @@ export default function(group, bpmnFactory, timerEventDefinition, timerOptions) 
 
   }));
 
-  group.entries.push(entryFactory.textField({
+  group.entries.push(entryFactory.textField(translate, {
     id: 'timer-event-definition',
-    label: 'Timer Definition',
+    label: translate('Timer Definition'),
     modelProperty: 'timerDefinition',
 
     get: function(element, node) {
@@ -88,7 +88,7 @@ export default function(group, bpmnFactory, timerEventDefinition, timerOptions) 
         const value = definition.get('body');
         if (!value) {
           return {
-            timerDefinition: 'Must provide a value'
+            timerDefinition: translate('Must provide a value')
           };
         }
       }

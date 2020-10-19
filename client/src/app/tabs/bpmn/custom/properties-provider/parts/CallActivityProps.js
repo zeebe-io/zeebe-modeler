@@ -69,7 +69,7 @@ export default function(group, element, bpmnFactory, translate) {
 
   // properties /////////////////////////////////////////////////////////////////
 
-  group.entries.push(entryFactory.validationAwareTextField({
+  group.entries.push(entryFactory.validationAwareTextField(translate, {
     id: 'process-id',
     label: translate('Process Id'),
     modelProperty: 'processId',

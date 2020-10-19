@@ -22,7 +22,7 @@ function ensureInputOutputSupported(element) {
   return isInputOutputSupported(element);
 }
 
-export default function(element, bpmnFactory, options = {}) {
+export default function(element, bpmnFactory, translate, options = {}) {
   const idPrefix = options.idPrefix || '';
 
   const getSelected = options.getSelectedParameter;
@@ -40,9 +40,9 @@ export default function(element, bpmnFactory, options = {}) {
 
   // parameter source ////////////////////////////////////////////////////////
 
-  entries.push(entryFactory.validationAwareTextField({
+  entries.push(entryFactory.validationAwareTextField(translate, {
     id: `${idPrefix}parameterSource`,
-    label: 'Source',
+    label: translate('Source'),
     modelProperty: 'source',
 
     getProperty: function(element, node) {
@@ -62,7 +62,7 @@ export default function(element, bpmnFactory, options = {}) {
         const sourceValue = values.source;
 
         if (!sourceValue) {
-          validation.source = 'Parameter must have a source';
+          validation.source = translate('Parameter must have a source');
         }
       }
 
@@ -77,9 +77,9 @@ export default function(element, bpmnFactory, options = {}) {
 
   // parameter target ////////////////////////////////////////////////////////
 
-  entries.push(entryFactory.validationAwareTextField({
+  entries.push(entryFactory.validationAwareTextField(translate, {
     id: `${idPrefix}parameterTarget`,
-    label: 'Target',
+    label: translate('Target'),
     modelProperty: 'target',
 
     getProperty: function(element, node) {
@@ -100,11 +100,11 @@ export default function(element, bpmnFactory, options = {}) {
 
         if (targetValue) {
           if (utils.containsSpace(targetValue)) {
-            validation.target = 'Target must not contain spaces';
+            validation.target = translate('Target must not contain spaces');
           }
         }
         else {
-          validation.target = 'Parameter must have a Target';
+          validation.target = translate('Parameter must have a Target');
         }
       }
 

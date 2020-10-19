@@ -27,6 +27,7 @@ import {
  * @param  {djs.model.Base} element
  * @param  {ModdleElement} definition
  * @param  {BpmnFactory} bpmnFactory
+ * @param  {Function} translate
  * @param  {Object} options
  * @param  {string} options.id the id of the entry
  * @param  {string} options.label the label of the entry
@@ -37,7 +38,7 @@ import {
  *
  * @return {Array<Object>} return an array containing the entries
  */
-export default function(element, definition, bpmnFactory, options) {
+export default function(element, definition, bpmnFactory, translate, options) {
 
   const id = options.id || 'element-property';
   const label = options.label;
@@ -57,7 +58,7 @@ export default function(element, definition, bpmnFactory, options) {
     return (getElements(bo, extensionElementKey) || [])[0];
   }
 
-  const entry = entryFactory.textField({
+  const entry = entryFactory.textField(translate, {
     id: id,
     label: label,
     modelProperty: modelProperty,

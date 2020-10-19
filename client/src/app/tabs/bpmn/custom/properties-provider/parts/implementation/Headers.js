@@ -19,7 +19,7 @@ import {
   is
 } from 'bpmn-js/lib/util/ModelUtil';
 
-import factory from 'bpmn-js-properties-panel/lib//factory/EntryFactory';
+import entryFactory from 'bpmn-js-properties-panel/lib//factory/EntryFactory';
 
 import elementHelper from 'bpmn-js-properties-panel/lib//helper/ElementHelper';
 
@@ -94,14 +94,17 @@ function isExtensionElements(element) {
  *
  * @param  {djs.model.Base} element
  * @param  {BpmnFactory} bpmnFactory
+ * @param  {Function} translate
  * @param  {Object} options
  * @param  {string} options.id
  * @param  {Array<string>} options.modelProperties
  * @param  {Array<string>} options.labels
  * @param  {function} options.getParent Gets the parent business object
  * @param  {function} options.show Indicate when the entry will be shown, should return boolean
+ *
+ * @returns {Object} a tableEntry object
  */
-export default function(element, bpmnFactory, options) {
+export default function(element, bpmnFactory, translate, options) {
 
   const getParent = options.getParent;
 
@@ -115,7 +118,7 @@ export default function(element, bpmnFactory, options) {
 
 
   assign(options, {
-    addLabel: 'Add Header',
+    addLabel: translate('Add Header'),
     getElements: function(element, node) {
       const parent = getParent(element, node, bo);
       return getPropertyValues(parent);
@@ -215,5 +218,5 @@ export default function(element, bpmnFactory, options) {
     }
   });
 
-  return factory.table(options);
+  return entryFactory.table(translate, options);
 }

@@ -58,7 +58,7 @@ const getInputOutputParameterLabel = param => {
 function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   const generalGroup = {
     id: 'general',
-    label: 'General',
+    label: translate('General'),
     entries: []
   };
   idProps(generalGroup, element, translate);
@@ -91,14 +91,14 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   ];
 }
 
-function createHeadersGroups(element, bpmnFactory) {
+function createHeadersGroups(element, bpmnFactory, translate) {
 
   const headersGroup = {
     id: 'headers-properties',
-    label: 'Headers',
+    label: translate('Headers'),
     entries: []
   };
-  headers(headersGroup, element, bpmnFactory);
+  headers(headersGroup, element, bpmnFactory, translate);
 
   return [
     headersGroup
@@ -106,11 +106,11 @@ function createHeadersGroups(element, bpmnFactory) {
 }
 
 
-function createInputOutputTabGroups(element, bpmnFactory) {
+function createInputOutputTabGroups(element, bpmnFactory, translate) {
 
   const inputOutputGroup = {
     id: 'input-output',
-    label: 'Parameters',
+    label: translate('Parameters'),
     entries: []
   };
 
@@ -128,7 +128,7 @@ function createInputOutputTabGroups(element, bpmnFactory) {
     }
   };
 
-  inputOutputParameter(inputOutputParameterGroup, element, bpmnFactory, options);
+  inputOutputParameter(inputOutputParameterGroup, element, bpmnFactory, translate, options);
 
   return [
     inputOutputGroup,
@@ -150,23 +150,23 @@ export default class ZeebePropertiesProvider extends PropertiesActivator {
   getTabs(element) {
     const generalTab = {
       id: 'general',
-      label: 'General',
+      label: this._translate('General'),
       groups: createGeneralTabGroups(
         element, this._bpmnFactory, this._canvas, this._translate)
     };
 
     const inputOutputTab = {
       id: 'input-output',
-      label: 'Input/Output',
+      label: this._translate('Input/Output'),
       groups: createInputOutputTabGroups(
-        element, this._bpmnFactory)
+        element, this._bpmnFactory, this._translate)
     };
 
     const headersTab = {
       id: 'headers',
-      label: 'Headers',
+      label: this._translate('Headers'),
       groups: createHeadersGroups(
-        element, this._bpmnFactory)
+        element, this._bpmnFactory, this._translate)
     };
 
     return [

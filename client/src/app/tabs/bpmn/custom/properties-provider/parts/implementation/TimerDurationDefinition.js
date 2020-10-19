@@ -28,10 +28,10 @@ function createFormalExpression(parent, body = undefined, bpmnFactory) {
   return elementHelper.createElement('bpmn:FormalExpression', { body: body }, parent, bpmnFactory);
 }
 
-export default function(group, bpmnFactory, timerEventDefinition) {
-  group.entries.push(entryFactory.textField({
+export default function(group, bpmnFactory, timerEventDefinition, translate) {
+  group.entries.push(entryFactory.textField(translate, {
     id: 'timer-event-duration',
-    label: 'Timer Duration',
+    label: translate('Timer Duration'),
     modelProperty: 'timerDefinition',
 
     get: function(element, node) {
@@ -68,7 +68,7 @@ export default function(group, bpmnFactory, timerEventDefinition) {
         const value = definition.get('body');
         if (!value) {
           return {
-            timerDefinition: 'Must provide a value'
+            timerDefinition: translate('Must provide a value')
           };
         }
       }
