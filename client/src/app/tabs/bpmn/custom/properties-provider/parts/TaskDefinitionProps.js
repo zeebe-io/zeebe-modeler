@@ -37,7 +37,7 @@ export default function(group, element, bpmnFactory, translate) {
     return (getElements(bo, 'zeebe:TaskDefinition') || [])[0];
   }
 
-  group.entries.push(entryFactory.validationAwareTextField({
+  group.entries.push(entryFactory.validationAwareTextField(translate, {
     id: 'taskDefinitionType',
     label: translate('Type'),
     modelProperty: 'type',
@@ -86,7 +86,7 @@ export default function(group, element, bpmnFactory, translate) {
 
         if (!type) {
           validation = {
-            type: 'ServiceTask must have a type'
+            type: translate('ServiceTask must have a type')
           };
         }
 
@@ -95,7 +95,7 @@ export default function(group, element, bpmnFactory, translate) {
     }
   }));
 
-  group.entries.push(entryFactory.textField({
+  group.entries.push(entryFactory.textField(translate, {
     id: 'taskDefinitionRetries',
     label: translate('Retries'),
     modelProperty: 'retries',
@@ -139,11 +139,3 @@ export default function(group, element, bpmnFactory, translate) {
   }));
 
 }
-
-
-
-
-
-
-
-

@@ -23,7 +23,7 @@ import timerEventDefinitionImpl from './implementation/TimerEventDefinition';
 
 import timerDurationDefinitionImpl from './implementation/TimerDurationDefinition';
 
-export default function(group, element, bpmnFactory) {
+export default function(group, element, bpmnFactory, translate) {
 
   const timerEventDefinition = eventDefinitionHelper.getTimerEventDefinition(element);
 
@@ -34,10 +34,10 @@ export default function(group, element, bpmnFactory) {
   }
 
   if (!timerOptions.length) {
-    return timerDurationDefinitionImpl(group, bpmnFactory, timerEventDefinition);
+    return timerDurationDefinitionImpl(group, bpmnFactory, timerEventDefinition, translate);
   }
 
-  timerEventDefinitionImpl(group, bpmnFactory, timerEventDefinition, timerOptions);
+  timerEventDefinitionImpl(group, bpmnFactory, timerEventDefinition, timerOptions, translate);
 }
 
 

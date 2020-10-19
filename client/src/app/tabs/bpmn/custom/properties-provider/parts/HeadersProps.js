@@ -18,16 +18,16 @@ import {
   is
 } from 'bpmn-js/lib/util/ModelUtil';
 
-export default function(group, element, bpmnFactory) {
+export default function(group, element, bpmnFactory, translate) {
 
   if (!is(element, 'bpmn:ServiceTask')) {
     return;
   }
 
-  const propertiesEntry = properties(element, bpmnFactory, {
+  const propertiesEntry = properties(element, bpmnFactory, translate, {
     id: 'headers',
     modelProperties: [ 'key', 'value' ],
-    labels: [ 'Key', 'Value' ],
+    labels: [ translate('Key'), translate('Value') ],
 
     getParent: function(element, node, bo) {
       return bo.extensionElements;

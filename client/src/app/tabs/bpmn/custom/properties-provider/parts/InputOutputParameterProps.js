@@ -14,8 +14,8 @@ import {
   assign
 } from 'min-dash';
 
-export default function(group, element, bpmnFactory, options) {
+export default function(group, element, bpmnFactory, translate, options) {
 
-  group.entries = group.entries.concat(inputOutputParameter(element, bpmnFactory, assign({}, options)));
+  group.entries = group.entries.concat(inputOutputParameter(element, bpmnFactory, translate, assign({}, options)));
 
 }

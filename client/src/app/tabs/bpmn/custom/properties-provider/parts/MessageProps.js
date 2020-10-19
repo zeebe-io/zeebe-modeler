@@ -30,9 +30,9 @@ export default function(group, element, bpmnFactory, translate) {
 
   if (is(element, 'bpmn:ReceiveTask')) {
     message(group, element, bpmnFactory, getBusinessObject(element), translate);
-    group.entries = group.entries.concat(referenceExtensionElementProperty(element, getBusinessObject(element), bpmnFactory, {
+    group.entries = group.entries.concat(referenceExtensionElementProperty(element, getBusinessObject(element), bpmnFactory, translate, {
       id: 'message-element-subscription',
-      label: 'Subscription Correlation Key',
+      label: translate('Subscription Correlation Key'),
       referenceProperty: 'messageRef',
       modelProperty: 'correlationKey',
       extensionElement: 'zeebe:Subscription',
@@ -42,9 +42,9 @@ export default function(group, element, bpmnFactory, translate) {
     message(group, element, bpmnFactory, messageEventDefinition, translate);
     if (!is(element, 'bpmn:StartEvent') || isEventSubProcess(parent)) {
 
-      group.entries = group.entries.concat(referenceExtensionElementProperty(element, messageEventDefinition, bpmnFactory, {
+      group.entries = group.entries.concat(referenceExtensionElementProperty(element, messageEventDefinition, bpmnFactory, translate, {
         id: 'message-element-subscription',
-        label: 'Subscription Correlation Key',
+        label: translate('Subscription Correlation Key'),
         referenceProperty: 'messageRef',
         modelProperty: 'correlationKey',
         extensionElement: 'zeebe:Subscription',
@@ -54,5 +54,3 @@ export default function(group, element, bpmnFactory, translate) {
   }
 
 }
-
-
