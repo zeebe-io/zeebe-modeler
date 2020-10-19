@@ -67,7 +67,7 @@ export default function(group, element, bpmnFactory, translate) {
 
   // properties /////////////////////////////////////////////////////////////////
 
-  group.entries.push(entryFactory.textField({
+  group.entries.push(entryFactory.textField(translate, {
     id: 'process-id',
     label: translate('Process Id'),
     modelProperty: 'processId',

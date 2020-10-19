@@ -22,7 +22,7 @@ function ensureInputOutputSupported(element) {
   return isInputOutputSupported(element);
 }
 
-export default function(element, bpmnFactory, options = {}) {
+export default function(element, bpmnFactory, options = {}, translate) {
   const idPrefix = options.idPrefix || '';
 
   const getSelected = options.getSelectedParameter;
@@ -40,7 +40,7 @@ export default function(element, bpmnFactory, options = {}) {
 
   // parameter source ////////////////////////////////////////////////////////
 
-  entries.push(entryFactory.validationAwareTextField({
+  entries.push(entryFactory.validationAwareTextField(translate, {
     id: `${idPrefix}parameterSource`,
     label: 'Source',
     modelProperty: 'source',
@@ -77,7 +77,7 @@ export default function(element, bpmnFactory, options = {}) {
 
   // parameter target ////////////////////////////////////////////////////////
 
-  entries.push(entryFactory.validationAwareTextField({
+  entries.push(entryFactory.validationAwareTextField(translate, {
     id: `${idPrefix}parameterTarget`,
     label: 'Target',
     modelProperty: 'target',

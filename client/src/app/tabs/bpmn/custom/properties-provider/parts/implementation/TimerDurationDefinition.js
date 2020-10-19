@@ -28,8 +28,8 @@ function createFormalExpression(parent, body = undefined, bpmnFactory) {
   return elementHelper.createElement('bpmn:FormalExpression', { body: body }, parent, bpmnFactory);
 }
 
-export default function(group, bpmnFactory, timerEventDefinition) {
-  group.entries.push(entryFactory.textField({
+export default function(group, bpmnFactory, timerEventDefinition, translate) {
+  group.entries.push(entryFactory.textField(translate, {
     id: 'timer-event-duration',
     label: 'Timer Duration',
     modelProperty: 'timerDefinition',

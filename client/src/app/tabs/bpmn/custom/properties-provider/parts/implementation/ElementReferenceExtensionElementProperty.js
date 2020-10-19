@@ -34,10 +34,11 @@ import {
  * @param  {string} options.modelProperty the name of property to modify
  * @param  {string} options.extensionElement the name of the extensionElement to modify
  * @param  {string} options.shouldValidate a flag indicate whether to validate or not
+ * @param  {Function} translate bpmn-js translation function
  *
  * @return {Array<Object>} return an array containing the entries
  */
-export default function(element, definition, bpmnFactory, options) {
+export default function(element, definition, bpmnFactory, options, translate) {
 
   const id = options.id || 'element-property';
   const label = options.label;
@@ -57,7 +58,7 @@ export default function(element, definition, bpmnFactory, options) {
     return (getElements(bo, extensionElementKey) || [])[0];
   }
 
-  const entry = entryFactory.textField({
+  const entry = entryFactory.textField(translate, {
     id: id,
     label: label,
     modelProperty: modelProperty,

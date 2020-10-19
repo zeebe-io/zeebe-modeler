@@ -100,8 +100,11 @@ function isExtensionElements(element) {
  * @param  {Array<string>} options.labels
  * @param  {function} options.getParent Gets the parent business object
  * @param  {function} options.show Indicate when the entry will be shown, should return boolean
+ * @param  {Function} translate bpmn-js translation function
+ *
+ * @return {Object} returns an TableEntry object
  */
-export default function(element, bpmnFactory, options) {
+export default function(element, bpmnFactory, options, translate) {
 
   const getParent = options.getParent;
 
@@ -215,5 +218,5 @@ export default function(element, bpmnFactory, options) {
     }
   });
 
-  return factory.table(options);
+  return factory.table(translate, options);
 }
