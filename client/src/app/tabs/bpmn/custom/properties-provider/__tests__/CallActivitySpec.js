@@ -84,6 +84,16 @@ describe('customs - call activity', function() {
 
     describe('create', function() {
 
+      function changeInputValue(value) {
+        const input = getInputField(
+          container,
+          'camunda-callActivity-processId',
+          'processId'
+        );
+
+        triggerValue(input, value, 'change');
+      }
+
       beforeEach(inject(function(elementRegistry, selection) {
 
         // given
@@ -94,18 +104,24 @@ describe('customs - call activity', function() {
 
         // assume
         expect(getCalledElement(bo)).to.be.undefined;
-
-        const input = getInputField(
-          container,
-          'camunda-callActivity-processId',
-          'processId'
-        );
-
-        // when
-        triggerValue(input, 'foo', 'change');
       }));
 
+      it('should fail', function() {
+
+        // when
+        changeInputValue('123');
+
+        // then
+        const calledElement = getCalledElement(bo);
+
+        expect(calledElement).to.exist;
+        expect(calledElement.processId).to.be.undefined;
+      });
+
       it('should execute', function() {
+
+        // when
+        changeInputValue('foo');
 
         // then
         const calledElement = getCalledElement(bo);
@@ -118,6 +134,7 @@ describe('customs - call activity', function() {
       it('should undo', inject(function(commandStack) {
 
         // when
+        changeInputValue('foo');
         commandStack.undo();
 
         // then
@@ -130,6 +147,8 @@ describe('customs - call activity', function() {
       it('should redo', inject(function(commandStack) {
 
         // when
+        changeInputValue('foo');
+
         commandStack.undo();
         commandStack.redo();
 

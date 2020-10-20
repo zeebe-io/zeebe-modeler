@@ -12,6 +12,8 @@ import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
 
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
+import { isIdValid } from 'bpmn-js-properties-panel/lib/Utils';
+
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
 import {
@@ -67,24 +69,29 @@ export default function(group, element, bpmnFactory, translate) {
 
   // properties /////////////////////////////////////////////////////////////////
 
-  group.entries.push(entryFactory.textField({
+  group.entries.push(entryFactory.validationAwareTextField({
     id: 'process-id',
     label: translate('Process Id'),
     modelProperty: 'processId',
 
-    get: function(element) {
-      return {
-        processId: getProperty(element, 'processId')
-      };
+    getProperty: function(element) {
+      return getProperty(element, 'processId');
     },
 
-    set: function(element, values) {
+    setProperty: function(element, values) {
       return setProperties(element, {
         processId: values.processId || undefined
       });
+    },
+    validate: function(element, values) {
+      var idValue = values.processId;
+      var bo = getBusinessObject(element);
+
+      var idError = isIdValid(bo, idValue, translate);
+
+      return idError ? { processId: idError } : {};
     }
   }));
-
 }
 
 // helper //////////
