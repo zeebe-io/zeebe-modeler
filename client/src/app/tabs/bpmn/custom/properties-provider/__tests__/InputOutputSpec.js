@@ -30,7 +30,8 @@ import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/Extensi
 
 import {
   classes as domClasses,
-  query as domQuery
+  query as domQuery,
+  queryAll as domQueryAll
 } from 'min-dom';
 
 import coreModule from 'bpmn-js/lib/core';
@@ -41,12 +42,16 @@ import zeebeModdleExtensions from 'zeebe-bpmn-moddle/resources/zeebe';
 
 const HIDE_CLASS = 'bpp-hidden';
 
+const COLLAPSE_CLASS = 'bpp-collapsible--collapsed';
+
 describe('customs - input output property tab', function() {
 
   const diagramXML = require('./InputOutput.bpmn');
 
   const testModules = [
-    coreModule, selectionModule, modelingModule,
+    coreModule,
+    modelingModule,
+    selectionModule,
     propertiesPanelModule,
     propertiesProviderModule
   ];
@@ -66,7 +71,6 @@ describe('customs - input output property tab', function() {
     moddleExtensions
   }));
 
-
   beforeEach(inject(function(commandStack, propertiesPanel) {
 
     const undoButton = document.createElement('button');
@@ -84,8 +88,8 @@ describe('customs - input output property tab', function() {
   it('should fetch empty list of input and output parameters', inject(function(selection, elementRegistry) {
 
     // given
-    const shape = elementRegistry.get('ServiceTask_empty');
-    const bo = getBusinessObject(shape);
+    const shape = elementRegistry.get('ServiceTask_empty'),
+          bo = getBusinessObject(shape);
 
     // assume
     expect(getInputParameters(bo).length).to.equal(0);
@@ -95,19 +99,19 @@ describe('customs - input output property tab', function() {
     selection.select(shape);
 
     // then
-    const inputsSelection = getInputParameterSelect(container);
-    expect(inputsSelection.options.length).to.equal(0);
+    const inputParameterEntries = getInputParameterCollapsibles(container);
+    expect(inputParameterEntries.length).to.equal(0);
 
-    const outputsSelection = getOutputParameterSelect(container);
-    expect(outputsSelection.options.length).to.equal(0);
+    const outputParameterEntries = getOutputParameterCollapsibles(container);
+    expect(outputParameterEntries.length).to.equal(0);
   }));
 
 
   it('should fetch list of input parameters', inject(function(selection, elementRegistry) {
 
     // given
-    const shape = elementRegistry.get('ServiceTask_1');
-    const bo = getBusinessObject(shape);
+    const shape = elementRegistry.get('ServiceTask_1'),
+          bo = getBusinessObject(shape);
 
     // assume
     expect(getInputParameters(bo).length).to.equal(4);
@@ -116,16 +120,16 @@ describe('customs - input output property tab', function() {
     selection.select(shape);
 
     // then
-    const inputsSelection = getInputParameterSelect(container);
-    expect(inputsSelection.options.length).to.equal(4);
+    const inputParameterEntries = getInputParameterCollapsibles(container);
+    expect(inputParameterEntries.length).to.equal(4);
   }));
 
 
   it('should fetch list of output parameters', inject(function(selection, elementRegistry) {
 
     // given
-    const shape = elementRegistry.get('ServiceTask_1');
-    const bo = getBusinessObject(shape);
+    const shape = elementRegistry.get('ServiceTask_1'),
+          bo = getBusinessObject(shape);
 
     // assume
     expect(getOutputParameters(bo).length).to.equal(4);
@@ -134,8 +138,8 @@ describe('customs - input output property tab', function() {
     selection.select(shape);
 
     // then
-    const outputsSelection = getOutputParameterSelect(container);
-    expect(outputsSelection.options.length).to.equal(4);
+    const outputParameterEntries = getOutputParameterCollapsibles(container);
+    expect(outputParameterEntries.length).to.equal(4);
   }));
 
 
@@ -152,12 +156,21 @@ describe('customs - input output property tab', function() {
 
         // then
         const inputOutputTab = getInputOutputTab(container),
-              inputParameters = getInputParameterSelect(container),
-              outputParameters = getOutputParameterSelect(container);
+              inputParameterGroup = getInputParameterGroup(container),
+              outputParameterGroup = getOutputParameterGroup(container),
+              inputParameterAddButton = getAddInputParameterButton(container),
+              outputParameterAddButton = getAddOutputParameterButton(container);
 
         expect(inputOutputTab).to.exist;
-        expect(inputParameters).to.exist;
-        expect(outputParameters).to.exist;
+        expect(inputOutputTab.className).not.to.contain(HIDE_CLASS);
+
+        expect(inputParameterGroup).to.exist;
+        expect(inputParameterGroup.className).not.to.contain(HIDE_CLASS);
+        expect(inputParameterAddButton).to.exist;
+
+        expect(outputParameterGroup).to.exist;
+        expect(outputParameterGroup.className).not.to.contain(HIDE_CLASS);
+        expect(outputParameterAddButton).to.exist;
       }
     ));
 
@@ -173,12 +186,21 @@ describe('customs - input output property tab', function() {
 
         // then
         const inputOutputTab = getInputOutputTab(container),
-              inputParameters = getInputParameterSelect(container),
-              outputParameters = getOutputParameterSelect(container);
+              inputParameterGroup = getInputParameterGroup(container),
+              outputParameterGroup = getOutputParameterGroup(container),
+              inputParameterAddButton = getAddInputParameterButton(container),
+              outputParameterAddButton = getAddOutputParameterButton(container);
 
         expect(inputOutputTab).to.exist;
-        expect(inputParameters).to.exist;
-        expect(outputParameters).to.exist;
+        expect(inputOutputTab.className).not.to.contain(HIDE_CLASS);
+
+        expect(inputParameterGroup).to.exist;
+        expect(inputParameterGroup.className).not.to.contain(HIDE_CLASS);
+        expect(inputParameterAddButton).to.exist;
+
+        expect(outputParameterGroup).to.exist;
+        expect(outputParameterGroup.className).not.to.contain(HIDE_CLASS);
+        expect(outputParameterAddButton).to.exist;
       }
     ));
 
@@ -194,12 +216,21 @@ describe('customs - input output property tab', function() {
 
         // then
         const inputOutputTab = getInputOutputTab(container),
-              inputParameters = getInputParameterSelect(container),
-              outputParameters = getOutputParameterSelect(container);
+              inputParameterGroup = getInputParameterGroup(container),
+              outputParameterGroup = getOutputParameterGroup(container),
+              inputParameterAddButton = getAddInputParameterButton(container),
+              outputParameterAddButton = getAddOutputParameterButton(container);
 
         expect(inputOutputTab).to.exist;
-        expect(inputParameters).to.exist;
-        expect(outputParameters).to.exist;
+        expect(inputOutputTab.className).not.to.contain(HIDE_CLASS);
+
+        expect(inputParameterGroup).to.exist;
+        expect(inputParameterGroup.className).not.to.contain(HIDE_CLASS);
+        expect(inputParameterAddButton).to.exist;
+
+        expect(outputParameterGroup).to.exist;
+        expect(outputParameterGroup.className).not.to.contain(HIDE_CLASS);
+        expect(outputParameterAddButton).to.exist;
       }
     ));
 
@@ -215,12 +246,21 @@ describe('customs - input output property tab', function() {
 
         // then
         const inputOutputTab = getInputOutputTab(container),
-              inputParameters = getInputParameterSelect(container),
-              outputParameters = getOutputParameterSelect(container);
+              inputParameterGroup = getInputParameterGroup(container),
+              outputParameterGroup = getOutputParameterGroup(container),
+              inputParameterAddButton = getAddInputParameterButton(container),
+              outputParameterAddButton = getAddOutputParameterButton(container);
 
         expect(inputOutputTab).to.exist;
-        expect(inputParameters).not.to.exist;
-        expect(outputParameters).to.exist;
+        expect(inputOutputTab.className).not.to.contain(HIDE_CLASS);
+
+        expect(inputParameterGroup).to.exist;
+        expect(inputParameterGroup.className).to.contain(HIDE_CLASS);
+        expect(inputParameterAddButton).not.to.exist;
+
+        expect(outputParameterGroup).to.exist;
+        expect(outputParameterGroup.className).not.to.contain(HIDE_CLASS);
+        expect(outputParameterAddButton).to.exist;
       }
     ));
 
@@ -236,12 +276,21 @@ describe('customs - input output property tab', function() {
 
         // then
         const inputOutputTab = getInputOutputTab(container),
-              inputParameters = getInputParameterSelect(container),
-              outputParameters = getOutputParameterSelect(container);
+              inputParameterGroup = getInputParameterGroup(container),
+              outputParameterGroup = getOutputParameterGroup(container),
+              inputParameterAddButton = getAddInputParameterButton(container),
+              outputParameterAddButton = getAddOutputParameterButton(container);
 
         expect(inputOutputTab).to.exist;
-        expect(inputParameters).not.to.exist;
-        expect(outputParameters).to.exist;
+        expect(inputOutputTab.className).not.to.contain(HIDE_CLASS);
+
+        expect(inputParameterGroup).to.exist;
+        expect(inputParameterGroup.className).to.contain(HIDE_CLASS);
+        expect(inputParameterAddButton).not.to.exist;
+
+        expect(outputParameterGroup).to.exist;
+        expect(outputParameterGroup.className).not.to.contain(HIDE_CLASS);
+        expect(outputParameterAddButton).to.exist;
       }
     ));
 
@@ -257,20 +306,29 @@ describe('customs - input output property tab', function() {
 
         // then
         const inputOutputTab = getInputOutputTab(container),
-              inputParameters = getInputParameterSelect(container),
-              outputParameters = getOutputParameterSelect(container);
+              inputParameterGroup = getInputParameterGroup(container),
+              outputParameterGroup = getOutputParameterGroup(container),
+              inputParameterAddButton = getAddInputParameterButton(container),
+              outputParameterAddButton = getAddOutputParameterButton(container);
 
         expect(inputOutputTab).to.exist;
         expect(inputOutputTab.className).to.contain(HIDE_CLASS);
-        expect(inputParameters).not.to.exist;
-        expect(outputParameters).not.to.exist;
+
+        expect(inputParameterGroup).to.exist;
+        expect(inputParameterGroup.className).to.contain(HIDE_CLASS);
+        expect(inputParameterAddButton).not.to.exist;
+
+        expect(outputParameterGroup).to.exist;
+        expect(outputParameterGroup.className).to.contain(HIDE_CLASS);
+        expect(outputParameterAddButton).not.to.exist;
       }
     ));
+
 
   });
 
 
-  describe('property controls', function() {
+  describe('toggle behavior', function() {
 
     let container;
 
@@ -279,54 +337,114 @@ describe('customs - input output property tab', function() {
       // given
       container = propertiesPanel._container;
       const shape = elementRegistry.get('ServiceTask_1');
-      selection.select(shape);
 
+      selection.select(shape);
     }));
 
     describe('of input parameters', function() {
 
-      it('should fetch source property', function() {
-
-        // when
-        selectInputParameter(0, container);
+      it('should initially be collapsed for all', function() {
 
         // then
-        expect(getParameterSourceInput(container).value).to.equal('inputSourceValue1');
+        getInputParameterCollapsibles(container).forEach(function(collapsible) {
+          expect(collapsible.className).to.contain(COLLAPSE_CLASS);
+        });
       });
 
 
-      it('should fetch target property', function() {
+      it('should uncollapse once clicked on', function() {
+
+        // given
+        const idx = 0;
 
         // when
-        selectInputParameter(0, container);
+        clickInputCollapsibleTitle(container, idx);
 
         // then
-        expect(getParameterTargetInput(container).value).to.equal('inputTargetValue1');
+        getInputParameterCollapsibles(container).forEach(function(collapsible, i) {
+          if (i === idx) {
+            expect(collapsible.className).not.to.contain(COLLAPSE_CLASS);
+          } else {
+            expect(collapsible.className).to.contain(COLLAPSE_CLASS);
+          }
+        });
       });
+
+
+      it('should collapse others once clicked on', function() {
+
+        // given
+        const idxFirstClick = 0,
+              idxSecondClick = 1;
+
+        // when
+        clickInputCollapsibleTitle(container, idxFirstClick);
+        clickInputCollapsibleTitle(container, idxSecondClick);
+
+        // then
+        getInputParameterCollapsibles(container).forEach(function(collapsible, i) {
+          if (i === idxSecondClick) {
+            expect(collapsible.className).not.to.contain(COLLAPSE_CLASS);
+          } else {
+            expect(collapsible.className).to.contain(COLLAPSE_CLASS);
+          }
+        });
+      });
+
 
     });
 
 
     describe('of output parameters', function() {
 
-      it('should fetch source property', function() {
-
-        // when
-        selectOutputParameter(0, container);
+      it('should initially be collapsed for all', function() {
 
         // then
-        expect(getParameterSourceInput(container).value).to.equal('outputSourceValue1');
+        getOutputParameterCollapsibles(container).forEach(function(collapsible) {
+          expect(collapsible.className).to.contain(COLLAPSE_CLASS);
+        });
       });
 
 
-      it('should fetch target property', function() {
+      it('should uncollapse once clicked on', function() {
+
+        // given
+        const idx = 0;
 
         // when
-        selectOutputParameter(0, container);
+        clickOutputCollapsibleTitle(container, idx);
 
         // then
-        expect(getParameterTargetInput(container).value).to.equal('outputTargetValue1');
+        getOutputParameterCollapsibles(container).forEach(function(collapsible, i) {
+          if (i === idx) {
+            expect(collapsible.className).not.to.contain(COLLAPSE_CLASS);
+          } else {
+            expect(collapsible.className).to.contain(COLLAPSE_CLASS);
+          }
+        });
       });
+
+
+      it('should collapse others once clicked on', function() {
+
+        // given
+        const idxFirstClick = 0,
+              idxSecondClick = 1;
+
+        // when
+        clickOutputCollapsibleTitle(container, idxFirstClick);
+        clickOutputCollapsibleTitle(container, idxSecondClick);
+
+        // then
+        getOutputParameterCollapsibles(container).forEach(function(collapsible, i) {
+          if (i === idxSecondClick) {
+            expect(collapsible.className).not.to.contain(COLLAPSE_CLASS);
+          } else {
+            expect(collapsible.className).to.contain(COLLAPSE_CLASS);
+          }
+        });
+      });
+
 
     });
 
@@ -335,14 +453,14 @@ describe('customs - input output property tab', function() {
 
   describe('add input parameter', function() {
 
-    let bo;
+    let bo, container;
 
     beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
 
       // given
-      const container = propertiesPanel._container;
-
+      container = propertiesPanel._container;
       const shape = elementRegistry.get('ServiceTask_empty');
+
       selection.select(shape);
 
       bo = getBusinessObject(shape);
@@ -351,7 +469,6 @@ describe('customs - input output property tab', function() {
       clickAddInputParameterButton(container);
 
     }));
-
 
     describe('on the business object', function() {
 
@@ -382,22 +499,16 @@ describe('customs - input output property tab', function() {
         expect(getInputParameters(bo).length).to.equal(1);
       }));
 
+
     });
 
 
     describe('in the DOM', function() {
 
-      let inputSelectBox;
-
-      beforeEach(inject(function(propertiesPanel) {
-        inputSelectBox = getInputParameterSelect(propertiesPanel._container);
-      }));
-
-
       it('should execute', function() {
 
         // then
-        expect(inputSelectBox.options.length).to.equal(1);
+        expect(getInputParameterCollapsibles(container).length).to.equal(1);
       });
 
 
@@ -407,7 +518,7 @@ describe('customs - input output property tab', function() {
         commandStack.undo();
 
         // then
-        expect(inputSelectBox.options.length).to.equal(0);
+        expect(getInputParameterCollapsibles(container).length).to.equal(0);
       }));
 
 
@@ -418,8 +529,9 @@ describe('customs - input output property tab', function() {
         commandStack.redo();
 
         // then
-        expect(inputSelectBox.options.length).to.equal(1);
+        expect(getInputParameterCollapsibles(container).length).to.equal(1);
       }));
+
 
     });
 
@@ -433,9 +545,9 @@ describe('customs - input output property tab', function() {
     beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
 
       // given
-      const container = propertiesPanel._container;
+      const container = propertiesPanel._container,
+            shape = elementRegistry.get('ServiceTask_empty');
 
-      const shape = elementRegistry.get('ServiceTask_empty');
       selection.select(shape);
 
       bo = getBusinessObject(shape);
@@ -444,7 +556,6 @@ describe('customs - input output property tab', function() {
       clickAddOutputParameterButton(container);
 
     }));
-
 
     describe('on the business object', function() {
 
@@ -475,22 +586,16 @@ describe('customs - input output property tab', function() {
         expect(getOutputParameters(bo).length).to.equal(1);
       }));
 
+
     });
 
 
     describe('in the DOM', function() {
 
-      let outputSelectBox;
-
-      beforeEach(inject(function(propertiesPanel) {
-        outputSelectBox = getOutputParameterSelect(propertiesPanel._container);
-      }));
-
-
       it('should execute', function() {
 
         // then
-        expect(outputSelectBox.options.length).to.equal(1);
+        expect(getOutputParameterCollapsibles(container).length).to.equal(1);
       });
 
 
@@ -500,7 +605,7 @@ describe('customs - input output property tab', function() {
         commandStack.undo();
 
         // then
-        expect(outputSelectBox.options.length).to.equal(0);
+        expect(getOutputParameterCollapsibles(container).length).to.equal(0);
       }));
 
 
@@ -511,95 +616,10 @@ describe('customs - input output property tab', function() {
         commandStack.redo();
 
         // then
-        expect(outputSelectBox.options.length).to.equal(1);
+        expect(getOutputParameterCollapsibles(container).length).to.equal(1);
       }));
 
-    });
 
-  });
-
-
-  describe('select input parameter', function() {
-
-    let container;
-
-    beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
-
-      // given
-      container = propertiesPanel._container;
-
-      const shape = elementRegistry.get('ServiceTask_1');
-      selection.select(shape);
-    }));
-
-    it('should nothing be selected', function() {
-
-      // then
-      expect(getInputParameterSelect(container).selectedIndex).to.equal(-1);
-    });
-
-
-    it('should select input parameter', function() {
-
-      // when
-      selectInputParameter(2, container);
-
-      // then
-      expect(getInputParameterSelect(container).selectedIndex).to.equal(2);
-      expect(getParameterSourceInput(container).value).to.equal('inputSourceValue3');
-    });
-
-
-    it('should deselect input parameter', function() {
-
-      // when
-      selectOutputParameter(2, container);
-
-      // then
-      expect(getInputParameterSelect(container).selectedIndex).to.equal(-1);
-    });
-
-  });
-
-
-  describe('select output parameter', function() {
-
-    let container;
-
-    beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
-
-      // given
-      container = propertiesPanel._container;
-
-      const shape = elementRegistry.get('ServiceTask_1');
-      selection.select(shape);
-    }));
-
-    it('should nothing be selected', function() {
-
-      // then
-      expect(getOutputParameterSelect(container).selectedIndex).to.equal(-1);
-    });
-
-
-    it('should select output parameter', function() {
-
-      // when
-      selectOutputParameter(2, container);
-
-      // then
-      expect(getOutputParameterSelect(container).selectedIndex).to.equal(2);
-      expect(getParameterSourceInput(container).value).to.equal('outputSourceValue3');
-    });
-
-
-    it('should deselect output parameter', function() {
-
-      // when
-      selectInputParameter(2, container);
-
-      // then
-      expect(getOutputParameterSelect(container).selectedIndex).to.equal(-1);
     });
 
   });
@@ -612,20 +632,17 @@ describe('customs - input output property tab', function() {
     beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
 
       // given
-      const container = propertiesPanel._container;
+      const container = propertiesPanel._container,
+            shape = elementRegistry.get('ServiceTask_1');
 
-      const shape = elementRegistry.get('ServiceTask_1');
       selection.select(shape);
 
       bo = getBusinessObject(shape);
 
-      selectInputParameter(3, container);
-
       // when
-      clickRemoveInputParameterButton(container);
+      clickRemoveInputParameterButton(container, 3);
 
     }));
-
 
     describe('on the business object', function() {
 
@@ -657,22 +674,16 @@ describe('customs - input output property tab', function() {
         expect(getInputParameters(bo).length).to.equal(3);
       }));
 
+
     });
 
 
     describe('in the DOM', function() {
 
-      let inputSelectBox;
-
-      beforeEach(inject(function(propertiesPanel) {
-        inputSelectBox = getInputParameterSelect(propertiesPanel._container);
-      }));
-
-
       it('should execute', function() {
 
         // then
-        expect(inputSelectBox.options.length).to.equal(3);
+        expect(getInputParameterCollapsibles(container).length).to.equal(3);
       });
 
 
@@ -682,7 +693,7 @@ describe('customs - input output property tab', function() {
         commandStack.undo();
 
         // then
-        expect(inputSelectBox.options.length).to.equal(4);
+        expect(getInputParameterCollapsibles(container).length).to.equal(4);
       }));
 
 
@@ -693,8 +704,9 @@ describe('customs - input output property tab', function() {
         commandStack.redo();
 
         // then
-        expect(inputSelectBox.options.length).to.equal(3);
+        expect(getInputParameterCollapsibles(container).length).to.equal(3);
       }));
+
 
     });
 
@@ -708,17 +720,15 @@ describe('customs - input output property tab', function() {
     beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
 
       // given
-      const container = propertiesPanel._container;
+      const container = propertiesPanel._container,
+            shape = elementRegistry.get('ServiceTask_1');
 
-      const shape = elementRegistry.get('ServiceTask_1');
       selection.select(shape);
 
       bo = getBusinessObject(shape);
 
-      selectOutputParameter(3, container);
-
       // when
-      clickRemoveOutputParameterButton(container);
+      clickRemoveOutputParameterButton(container, 3);
 
     }));
 
@@ -753,22 +763,16 @@ describe('customs - input output property tab', function() {
         expect(getOutputParameters(bo).length).to.equal(3);
       }));
 
+
     });
 
 
     describe('in the DOM', function() {
 
-      let outputSelectBox;
-
-      beforeEach(inject(function(propertiesPanel) {
-        outputSelectBox = getOutputParameterSelect(propertiesPanel._container);
-      }));
-
-
       it('should execute', function() {
 
         // then
-        expect(outputSelectBox.options.length).to.equal(3);
+        expect(getOutputParameterCollapsibles(container).length).to.equal(3);
       });
 
 
@@ -778,7 +782,7 @@ describe('customs - input output property tab', function() {
         commandStack.undo();
 
         // then
-        expect(outputSelectBox.options.length).to.equal(4);
+        expect(getOutputParameterCollapsibles(container).length).to.equal(4);
       }));
 
 
@@ -789,98 +793,34 @@ describe('customs - input output property tab', function() {
         commandStack.redo();
 
         // then
-        expect(outputSelectBox.options.length).to.equal(3);
+        expect(getOutputParameterCollapsibles(container).length).to.equal(3);
       }));
+
 
     });
 
   });
 
+  describe('delete IO mapping', function() {
 
-  describe('change parameter source', function() {
-
-    let parameterSourceInput,
-        parameter;
+    let bo;
 
     beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
 
       // given
-      const container = propertiesPanel._container;
-
-      const shape = elementRegistry.get('ServiceTask_1');
+      const container = propertiesPanel._container,
+            shape = elementRegistry.get('CallActivity_1');
       selection.select(shape);
 
-      // select first parameter
-      selectInputParameter(0, container);
+      bo = getBusinessObject(shape);
 
-      parameterSourceInput = getParameterSourceInput(container);
-      parameter = getInputParameters(getBusinessObject(shape))[0];
+      // assume
+      expect(getIOMapping(bo)).to.exist;
 
       // when
-      triggerValue(parameterSourceInput, 'foo', 'change');
+      clickRemoveInputParameterButton(container, 0);
+      clickRemoveOutputParameterButton(container, 0);
     }));
-
-
-    describe('in the DOM', function() {
-
-      it('should execute', function() {
-
-        // then
-        expect(parameterSourceInput.value).to.equal('foo');
-      });
-
-
-      it('should undo', inject(function(commandStack) {
-
-        // when
-        commandStack.undo();
-
-        // then
-        expect(parameterSourceInput.value).to.equal('inputSourceValue1');
-      }));
-
-
-      it('should redo', inject(function(commandStack) {
-
-        // when
-        commandStack.undo();
-        commandStack.redo();
-
-        // then
-        expect(parameterSourceInput.value).to.equal('foo');
-      }));
-
-
-      it('should not allow empty source value', function() {
-
-        // when
-        triggerValue(parameterSourceInput, '', 'change');
-
-        // then
-        expect(isInvalidInput(parameterSourceInput)).to.be.true;
-      });
-
-
-      it('should allow with spaces', function() {
-
-        // when
-        triggerValue(parameterSourceInput, 'foo bar', 'change');
-
-        // then
-        expect(isInvalidInput(parameterSourceInput)).to.be.false;
-      });
-
-
-      it('should allow FEEL expression', function() {
-
-        // when
-        triggerValue(parameterSourceInput, '=if (variable = null) then 1 else variable + 1', 'change');
-
-        // then
-        expect(isInvalidInput(parameterSourceInput)).to.be.false;
-      });
-
-    });
 
 
     describe('on the business object', function() {
@@ -888,7 +828,7 @@ describe('customs - input output property tab', function() {
       it('should execute', function() {
 
         // then
-        expect(parameter.source).to.equal('foo');
+        expect(getIOMapping(bo)).not.to.exist;
       });
 
 
@@ -898,7 +838,7 @@ describe('customs - input output property tab', function() {
         commandStack.undo();
 
         // then
-        expect(parameter.source).to.equal('inputSourceValue1');
+        expect(getIOMapping(bo)).to.exist;
       }));
 
 
@@ -909,8 +849,280 @@ describe('customs - input output property tab', function() {
         commandStack.redo();
 
         // then
-        expect(parameter.source).to.equal('foo');
+        expect(getIOMapping(bo)).not.to.exist;
       }));
+
+
+    });
+
+
+  });
+
+  describe('change parameter source', function() {
+
+    describe('input', function() {
+
+      let parameterSourceInput,
+          parameter;
+
+      beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
+
+        // given
+        const idx = 0;
+
+        const container = propertiesPanel._container;
+
+        const shape = elementRegistry.get('ServiceTask_1');
+        selection.select(shape);
+
+        // toggle
+        clickInputCollapsibleTitle(container, idx);
+
+        parameterSourceInput = getInputSourceParameter(idx, container);
+        parameter = getInputParameters(getBusinessObject(shape))[idx];
+
+        // when
+        triggerValue(parameterSourceInput, '= foo', 'change');
+      }));
+
+
+      describe('in the DOM', function() {
+
+        it('should execute', function() {
+
+          // then
+          expect(parameterSourceInput.value).to.equal('= foo');
+        });
+
+
+        it('should undo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+
+          // then
+          expect(parameterSourceInput.value).to.equal('= inputSourceValue1');
+        }));
+
+
+        it('should redo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+          commandStack.redo();
+
+          // then
+          expect(parameterSourceInput.value).to.equal('= foo');
+        }));
+
+
+        it('should not allow empty source value', function() {
+
+          // when
+          triggerValue(parameterSourceInput, '', 'change');
+
+          // then
+          expect(isInvalidInput(parameterSourceInput)).to.be.true;
+        });
+
+
+        it('should not allow values without starting "="', function() {
+
+          // when
+          triggerValue(parameterSourceInput, 'invalid value', 'change');
+
+          // then
+          expect(isInvalidInput(parameterSourceInput)).to.be.true;
+        });
+
+
+        it('should allow with spaces', function() {
+
+          // when
+          triggerValue(parameterSourceInput, '= foo bar', 'change');
+
+          // then
+          expect(isInvalidInput(parameterSourceInput)).to.be.false;
+        });
+
+
+        it('should allow FEEL expression', function() {
+
+          // when
+          triggerValue(parameterSourceInput, '=if (variable = null) then 1 else variable + 1', 'change');
+
+          // then
+          expect(isInvalidInput(parameterSourceInput)).to.be.false;
+        });
+
+
+      });
+
+
+      describe('on the business object', function() {
+
+        it('should execute', function() {
+
+          // then
+          expect(parameter.source).to.equal('= foo');
+        });
+
+
+        it('should undo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+
+          // then
+          expect(parameter.source).to.equal('= inputSourceValue1');
+        }));
+
+
+        it('should redo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+          commandStack.redo();
+
+          // then
+          expect(parameter.source).to.equal('= foo');
+        }));
+
+
+      });
+
+    });
+
+
+    describe('output', function() {
+
+      let parameterSourceOutput,
+          parameter;
+
+      beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
+
+        // given
+        const idx = 0,
+              container = propertiesPanel._container,
+              shape = elementRegistry.get('ServiceTask_1');
+
+        selection.select(shape);
+
+        // toggle
+        clickOutputCollapsibleTitle(container, idx);
+
+        parameterSourceOutput = getOutputSourceParameter(idx, container);
+        parameter = getOutputParameters(getBusinessObject(shape))[idx];
+
+        // when
+        triggerValue(parameterSourceOutput, '= foo', 'change');
+      }));
+
+
+      describe('in the DOM', function() {
+
+        it('should execute', function() {
+
+          // then
+          expect(parameterSourceOutput.value).to.equal('= foo');
+        });
+
+
+        it('should undo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+
+          // then
+          expect(parameterSourceOutput.value).to.equal('= outputSourceValue1');
+        }));
+
+
+        it('should redo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+          commandStack.redo();
+
+          // then
+          expect(parameterSourceOutput.value).to.equal('= foo');
+        }));
+
+
+        it('should not allow empty source value', function() {
+
+          // when
+          triggerValue(parameterSourceOutput, '', 'change');
+
+          // then
+          expect(isInvalidInput(parameterSourceOutput)).to.be.true;
+        });
+
+
+        it('should not allow values without starting "="', function() {
+
+          // when
+          triggerValue(parameterSourceOutput, 'invalid value', 'change');
+
+          // then
+          expect(isInvalidInput(parameterSourceOutput)).to.be.true;
+        });
+
+
+        it('should allow with spaces', function() {
+
+          // when
+          triggerValue(parameterSourceOutput, '= foo bar', 'change');
+
+          // then
+          expect(isInvalidInput(parameterSourceOutput)).to.be.false;
+        });
+
+
+        it('should allow FEEL expression', function() {
+
+          // when
+          triggerValue(parameterSourceOutput, '=if (variable = null) then 1 else variable + 1', 'change');
+
+          // then
+          expect(isInvalidInput(parameterSourceOutput)).to.be.false;
+        });
+
+
+      });
+
+
+      describe('on the business object', function() {
+
+        it('should execute', function() {
+
+          // then
+          expect(parameter.source).to.equal('= foo');
+        });
+
+
+        it('should undo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+
+          // then
+          expect(parameter.source).to.equal('= outputSourceValue1');
+        }));
+
+
+        it('should redo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+          commandStack.redo();
+
+          // then
+          expect(parameter.source).to.equal('= foo');
+        }));
+
+
+      });
 
     });
 
@@ -919,120 +1131,246 @@ describe('customs - input output property tab', function() {
 
   describe('change parameter target', function() {
 
-    let parameterTargetInput,
-        parameter;
+    describe('input', function() {
 
-    beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
+      let parameterTargetInput,
+          parameter;
 
-      // given
-      const container = propertiesPanel._container;
+      beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
 
-      const shape = elementRegistry.get('ServiceTask_1');
-      selection.select(shape);
+        // given
+        const idx = 0,
+              container = propertiesPanel._container,
+              shape = elementRegistry.get('ServiceTask_1');
 
-      // select first parameter
-      selectInputParameter(0, container);
+        selection.select(shape);
 
-      parameterTargetInput = getParameterTargetInput(container);
-      parameter = getInputParameters(getBusinessObject(shape))[0];
+        // toggle
+        clickInputCollapsibleTitle(container, idx);
 
-      // when
-      triggerValue(parameterTargetInput, 'foo', 'change');
-    }));
-
-
-    describe('in the DOM', function() {
-
-      it('should execute', function() {
-
-        // then
-        expect(parameterTargetInput.value).to.equal('foo');
-      });
-
-
-      it('should undo', inject(function(commandStack) {
+        parameterTargetInput = getInputTargetParameter(idx, container);
+        parameter = getInputParameters(getBusinessObject(shape))[idx];
 
         // when
-        commandStack.undo();
-
-        // then
-        expect(parameterTargetInput.value).to.equal('inputTargetValue1');
+        triggerValue(parameterTargetInput, 'foo', 'change');
       }));
 
 
-      it('should redo', inject(function(commandStack) {
+      describe('in the DOM', function() {
 
-        // when
-        commandStack.undo();
-        commandStack.redo();
+        it('should execute', function() {
 
-        // then
-        expect(parameterTargetInput.value).to.equal('foo');
-      }));
+          // then
+          expect(parameterTargetInput.value).to.equal('foo');
+        });
 
 
-      it('should validate', function() {
+        it('should undo', inject(function(commandStack) {
 
-        // when
-        triggerValue(parameterTargetInput, '', 'change');
+          // when
+          commandStack.undo();
 
-        // then
-        expect(isInvalidInput(parameterTargetInput)).to.be.true;
+          // then
+          expect(parameterTargetInput.value).to.equal('inputTargetValue1');
+        }));
+
+
+        it('should redo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+          commandStack.redo();
+
+          // then
+          expect(parameterTargetInput.value).to.equal('foo');
+        }));
+
+
+        it('should validate', function() {
+
+          // when
+          triggerValue(parameterTargetInput, '', 'change');
+
+          // then
+          expect(isInvalidInput(parameterTargetInput)).to.be.true;
+        });
+
+
+        it('should validate with spaces', function() {
+
+          // when
+          triggerValue(parameterTargetInput, 'foo bar', 'change');
+
+          // then
+          expect(isInvalidInput(parameterTargetInput)).to.be.true;
+        });
+
+
       });
 
 
-      it('should validate with spaces', function() {
+      describe('on the business object', function() {
 
-        // when
-        triggerValue(parameterTargetInput, 'foo bar', 'change');
+        it('should execute', function() {
 
-        // then
-        expect(isInvalidInput(parameterTargetInput)).to.be.true;
+          // then
+          expect(parameter.target).to.equal('foo');
+        });
+
+
+        it('should undo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+
+          // then
+          expect(parameter.target).to.equal('inputTargetValue1');
+        }));
+
+
+        it('should redo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+          commandStack.redo();
+
+          // then
+          expect(parameter.target).to.equal('foo');
+        }));
+
+
       });
 
     });
 
 
-    describe('on the business object', function() {
+    describe('output', function() {
 
-      it('should execute', function() {
+      let parameterTargetOutput,
+          parameter;
 
-        // then
-        expect(parameter.target).to.equal('foo');
+      beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
+
+        // given
+        const idx = 0;
+        const container = propertiesPanel._container;
+
+        const shape = elementRegistry.get('ServiceTask_1');
+        selection.select(shape);
+
+        // toggle
+        clickOutputCollapsibleTitle(container, idx);
+
+        parameterTargetOutput = getOutputTargetParameter(idx, container);
+        parameter = getOutputParameters(getBusinessObject(shape))[idx];
+
+        // when
+        triggerValue(parameterTargetOutput, 'foo', 'change');
+      }));
+
+      describe('in the DOM', function() {
+
+        it('should execute', function() {
+
+          // then
+          expect(parameterTargetOutput.value).to.equal('foo');
+        });
+
+
+        it('should undo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+
+          // then
+          expect(parameterTargetOutput.value).to.equal('outputTargetValue1');
+        }));
+
+
+        it('should redo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+          commandStack.redo();
+
+          // then
+          expect(parameterTargetOutput.value).to.equal('foo');
+        }));
+
+
+        it('should validate', function() {
+
+          // when
+          triggerValue(parameterTargetOutput, '', 'change');
+
+          // then
+          expect(isInvalidInput(parameterTargetOutput)).to.be.true;
+        });
+
+
+        it('should validate with spaces', function() {
+
+          // when
+          triggerValue(parameterTargetOutput, 'foo bar', 'change');
+
+          // then
+          expect(isInvalidInput(parameterTargetOutput)).to.be.true;
+        });
+
+
       });
 
 
-      it('should undo', inject(function(commandStack) {
+      describe('on the business object', function() {
 
-        // when
-        commandStack.undo();
+        it('should execute', function() {
 
-        // then
-        expect(parameter.target).to.equal('inputTargetValue1');
-      }));
+          // then
+          expect(parameter.target).to.equal('foo');
+        });
 
 
-      it('should redo', inject(function(commandStack) {
+        it('should undo', inject(function(commandStack) {
 
-        // when
-        commandStack.undo();
-        commandStack.redo();
+          // when
+          commandStack.undo();
 
-        // then
-        expect(parameter.target).to.equal('foo');
-      }));
+          // then
+          expect(parameter.target).to.equal('outputTargetValue1');
+        }));
+
+
+        it('should redo', inject(function(commandStack) {
+
+          // when
+          commandStack.undo();
+          commandStack.redo();
+
+          // then
+          expect(parameter.target).to.equal('foo');
+        }));
+
+
+      });
 
     });
 
   });
-
 });
 
 
 // helper /////////
 
+const getParameters = (bo, prop) => {
+  return getElements(bo, 'zeebe:IoMapping', prop);
+};
+
 const getInputParameters = (bo) => {
   return getParameters(bo, 'inputParameters');
+};
+
+const getOutputParameters = (bo) => {
+  return getParameters(bo, 'outputParameters');
 };
 
 const getElements = (bo, type, prop) => {
@@ -1040,20 +1378,60 @@ const getElements = (bo, type, prop) => {
   return !prop ? elems : (elems[0] || {})[prop] || [];
 };
 
-const getOutputParameters = (bo) => {
-  return getParameters(bo, 'outputParameters');
+const getIOMapping = (bo) => {
+  return extensionElementsHelper.getExtensionElements(bo, 'zeebe:IoMapping');
 };
 
-const getParameters = (bo, prop) => {
-  return getElements(bo, 'zeebe:IoMapping', prop);
+const getInputOutputTab = (container) => {
+  return domQuery('div[data-tab="input-output"]', container);
 };
 
-const getInputParameterSelect = (container) => {
-  return getSelect('inputs', container);
+const getParameterGroup = (type, container) => {
+  return domQuery(`div[data-group="${type}"]`, getInputOutputTab(container));
+};
+
+const getInputParameterGroup = (container) => {
+  return getParameterGroup('input', container);
+};
+
+const getOutputParameterGroup = (container) => {
+  return getParameterGroup('output', container);
+};
+
+const getParameterCollapsibles = (type, container) => {
+  return domQueryAll(`div[data-entry^="${type}-parameter-"].bpp-collapsible`, getInputOutputTab(container));
+};
+
+const getInputParameterCollapsibles = (container) => {
+  return getParameterCollapsibles('input', container);
+};
+
+const getOutputParameterCollapsibles = (container) => {
+  return getParameterCollapsibles('output', container);
+};
+
+const getParameterCollapsibleTitles = (container) => {
+  return domQueryAll('label.bpp-collapsible__title', container);
+};
+
+const getInputParameterCollapsibleTitles = (container) => {
+  return getParameterCollapsibleTitles(getInputParameterGroup(container));
+};
+
+const getOutputParameterCollapsibleTitles = (container) => {
+  return getParameterCollapsibleTitles(getOutputParameterGroup(container));
+};
+
+const getAddButton = (container) => {
+  return domQuery('button[data-action="createElement"].bpp-input-output__add', container);
 };
 
 const getAddInputParameterButton = (container) => {
-  return getAddButton('inputs', container);
+  return getAddButton(getInputParameterGroup(container));
+};
+
+const getAddOutputParameterButton = (container) => {
+  return getAddButton(getOutputParameterGroup(container));
 };
 
 const clickAddInputParameterButton = (container) => {
@@ -1061,71 +1439,71 @@ const clickAddInputParameterButton = (container) => {
   triggerEvent(addButton, 'click');
 };
 
-const getRemoveInputParameterButton = (container) => {
-  return getRemoveButton('inputs', container);
-};
-
-const clickRemoveInputParameterButton = (container) => {
-  const removeButton = getRemoveInputParameterButton(container);
-  triggerEvent(removeButton, 'click');
-};
-
-const selectInputParameter = (idx, container) => {
-  const selectBox = getInputParameterSelect(container);
-  selectBox.options[idx].selected = 'selected';
-  triggerEvent(selectBox, 'change');
-};
-
-const getOutputParameterSelect = (container) => {
-  return getSelect('outputs', container);
-};
-
-const getAddOutputParameterButton = (container) => {
-  return getAddButton('outputs', container);
-};
-
 const clickAddOutputParameterButton = (container) => {
   const addButton = getAddOutputParameterButton(container);
   triggerEvent(addButton, 'click');
 };
 
-const getRemoveOutputParameterButton = (container) => {
-  return getRemoveButton('outputs', container);
+const getRemoveButtons = (container) => {
+  return domQueryAll('button[data-action="onRemove"].bpp-collapsible__remove', container);
 };
 
-const clickRemoveOutputParameterButton = (container) => {
-  const removeButton = getRemoveOutputParameterButton(container);
-  triggerEvent(removeButton, 'click');
+const getRemoveInputParameterButtons = (container) => {
+  return getRemoveButtons(getInputParameterGroup(container));
 };
 
-const selectOutputParameter = (idx, container) => {
-  const selectBox = getOutputParameterSelect(container);
-  selectBox.options[idx].selected = 'selected';
-  triggerEvent(selectBox, 'change');
+const getRemoveOutputParameterButtons = (container) => {
+  return getRemoveButtons(getOutputParameterGroup(container));
 };
 
-const getInputOutputTab = (container) => {
-  return domQuery('div[data-tab="input-output"]', container);
+const clickRemoveInputParameterButton = (container, idx) => {
+  const removeButtons = getRemoveInputParameterButtons(container);
+  triggerEvent(removeButtons[idx], 'click');
 };
 
-const getParameterSourceInput = (container) => {
-  return domQuery('input[id="camunda-parameterSource"]', getInputOutputTab(container));
+const clickRemoveOutputParameterButton = (container, idx) => {
+  const removeButtons = getRemoveOutputParameterButtons(container);
+  triggerEvent(removeButtons[idx], 'click');
 };
 
-const getParameterTargetInput = (container) => {
-  return domQuery('input[id="camunda-parameterTarget"]', getInputOutputTab(container));
+const clickCollapsibleTitle = (collapsibles, idx) => {
+  triggerEvent(collapsibles[idx], 'click');
 };
 
-const getSelect = (suffix, container) => {
-  return domQuery('select[id="cam-extensionElements-' + suffix + '"]', getInputOutputTab(container));
+const clickInputCollapsibleTitle = (container, idx) => {
+  clickCollapsibleTitle(getInputParameterCollapsibleTitles(container), idx);
 };
 
-const getAddButton = (suffix, container) => {
-  return domQuery('button[id="cam-extensionElements-create-' + suffix + '"]', getInputOutputTab(container));
+const clickOutputCollapsibleTitle = (container, idx) => {
+  clickCollapsibleTitle(getOutputParameterCollapsibleTitles(container), idx);
 };
 
-const getRemoveButton = (suffix, container) => {
-  return domQuery('button[id="cam-extensionElements-remove-' + suffix + '"]', getInputOutputTab(container));
+const getParameter = (idx, paramType, container) => {
+  return domQueryAll(`input[name="${paramType}"]`, container)[idx];
+};
+
+const getInputParameter = (idx, paramType, container) => {
+  return getParameter(idx, paramType, getInputParameterGroup(container));
+};
+
+const getOutputParameter = (idx, paramType, container) => {
+  return getParameter(idx, paramType, getOutputParameterGroup(container));
+};
+
+const getInputSourceParameter = (idx, container) => {
+  return getInputParameter(idx, 'source', container);
+};
+
+const getOutputSourceParameter = (idx, container) => {
+  return getOutputParameter(idx, 'source', container);
+};
+
+const getInputTargetParameter = (idx, container) => {
+  return getInputParameter(idx, 'target', container);
+};
+
+const getOutputTargetParameter = (idx, container) => {
+  return getOutputParameter(idx, 'target', container);
 };
 
 const isInvalidInput = (node) => {

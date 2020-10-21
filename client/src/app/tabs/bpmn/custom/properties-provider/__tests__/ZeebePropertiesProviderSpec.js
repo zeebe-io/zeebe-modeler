@@ -13,10 +13,6 @@ import {
   inject
 } from 'bpmn-js/test/helper';
 
-import {
-  triggerEvent
-} from './helper';
-
 import TestContainer from 'mocha-test-container-support';
 
 import propertiesPanelModule from 'bpmn-js-properties-panel';
@@ -126,31 +122,81 @@ describe('zeebe-properties-provider', function() {
 
   describe('input output tab', function() {
 
-    it('should show input output group ', inject(function(selection, elementRegistry) {
+    describe('input and output group', function() {
 
-      // given
-      const shape = elementRegistry.get('ServiceTask_1');
+      it('should show for serviceTasks', inject(function(selection, elementRegistry) {
 
-      // when
-      selection.select(shape);
+        // given
+        const shape = elementRegistry.get('ServiceTask_1');
 
-      // then
-      shouldHaveGroup(container, 'input-output', 'input-output');
-    }));
+        // when
+        selection.select(shape);
+
+        // then
+        shouldHaveGroup(container, 'input', 'input');
+        shouldHaveGroup(container, 'output', 'output');
+      }));
 
 
-    it('should show parameters group', inject(function(selection, elementRegistry) {
+      it('should show for callActivity', inject(function(selection, elementRegistry) {
 
-      // given
-      const shape = elementRegistry.get('ServiceTask_1');
+        // given
+        const shape = elementRegistry.get('CallActivity_1');
 
-      // when
-      selection.select(shape);
-      selectInputParameter(0, container);
+        // when
+        selection.select(shape);
 
-      // then
-      shouldHaveGroup(container, 'input-output', 'input-output-parameter');
-    }));
+        // then
+        shouldHaveGroup(container, 'input', 'input');
+        shouldHaveGroup(container, 'output', 'output');
+      }));
+
+
+      it('should show for subProcess', inject(function(selection, elementRegistry) {
+
+        // given
+        const shape = elementRegistry.get('SubProcess_1');
+
+        // when
+        selection.select(shape);
+
+        // then
+        shouldHaveGroup(container, 'input', 'input');
+        shouldHaveGroup(container, 'output', 'output');
+      }));
+
+    });
+
+    describe('output group but not input group', function() {
+
+      it('should show for receiveTask', inject(function(selection, elementRegistry) {
+
+        // given
+        const shape = elementRegistry.get('ReceiveTask_1');
+
+        // when
+        selection.select(shape);
+
+        // then
+        shouldNotHaveGroup(container, 'input', 'input');
+        shouldHaveGroup(container, 'output', 'output');
+      }));
+
+
+      it('should show for events', inject(function(selection, elementRegistry) {
+
+        // given
+        const shape = elementRegistry.get('EndEvent_1');
+
+        // when
+        selection.select(shape);
+
+        // then
+        shouldNotHaveGroup(container, 'input', 'input');
+        shouldHaveGroup(container, 'output', 'output');
+      }));
+
+    });
 
   });
 
@@ -168,23 +214,13 @@ function getGroup(container, tabName, groupName) {
   return domQuery(`div[data-group="${groupName}"]`, tab);
 }
 
-const getSelect = (suffix, tab) => {
-  return domQuery('select[id="cam-extensionElements-' + suffix + '"]', tab);
-};
-
-const getInputParameterSelect = (container) => {
-  const tab = getTab(container, 'input-output');
-  return getSelect('inputs', tab);
-};
-
-const selectInputParameter = (idx, container) => {
-  const selectBox = getInputParameterSelect(container);
-  selectBox.options[idx].selected = 'selected';
-  triggerEvent(selectBox, 'change');
-};
-
 const shouldHaveGroup = (container, tabName, groupName) => {
   const group = getGroup(container, tabName, groupName);
   expect(group).to.exist;
   expect(domClasses(group).has('bpp-hidden')).to.be.false;
+};
+
+const shouldNotHaveGroup = (container, tabName, groupName) => {
+  const group = getGroup(container, tabName, groupName);
+  expect(domClasses(group).has('bpp-hidden')).to.be.true;
 };

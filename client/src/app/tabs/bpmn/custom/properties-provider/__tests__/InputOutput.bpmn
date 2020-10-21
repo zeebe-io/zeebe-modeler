@@ -1,24 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_1md541i" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.8.0-dev">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_1md541i" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.11.0-dev.20201029">
   <bpmn:process id="Process_1" isExecutable="true">
     <bpmn:serviceTask id="ServiceTask_1">
       <bpmn:extensionElements>
         <zeebe:ioMapping>
-          <zeebe:input source="inputSourceValue1" target="inputTargetValue1" />
-          <zeebe:input source="inputSourceValue2" target="inputTargetValue2" />
-          <zeebe:input source="inputSourceValue3" target="inputTargetValue3" />
-          <zeebe:input source="inputSourceValue4" target="inputTargetValue4" />
-          <zeebe:output source="outputSourceValue1" target="outputTargetValue1" />
-          <zeebe:output source="outputSourceValue2" target="outputTargetValue2" />
-          <zeebe:output source="outputSourceValue3" target="outputTargetValue3" />
-          <zeebe:output source="outputSourceValue4" target="outputTargetValue4" />
+          <zeebe:input source="= inputSourceValue1" target="inputTargetValue1" />
+          <zeebe:input source="= inputSourceValue2" target="inputTargetValue2" />
+          <zeebe:input source="= inputSourceValue3" target="inputTargetValue3" />
+          <zeebe:input source="= inputSourceValue4" target="inputTargetValue4" />
+          <zeebe:output source="= outputSourceValue1" target="outputTargetValue1" />
+          <zeebe:output source="= outputSourceValue2" target="outputTargetValue2" />
+          <zeebe:output source="= outputSourceValue3" target="outputTargetValue3" />
+          <zeebe:output source="= outputSourceValue4" target="outputTargetValue4" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="ServiceTask_empty" />
-    <bpmn:callActivity id="CallActivity_1" />
+    <bpmn:callActivity id="CallActivity_1">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="callActivityRef" />
+        <zeebe:ioMapping>
+          <zeebe:input source="= inputSource1" target="inputTarget1" />
+          <zeebe:output source="= outputSource1" target="outputTarget1" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+    </bpmn:callActivity>
     <bpmn:receiveTask id="ReceiveTask_1" />
-    <bpmn:subProcess id="SubProcess_1" />
+    <bpmn:subProcess id="SubProcess_1">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:input source="= inputSource1" target="inputTarget1" />
+          <zeebe:output source="= outputSource1" target="outputTarget1" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+    </bpmn:subProcess>
     <bpmn:intermediateCatchEvent id="MessageEvent_1">
       <bpmn:messageEventDefinition />
     </bpmn:intermediateCatchEvent>

@@ -18,15 +18,18 @@ import {
 
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
-const getElements = (bo, type, prop) => {
+import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
+
+
+function getElements(bo, type, prop) {
   const elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
   return !prop ? elems : (elems[0] || {})[prop] || [];
-};
+}
 
-const getParameters = (element, prop) => {
+function getParameters(element, prop) {
   const inputOutput = getInputOutput(element);
   return (inputOutput && inputOutput.get(prop)) || [];
-};
+}
 
 /**
    * Get a inputOutput from the business object
@@ -132,4 +135,27 @@ export function areOutputParametersSupported(element) {
   ]);
 }
 
+export function createElement(type, parent, factory, properties) {
+  return elementHelper.createElement(type, properties, parent, factory);
+}
 
+export function createIOMapping(parent, bpmnFactory, properties) {
+  return createElement('zeebe:IoMapping', parent, bpmnFactory, properties);
+}
+
+/**
+ * Get getter function for IOMapping parameters according to provided property name
+ *
+ * @param {string} property
+ *
+ * @returns {Function} Getter function for the IOMapping parameters according to provided property name
+ */
+export function determineParamGetFunc(property) {
+  if (property == 'inputParameters') {
+    return getInputParameters;
+  }
+
+  if (property == 'outputParameters') {
+    return getOutputParameters;
+  }
+}
