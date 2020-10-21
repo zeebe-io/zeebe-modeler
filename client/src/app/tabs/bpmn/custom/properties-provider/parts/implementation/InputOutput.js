@@ -16,184 +16,244 @@ import elementHelper from 'bpmn-js-properties-panel/lib/helper/ElementHelper';
 
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
-import {
-  areOutputParametersSupported,
-  getInputOutput,
-  isInputOutputSupported,
-  getInputParameter,
-  getInputParameters,
-  getOutputParameter,
-  getOutputParameters,
-  areInputParametersSupported
-} from '../../helper/InputOutputHelper';
-
 import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
-import extensionElementsEntry from 'bpmn-js-properties-panel/lib/provider/camunda/parts/implementation/ExtensionElements';
+import { query as domQuery } from 'min-dom';
 
-function createElement(type, parent, factory, properties) {
-  return elementHelper.createElement(type, properties, parent, factory);
-}
+import entryFieldDescription from 'bpmn-js-properties-panel/lib/factory/EntryFieldDescription';
 
-function createInputOutput(parent, bpmnFactory, properties) {
-  return createElement('zeebe:IoMapping', parent, bpmnFactory, properties);
-}
+import {
+  areOutputParametersSupported,
+  areInputParametersSupported,
+  createIOMapping,
+  createElement as createParameter,
+  determineParamGetFunc,
+  getInputOutput,
+  isInputOutputSupported
+} from '../../helper/InputOutputHelper';
 
-function createParameter(type, parent, bpmnFactory, properties) {
-  return createElement(type, parent, bpmnFactory, properties);
-}
+import InputOutputParameter from './InputOutputParameter';
 
-function ensureInputOutputSupported(element) {
-  return isInputOutputSupported(element);
-}
 
-function ensureOutParameterSupported(element) {
-  return areOutputParametersSupported(element);
-}
+/**
+ * Create an input or output mapping entry (containing multiple sub-entries).
+ * @param {Object} element - diagram-js element.
+ * @param {Object} bpmnFactory - bpmn-js bpmn-factory.
+ * @param {Function} translate - translate function.
+ * @param {Object} options - Options.
+ * @param {string} [options.type] - moddle (zeebe-bpmn-moddle) type name for the IOMapping.
+ * @param {string} [options.prop] - moddle (zeebe-bpmn-moddle) property name for the IOMapping.
+ * @param {string} [options.prefix] - prefix to be used when constructing id attribute of HTMLElements.
+ *
+ * @returns {Object} An Object containing multiple Objects in its `entries` attribute,
+ * each representing a properties-panel entry. First entry will always be a heading followed
+ * by n input / output parameter entries.
+ */
+export default function(element, bpmnFactory, translate, options = {}) {
+  const result = {},
+        entries = result.entries = [];
 
-function ensureInputParameterSupported(element) {
-  return areInputParametersSupported(element);
-}
-
-export default function(element, bpmnFactory, options = {}) {
-  const idPrefix = options.idPrefix || '';
-
-  let inputEntry, outputEntry;
-
-  const getSelected = (element, node) => {
-    let selection = (inputEntry && inputEntry.getSelected(element, node)) || { idx: -1 };
-
-    let parameter = getInputParameter(element, selection.idx);
-    if (!parameter && outputEntry) {
-      selection = outputEntry.getSelected(element, node);
-      parameter = getOutputParameter(element, selection.idx);
-    }
-    return parameter;
-  };
-
-  const result = {
-    getSelectedParameter: getSelected
-  };
-
-  const entries = result.entries = [];
-
-  if (!ensureInputOutputSupported(element)) {
+  // Return if given moddle property is not supported for given element
+  if (!options.prop ||
+      !isInputOutputSupported(element) ||
+      (options.prop === 'inputParameters' && !areInputParametersSupported(element)) ||
+      (options.prop === 'outputParameters' && !areOutputParametersSupported(element))) {
     return result;
   }
 
-  const newElement = (type, prop, factory) => {
+  // Heading ///////////////////////////////////////////////////////////////
+  const entry = getParametersHeading(element, bpmnFactory, {
+    type: options.type,
+    prop: options.prop,
+    prefix: options.prefix
+  });
+  entries.push(entry);
 
-    return (element, extensionElements, value) => {
-      const commands = [];
+  // Parameters ///////////////////////////////////////////////////////////////
+  result.entries = result.entries.concat(getIOMappingEntries(element, bpmnFactory, translate, {
+    prefix: options.prefix,
+    prop: options.prop
+  }));
 
-      let inputOutput = getInputOutput(element);
-      if (!inputOutput) {
-        const parent = extensionElements;
-        inputOutput = createInputOutput(parent, bpmnFactory, {
-          inputParameters: [],
-          outputParameters: []
-        });
+  return result;
+}
 
-        commands.push(cmdHelper.addAndRemoveElementsFromList(
-          element,
-          extensionElements,
-          'values',
-          'extensionElements',
-          [ inputOutput ],
-          []
-        ));
+/**
+ * Create an input or output mapping heading entry.
+ * @param {Object} element - diagram-js element.
+ * @param {Object} bpmnFactory - bpmn-js bpmn-factory.
+ * @param {Object} options - Options.
+ * @param {string} [options.type] - moddle (zeebe-bpmn-moddle) type name for the IOMapping.
+ * @param {string} [options.prop] - moddle (zeebe-bpmn-moddle) property name for the IOMapping.
+ * @param {string} [options.prefix] - prefix to be used when constructing id attribute of HTMLElements.
+ *
+ * @returns {Object} An Object representing a properties-panel heading entry.
+ */
+function getParametersHeading(element, bpmnFactory, options) {
+  const entry = {
+    id: `${options.prefix}-heading`,
+    cssClasses: [ 'bpp-input-output' ],
+    html: `<div class="bpp-field-wrapper">
+      <button type="button" class="bpp-input-output__add add action-button" data-action="createElement">
+      </button><input name="hidden" type="hidden">
+      </div>`,
+    createElement: function(_, entryNode) {
+      const commands = createElement();
+
+      if (commands) {
+        scheduleCommands(commands, entryNode);
+        return true;
       }
+    },
 
-      const newElem = createParameter(type, inputOutput, bpmnFactory, { source: 'sourceValue', target: 'targetValue' });
-      commands.push(cmdHelper.addElementsTolist(element, inputOutput, prop, [ newElem ]));
+    set: function() {
+      const commands = entry._commands;
 
-      return commands;
-    };
+      if (commands) {
+        delete entry._commands;
+        return commands;
+      }
+    }
   };
 
-  const removeElement = (getter, prop, otherProp) => {
-    return (element, extensionElements, value, idx) => {
-      const inputOutput = getInputOutput(element);
-      const parameter = getter(element, idx);
+  return entry;
 
-      const commands = [];
-      commands.push(cmdHelper.removeElementsFromList(element, inputOutput, prop, null, [ parameter ]));
+  function createElement() {
+    const commands = [],
+          bo = getBusinessObject(element);
 
-      const firstLength = inputOutput.get(prop).length-1;
-      const secondLength = (inputOutput.get(otherProp) || []).length;
+    let extensionElements = bo.get('extensionElements');
 
-      if (!firstLength && !secondLength) {
+    if (!extensionElements) {
+      extensionElements = elementHelper.createElement('bpmn:ExtensionElements', { values: [] }, bo, bpmnFactory);
+      commands.push(cmdHelper.updateBusinessObject(element, bo, { extensionElements: extensionElements }));
+    }
 
+    // Get the IOMapping
+    let inputOutput = getInputOutput(element);
+
+    if (!inputOutput) {
+      const parent = extensionElements;
+
+      inputOutput = createIOMapping(parent, bpmnFactory, {
+        inputParameters: [],
+        outputParameters: []
+      });
+
+      commands.push(cmdHelper.addAndRemoveElementsFromList(
+        element,
+        extensionElements,
+        'values',
+        'extensionElements',
+        [ inputOutput ],
+        []
+      ));
+    }
+
+    const newElem = createParameter(options.type, inputOutput, bpmnFactory, {
+      source: '= source',
+      target: 'target'
+    });
+
+    commands.push(cmdHelper.addElementsTolist(element, inputOutput, options.prop, [ newElem ]));
+
+    return commands;
+  }
+
+  /**
+   * Schedule commands to be run with next `set` method call.
+   *
+   * @param {Array<any>} commands
+   * @param {HTMLElement} entryNode
+   */
+  function scheduleCommands(commands, entryNode) {
+    entry._commands = commands;
+
+    // @maxtru, adapted from @barmac: hack to make properties panel call `set`
+    const input = domQuery('input[type="hidden"]', entryNode);
+    input.value = 1;
+  }
+}
+
+/**
+ * Create a list of Input or Output Mapping properties-panel entries.
+ * @param {Object} element - diagram-js element.
+ * @param {Object} bpmnFactory - bpmn-js bpmn-factory.
+ * @param {Function} translate - translate.
+ * @param {Object} options - Options.
+ * @param {string} [options.prop] - moddle (zeebe-bpmn-moddle) property name for the IOMapping.
+ * @param {string} [options.prefix] - prefix to be used when constructing id attribute of HTMLElements.
+ *
+ * @returns {Object} An Object representing a properties-panel heading entry.
+ */
+function getIOMappingEntries(element, bpmnFactory, translate, options) {
+
+  // Get the IOMapping and determine whether we are dealing with input or output parameters
+  const inputOutput = getInputOutput(element, false),
+        params = determineParamGetFunc(options.prop)(element, false);
+
+  if (!params.length) {
+    const description = entryFieldDescription(translate, translate('No Variables defined'));
+
+    return [{
+      id: `${options.prefix}-parameter-placeholder`,
+      cssClasses: [ 'bpp-input-output-placeholder' ],
+      html: description
+    }];
+  }
+
+  const parameters = params.map(function(param, index) {
+
+    return InputOutputParameter(param, bpmnFactory, translate,
+      {
+        idPrefix: `${options.prefix}-parameter-${index}`,
+        onRemove: onRemove,
+        onToggle: onToggle,
+        prop: options.prop
+      });
+
+    function onRemove() {
+      let commands = [];
+      commands.push(cmdHelper.removeElementsFromList(element, inputOutput, options.prop, null, [param]));
+
+      // remove inputOutput if there are no input/output parameters anymore
+      if (inputOutput.get('inputParameters').length + inputOutput.get('outputParameters').length === 1) {
         commands.push(extensionElementsHelper.removeEntry(getBusinessObject(element), element, inputOutput));
       }
 
       return commands;
-    };
-  };
+    }
+  });
 
-  const setOptionLabelValue = getter => {
-    return (element, node, option, property, value, idx) => {
-      const parameter = getter(element, idx);
+  // Return only the entries in a flat structure
+  const entries = parameters.flatMap(function(entry) {
+    return entry.entries;
+  });
 
-      option.text = `${value} : ${parameter['target']}`;
-    };
-  };
+  return entries;
 
+  /**
+   * Close remaining collapsible entries within group.
+   *
+   * @param {boolean} value
+   * @param {HTMLElement} entryNode
+   */
+  function onToggle(value, entryNode) {
+    if (!value) {
+      return;
+    }
 
-  // input parameters ///////////////////////////////////////////////////////////////
-  if (ensureInputParameterSupported(element)) {
-    inputEntry = extensionElementsEntry(element, bpmnFactory, {
-      id: `${idPrefix}inputs`,
-      label: 'Input Parameters',
-      modelProperty: 'source',
-      prefix: 'Input',
-      resizable: true,
+    const currentEntryId = entryNode.dataset.entry;
 
-      createExtensionElement: newElement('zeebe:Input', 'inputParameters'),
-      removeExtensionElement: removeElement(getInputParameter, 'inputParameters', 'outputParameters'),
+    // Add closing behavior to the parameters
+    parameters.forEach(function(parameter) {
 
-      getExtensionElements: function(element) {
-        return getInputParameters(element);
-      },
+      // Each parameter has 3 entries, the first one always is the collapsbile
+      if (parameter.entries[0].id === currentEntryId) {
+        return;
+      }
 
-      onSelectionChange: function(element, node, event, scope) {
-        outputEntry && outputEntry.deselect(element, node);
-      },
-
-      setOptionLabelValue: setOptionLabelValue(getInputParameter)
-
+      parameter.setOpen(false);
     });
-    entries.push(inputEntry);
   }
-
-
-  // output parameters ///////////////////////////////////////////////////////
-
-  if (ensureOutParameterSupported(element)) {
-    outputEntry = extensionElementsEntry(element, bpmnFactory, {
-      id: `${idPrefix}outputs`,
-      label: 'Output Parameters',
-      modelProperty: 'source',
-      prefix: 'Output',
-      resizable: true,
-
-      createExtensionElement: newElement('zeebe:Output', 'outputParameters'),
-      removeExtensionElement: removeElement(getOutputParameter, 'outputParameters', 'inputParameters'),
-
-      getExtensionElements: function(element) {
-        return getOutputParameters(element);
-      },
-
-      onSelectionChange: function(element, node, event, scope) {
-        if (inputEntry)
-          inputEntry.deselect(element, node);
-      },
-
-      setOptionLabelValue: setOptionLabelValue(getOutputParameter)
-
-    });
-    entries.push(outputEntry);
-  }
-
-  return result;
 }

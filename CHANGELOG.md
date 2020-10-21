@@ -5,6 +5,7 @@ All notable changes to the [Zeebe Modeler](https://github.com/zeebe-io/zeebe-mod
 ## Unreleased
 
 ___Note:__ Yet to be released changes appear here._
+* `FEAT`: use improved I/O mapping component ([#265](https://github.com/zeebe-io/zeebe-modeler/issues/265)
 
 ## 0.10.0
 

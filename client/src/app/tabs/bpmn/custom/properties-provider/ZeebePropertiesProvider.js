@@ -8,10 +8,6 @@
  * except in compliance with the MIT License.
  */
 
-import {
-  is
-} from 'bpmn-js/lib/util/ModelUtil';
-
 import PropertiesActivator from 'bpmn-js-properties-panel/lib/PropertiesActivator';
 
 import idProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/IdProps';
@@ -21,8 +17,6 @@ import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProp
 import executableProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/ExecutableProps';
 
 import inputOutput from './parts/InputOutputProps';
-
-import inputOutputParameter from './parts/InputOutputParameterProps';
 
 import headers from './parts/HeadersProps';
 
@@ -39,20 +33,6 @@ import multiInstanceProps from './parts/MultiInstanceProps';
 import errorProps from './parts/ErrorProps';
 
 import callActivityProps from './parts/CallActivityProps';
-
-
-const getInputOutputParameterLabel = param => {
-
-  if (is(param, 'zeebe:InputParameter')) {
-    return 'Input Parameter';
-  }
-
-  if (is(param, 'zeebe:OutputParameter')) {
-    return 'Output Parameter';
-  }
-
-  return '';
-};
 
 
 function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
@@ -108,31 +88,33 @@ function createHeadersGroups(element, bpmnFactory, translate) {
 
 function createInputOutputTabGroups(element, bpmnFactory, translate) {
 
-  const inputOutputGroup = {
-    id: 'input-output',
-    label: translate('Parameters'),
+  const inputGroup = {
+    id: 'input',
+    label: translate('Input Parameters'),
     entries: []
   };
 
-  const options = inputOutput(inputOutputGroup, element, bpmnFactory);
+  inputOutput(inputGroup, element, bpmnFactory, translate, {
+    type: 'zeebe:Input',
+    prop: 'inputParameters',
+    prefix: 'input'
+  });
 
-  const inputOutputParameterGroup = {
-    id: 'input-output-parameter',
-    entries: [],
-    enabled: function(element, node) {
-      return options.getSelectedParameter(element, node);
-    },
-    label: function(element, node) {
-      const param = options.getSelectedParameter(element, node);
-      return getInputOutputParameterLabel(param);
-    }
+  const outputGroup = {
+    id: 'output',
+    label: translate('Output Parameters'),
+    entries: []
   };
 
-  inputOutputParameter(inputOutputParameterGroup, element, bpmnFactory, translate, options);
+  inputOutput(outputGroup, element, bpmnFactory, translate, {
+    type: 'zeebe:Output',
+    prop: 'outputParameters',
+    prefix: 'output'
+  });
 
   return [
-    inputOutputGroup,
-    inputOutputParameterGroup
+    inputGroup,
+    outputGroup
   ];
 }
 
