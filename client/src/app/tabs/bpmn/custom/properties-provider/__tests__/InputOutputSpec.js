@@ -24,7 +24,9 @@ import {
 
 import TestContainer from 'mocha-test-container-support';
 
-import propertiesPanelModule from 'bpmn-js-properties-panel';
+/* global sinon */
+
+import { is } from 'bpmn-js/lib/util/ModelUtil';
 
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
@@ -540,9 +542,9 @@ describe('customs - input output property tab', function() {
 
   describe('add output parameter', function() {
 
-    let bo;
+    let bo, payloadValue, executedListener;
 
-    beforeEach(inject(function(propertiesPanel, elementRegistry, selection) {
+    beforeEach(inject(function(propertiesPanel, elementRegistry, selection, eventBus) {
 
       // given
       const container = propertiesPanel._container,
@@ -552,9 +554,14 @@ describe('customs - input output property tab', function() {
 
       bo = getBusinessObject(shape);
 
+      executedListener = sinon.spy(function(_, { context }) {
+        payloadValue = getBusinessObject(context);
+      });
+
+      eventBus.on('commandStack.properties-panel.update-businessobject-list.executed', executedListener);
+
       // when
       clickAddOutputParameterButton(container);
-
     }));
 
     describe('on the business object', function() {
@@ -622,6 +629,28 @@ describe('customs - input output property tab', function() {
 
     });
 
+
+    describe('execute <properties-panel.update-businessobject-list> command', function() {
+
+      it('should emit the command', inject(function() {
+
+        // then
+        expect(executedListener).to.have.been.called;
+      }));
+
+
+      it('should emit the payload', inject(function() {
+
+        // then
+        expect(payloadValue.element).to.exist;
+        expect(is(payloadValue.element, 'bpmn:ServiceTask')).to.be.true;
+        expect(payloadValue.objectsToAdd).to.exist;
+        expect(payloadValue.objectsToAdd.length).to.equal(1);
+        expect(is(payloadValue.objectsToAdd[0], 'zeebe:Output')).to.be.true;
+      }));
+
+    });
+
   });
 
 
@@ -643,6 +672,7 @@ describe('customs - input output property tab', function() {
       clickRemoveInputParameterButton(container, 3);
 
     }));
+
 
     describe('on the business object', function() {
 
@@ -666,7 +696,6 @@ describe('customs - input output property tab', function() {
       it('should redo', inject(function(commandStack) {
 
         // when
-
         commandStack.undo();
         commandStack.redo();
 
@@ -1349,7 +1378,6 @@ describe('customs - input output property tab', function() {
           // then
           expect(parameter.target).to.equal('foo');
         }));
-
 
       });
 
