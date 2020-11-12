@@ -14,7 +14,7 @@ import cmdHelper from 'bpmn-js-properties-panel/lib/helper/CmdHelper';
 
 import { isIdValid } from 'bpmn-js-properties-panel/lib/Utils';
 
-import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
+import { getCalledElement } from '../../modeling/helper/CalledElementHelper';
 
 import {
   is,
@@ -92,15 +92,4 @@ export default function(group, element, bpmnFactory, translate) {
       return idError ? { processId: idError } : {};
     }
   }));
-}
-
-// helper //////////
-
-function getCalledElement(bo) {
-  const elements = getExtensionElements(bo, 'zeebe:CalledElement') || [];
-  return elements[0];
-}
-
-function getExtensionElements(bo, type) {
-  return extensionElementsHelper.getExtensionElements(bo, type);
 }

@@ -18,7 +18,6 @@ import { query as domQuery } from 'min-dom';
 /**
  * Create an input or output mapping entry for a single input or output entry
  * @param {Object} parameter - BusinessObject for the respective paramter (can be 'zeebe:Input' or 'zeebe:Output')
- * @param {Object} bpmnFactory - bpmn-js bpmn-factory.
  * @param {Function} translate - translate function.
  * @param {Object} options - Options.
  * @param {string} [options.idPrefix] - preFix used to construct the 'id' of the GUI entries
@@ -30,7 +29,7 @@ import { query as domQuery } from 'min-dom';
  * each representing a properties-panel entry. First entry will always be a collapsible followed
  * by two inputs (one for source and one for target).
  */
-export default function(parameter, bpmnFactory, translate, options = {}) {
+export default function(parameter, translate, options = {}) {
   const result = {},
         entries = result.entries = [];
 
@@ -66,15 +65,15 @@ export default function(parameter, bpmnFactory, translate, options = {}) {
     label: getTargetTextInputLabel(translate, options.prop),
     modelProperty: 'target',
 
-    getProperty: function(element, node) {
+    getProperty: function() {
       return parameter.target;
     },
 
-    setProperty: function(element, values, node) {
+    setProperty: function(element, values) {
       return cmdHelper.updateBusinessObject(element, parameter, values);
     },
 
-    validate: function(element, values, node) {
+    validate: function(element, values) {
       const validation = {},
             targetValue = values.target;
 
@@ -87,7 +86,7 @@ export default function(parameter, bpmnFactory, translate, options = {}) {
       return validation;
     },
 
-    hidden: function(element, node) {
+    hidden: function() {
       return !isOpen();
     }
   }));
@@ -98,15 +97,15 @@ export default function(parameter, bpmnFactory, translate, options = {}) {
     label: translate('Variable Assignment Value'),
     modelProperty: 'source',
 
-    getProperty: function(element, node) {
+    getProperty: function() {
       return parameter.source;
     },
 
-    setProperty: function(element, values, node) {
+    setProperty: function(element, values) {
       return cmdHelper.updateBusinessObject(element, parameter, values);
     },
 
-    validate: function(element, value, node) {
+    validate: function(element, value) {
       const validation = {},
             sourceValue = value.source;
 
@@ -119,7 +118,7 @@ export default function(parameter, bpmnFactory, translate, options = {}) {
       return validation;
     },
 
-    hidden: function(element, node) {
+    hidden: function() {
       return !isOpen();
     }
   }));

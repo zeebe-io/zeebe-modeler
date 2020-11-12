@@ -37,10 +37,14 @@ import {
 } from 'min-dom';
 
 import coreModule from 'bpmn-js/lib/core';
-import selectionModule from 'diagram-js/lib/features/selection';
 import modelingModule from 'bpmn-js/lib/features/modeling';
+import propertiesPanelModule from 'bpmn-js-properties-panel';
 import propertiesProviderModule from '..';
+import selectionModule from 'diagram-js/lib/features/selection';
 import zeebeModdleExtensions from 'zeebe-bpmn-moddle/resources/zeebe';
+
+import customBehaviorModules from '../../modeling';
+
 
 const HIDE_CLASS = 'bpp-hidden';
 
@@ -53,9 +57,10 @@ describe('customs - input output property tab', function() {
   const testModules = [
     coreModule,
     modelingModule,
-    selectionModule,
     propertiesPanelModule,
-    propertiesProviderModule
+    propertiesProviderModule,
+    selectionModule,
+    customBehaviorModules
   ];
 
   const moddleExtensions = {
@@ -73,76 +78,71 @@ describe('customs - input output property tab', function() {
     moddleExtensions
   }));
 
-  beforeEach(inject(function(commandStack, propertiesPanel) {
-
-    const undoButton = document.createElement('button');
-    undoButton.textContent = 'UNDO';
-
-    undoButton.addEventListener('click', () => {
-      commandStack.undo();
-    });
-
-    container.appendChild(undoButton);
-
+  beforeEach(inject(function(propertiesPanel) {
     propertiesPanel.attachTo(container);
   }));
 
-  it('should fetch empty list of input and output parameters', inject(function(selection, elementRegistry) {
 
-    // given
-    const shape = elementRegistry.get('ServiceTask_empty'),
-          bo = getBusinessObject(shape);
+  describe('fetch parameters', function() {
 
-    // assume
-    expect(getInputParameters(bo).length).to.equal(0);
-    expect(getOutputParameters(bo).length).to.equal(0);
+    it('should fetch empty list of input and output parameters', inject(function(selection, elementRegistry) {
 
-    // when
-    selection.select(shape);
+      // given
+      const shape = elementRegistry.get('ServiceTask_empty'),
+            bo = getBusinessObject(shape);
 
-    // then
-    const inputParameterEntries = getInputParameterCollapsibles(container);
-    expect(inputParameterEntries.length).to.equal(0);
+      // assume
+      expect(getInputParameters(bo).length).to.equal(0);
+      expect(getOutputParameters(bo).length).to.equal(0);
 
-    const outputParameterEntries = getOutputParameterCollapsibles(container);
-    expect(outputParameterEntries.length).to.equal(0);
-  }));
+      // when
+      selection.select(shape);
 
+      // then
+      const inputParameterEntries = getInputParameterCollapsibles(container);
+      expect(inputParameterEntries.length).to.equal(0);
 
-  it('should fetch list of input parameters', inject(function(selection, elementRegistry) {
-
-    // given
-    const shape = elementRegistry.get('ServiceTask_1'),
-          bo = getBusinessObject(shape);
-
-    // assume
-    expect(getInputParameters(bo).length).to.equal(4);
-
-    // when
-    selection.select(shape);
-
-    // then
-    const inputParameterEntries = getInputParameterCollapsibles(container);
-    expect(inputParameterEntries.length).to.equal(4);
-  }));
+      const outputParameterEntries = getOutputParameterCollapsibles(container);
+      expect(outputParameterEntries.length).to.equal(0);
+    }));
 
 
-  it('should fetch list of output parameters', inject(function(selection, elementRegistry) {
+    it('should fetch list of input parameters', inject(function(selection, elementRegistry) {
 
-    // given
-    const shape = elementRegistry.get('ServiceTask_1'),
-          bo = getBusinessObject(shape);
+      // given
+      const shape = elementRegistry.get('ServiceTask_1'),
+            bo = getBusinessObject(shape);
 
-    // assume
-    expect(getOutputParameters(bo).length).to.equal(4);
+      // assume
+      expect(getInputParameters(bo).length).to.equal(4);
 
-    // when
-    selection.select(shape);
+      // when
+      selection.select(shape);
 
-    // then
-    const outputParameterEntries = getOutputParameterCollapsibles(container);
-    expect(outputParameterEntries.length).to.equal(4);
-  }));
+      // then
+      const inputParameterEntries = getInputParameterCollapsibles(container);
+      expect(inputParameterEntries.length).to.equal(4);
+    }));
+
+
+    it('should fetch list of output parameters', inject(function(selection, elementRegistry) {
+
+      // given
+      const shape = elementRegistry.get('ServiceTask_1'),
+            bo = getBusinessObject(shape);
+
+      // assume
+      expect(getOutputParameters(bo).length).to.equal(4);
+
+      // when
+      selection.select(shape);
+
+      // then
+      const outputParameterEntries = getOutputParameterCollapsibles(container);
+      expect(outputParameterEntries.length).to.equal(4);
+    }));
+
+  });
 
 
   describe('availability', function() {
@@ -326,7 +326,6 @@ describe('customs - input output property tab', function() {
       }
     ));
 
-
   });
 
 
@@ -343,7 +342,9 @@ describe('customs - input output property tab', function() {
       selection.select(shape);
     }));
 
+
     describe('of input parameters', function() {
+
 
       it('should initially be collapsed for all', function() {
 
@@ -392,7 +393,6 @@ describe('customs - input output property tab', function() {
           }
         });
       });
-
 
     });
 
@@ -447,7 +447,6 @@ describe('customs - input output property tab', function() {
         });
       });
 
-
     });
 
   });
@@ -471,6 +470,7 @@ describe('customs - input output property tab', function() {
       clickAddInputParameterButton(container);
 
     }));
+
 
     describe('on the business object', function() {
 
@@ -500,7 +500,6 @@ describe('customs - input output property tab', function() {
         // then
         expect(getInputParameters(bo).length).to.equal(1);
       }));
-
 
     });
 
@@ -534,7 +533,6 @@ describe('customs - input output property tab', function() {
         expect(getInputParameterCollapsibles(container).length).to.equal(1);
       }));
 
-
     });
 
   });
@@ -564,6 +562,7 @@ describe('customs - input output property tab', function() {
       clickAddOutputParameterButton(container);
     }));
 
+
     describe('on the business object', function() {
 
       it('should execute', function() {
@@ -592,7 +591,6 @@ describe('customs - input output property tab', function() {
         // then
         expect(getOutputParameters(bo).length).to.equal(1);
       }));
-
 
     });
 
@@ -625,7 +623,6 @@ describe('customs - input output property tab', function() {
         // then
         expect(getOutputParameterCollapsibles(container).length).to.equal(1);
       }));
-
 
     });
 
@@ -703,7 +700,6 @@ describe('customs - input output property tab', function() {
         expect(getInputParameters(bo).length).to.equal(3);
       }));
 
-
     });
 
 
@@ -735,7 +731,6 @@ describe('customs - input output property tab', function() {
         // then
         expect(getInputParameterCollapsibles(container).length).to.equal(3);
       }));
-
 
     });
 
@@ -792,7 +787,6 @@ describe('customs - input output property tab', function() {
         expect(getOutputParameters(bo).length).to.equal(3);
       }));
 
-
     });
 
 
@@ -824,7 +818,6 @@ describe('customs - input output property tab', function() {
         // then
         expect(getOutputParameterCollapsibles(container).length).to.equal(3);
       }));
-
 
     });
 
@@ -881,13 +874,13 @@ describe('customs - input output property tab', function() {
         expect(getIOMapping(bo)).not.to.exist;
       }));
 
-
     });
-
 
   });
 
+
   describe('change parameter source', function() {
+
 
     describe('input', function() {
 
@@ -984,7 +977,6 @@ describe('customs - input output property tab', function() {
           expect(isInvalidInput(parameterSourceInput)).to.be.false;
         });
 
-
       });
 
 
@@ -1016,7 +1008,6 @@ describe('customs - input output property tab', function() {
           // then
           expect(parameter.source).to.equal('= foo');
         }));
-
 
       });
 
@@ -1117,7 +1108,6 @@ describe('customs - input output property tab', function() {
           expect(isInvalidInput(parameterSourceOutput)).to.be.false;
         });
 
-
       });
 
 
@@ -1150,7 +1140,6 @@ describe('customs - input output property tab', function() {
           expect(parameter.source).to.equal('= foo');
         }));
 
-
       });
 
     });
@@ -1159,6 +1148,7 @@ describe('customs - input output property tab', function() {
 
 
   describe('change parameter target', function() {
+
 
     describe('input', function() {
 
@@ -1234,7 +1224,6 @@ describe('customs - input output property tab', function() {
           expect(isInvalidInput(parameterTargetInput)).to.be.true;
         });
 
-
       });
 
 
@@ -1267,7 +1256,6 @@ describe('customs - input output property tab', function() {
           expect(parameter.target).to.equal('foo');
         }));
 
-
       });
 
     });
@@ -1297,7 +1285,9 @@ describe('customs - input output property tab', function() {
         triggerValue(parameterTargetOutput, 'foo', 'change');
       }));
 
+
       describe('in the DOM', function() {
+
 
         it('should execute', function() {
 
@@ -1345,7 +1335,6 @@ describe('customs - input output property tab', function() {
           // then
           expect(isInvalidInput(parameterTargetOutput)).to.be.true;
         });
-
 
       });
 
