@@ -6,6 +6,7 @@ All notable changes to the [Zeebe Modeler](https://github.com/zeebe-io/zeebe-mod
 
 ___Note:__ Yet to be released changes appear here._
 * `FEAT`: use improved I/O mapping component ([#265](https://github.com/zeebe-io/zeebe-modeler/issues/265)
+* `FEAT`: support and allow editing propagateAllChildVariables of CallActivities ([#252]https://github.com/zeebe-io/zeebe-modeler/Issues/252)
 
 ## 0.10.0
 
