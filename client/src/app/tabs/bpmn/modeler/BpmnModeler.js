@@ -34,7 +34,9 @@ import propertiesProviderModule from '../custom/properties-provider';
 
 import zeebeModelingModule from '../custom/modeling';
 
-import zeebeModdleExtension from 'zeebe-bpmn-moddle/resources/zeebe';
+import zeebeModdle from 'zeebe-bpmn-moddle/resources/zeebe';
+
+import zeebeModdleExtension from 'zeebe-bpmn-moddle/lib';
 
 import zeebeCustoms from '../custom';
 
@@ -61,7 +63,7 @@ export default class ZeebeBpmnModeler extends BpmnModeler {
     super({
       ...otherOptions,
       moddleExtensions: {
-        zeebe: zeebeModdleExtension,
+        zeebe: zeebeModdle,
         ...(moddleExtensions || {})
       }
     });
