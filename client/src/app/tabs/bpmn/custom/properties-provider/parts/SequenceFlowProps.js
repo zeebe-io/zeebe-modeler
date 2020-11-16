@@ -49,7 +49,7 @@ export default function(group, element, bpmnFactory, translate) {
               </label>
               <div class="bpp-field-wrapper">
                 <input id="zeebe-condition" type="text" name="condition" />
-                <button class="clear" data-action="clear" data-show="canClear">
+                <button class="action-button clear" data-action="clear" data-show="canClear">
                  <span>X</span>
                 </button>
               </div>
