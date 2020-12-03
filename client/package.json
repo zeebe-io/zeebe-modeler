@@ -34,7 +34,7 @@
     "saxen": "^8.1.2",
     "scroll-tabs": "^1.0.1",
     "sourcemapped-stacktrace": "^1.1.9",
-    "zeebe-bpmn-moddle": "^0.2.0"
+    "zeebe-bpmn-moddle": "^0.4.0"
   },
   "homepage": ".",
   "devDependencies": {
