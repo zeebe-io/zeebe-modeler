@@ -5,8 +5,13 @@ All notable changes to the [Zeebe Modeler](https://github.com/zeebe-io/zeebe-mod
 ## Unreleased
 
 ___Note:__ Yet to be released changes appear here._
+
+## 0.11.0
 * `FEAT`: use improved I/O mapping component ([#265](https://github.com/zeebe-io/zeebe-modeler/issues/265))
 * `FEAT`: support and allow editing propagateAllChildVariables of CallActivities ([#252](https://github.com/zeebe-io/zeebe-modeler/issues/252))
+* `FEAT`: implement toggle switch for propagateAllChildVariables setting ([#267](https://github.com/zeebe-io/zeebe-modeler/issues/267))
+* `FIX`: add missing class to input clear button in properties panel ([#268](https://github.com/zeebe-io/zeebe-modeler/issues/268))
+* `FEAT`: integrate zeebe-bpmn-moddle extension ([#274](https://github.com/zeebe-io/zeebe-modeler/pull/274))
 
 ## 0.10.0
 
