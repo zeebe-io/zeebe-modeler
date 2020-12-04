@@ -11,6 +11,7 @@ __Target:__ Perform tests on nightly builds on supported platforms.
 ### Test Procedure
 
 * [ ] fetch [latest release/nightly](https://github.com/zeebe-io/zeebe-modeler/releases)
+* [ ] (linux only): run `$MODELER_DIR/support/xdg_register.sh`
 * [ ] click like crazy (see [below](#test-checklist))
 
 
@@ -26,7 +27,7 @@ Manual integration tests:
 * [ ] save file with other file name on disk
 * [ ] export as SVG
 * [ ] export as PNG
-* [ ] export as JPG
+* [ ] export as JPG (.jpeg extension for linux)
 * [ ] SVG, PNG and JPG exports open in browser
 
 ##### Copy/Paste
