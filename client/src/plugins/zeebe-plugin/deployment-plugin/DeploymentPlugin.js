@@ -185,8 +185,10 @@ export default class DeploymentPlugin extends PureComponent {
       return p.resolve(config);
     };
 
+    const defaultConfiguration = await this.getDefaultConfig(savedConfig, tab);
+
     const modalState = {
-      config: this.getDefaultConfig(savedConfig, tab),
+      config: defaultConfiguration,
       isStart: !!options.isStart,
       onClose
     };
@@ -234,24 +236,20 @@ export default class DeploymentPlugin extends PureComponent {
     }
 
     const {
-      deployment,
-      endpointId
+      deployment
     } = tabConfig;
-
-    const endpoints = await this.getEndpoints();
 
     return {
       deployment,
-      endpoint: endpoints.find(endpoint => endpoint.id === endpointId)
     };
   }
 
-  getDefaultConfig(savedConfig, tab) {
+  async getDefaultConfig(savedConfig, tab) {
     const deployment = {
       name: withoutExtension(tab.name)
     };
 
-    const endpoint = {
+    let endpoint = {
       id: generateId(),
       targetType: SELF_HOSTED,
       authType: AUTH_TYPES.NONE,
@@ -266,15 +264,17 @@ export default class DeploymentPlugin extends PureComponent {
       rememberCredentials: false
     };
 
+    const previousEndpoints = await this.getEndpoints();
+    if (previousEndpoints.length) {
+      endpoint = previousEndpoints[0];
+    }
+
     return {
       deployment: {
         ...deployment,
         ...savedConfig.deployment
       },
-      endpoint: {
-        ...endpoint,
-        ...savedConfig.endpoint
-      }
+      endpoint
     };
   }
 
