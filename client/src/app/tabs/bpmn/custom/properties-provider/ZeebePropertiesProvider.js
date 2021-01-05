@@ -14,6 +14,8 @@ import idProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/IdProps';
 
 import nameProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/NameProps';
 
+import processProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/ProcessProps';
+
 import executableProps from 'bpmn-js-properties-panel/lib/provider/bpmn/parts/ExecutableProps';
 
 import inputOutput from './parts/InputOutputProps';
@@ -43,6 +45,7 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   };
   idProps(generalGroup, element, translate);
   nameProps(generalGroup, element, bpmnFactory, canvas, translate);
+  processProps(generalGroup, element, translate);
   executableProps(generalGroup, element, translate);
 
   const detailsGroup = {
