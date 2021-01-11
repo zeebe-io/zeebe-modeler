@@ -84,8 +84,8 @@ describe('zeebe-properties-provider', function() {
       selection.select(pool);
 
       // then
-      shouldHaveInput(container, 'general', 'id');
-      shouldHaveInput(container, 'general', 'name');
+      shouldHaveInput(container, 'general', 'participant-id');
+      shouldHaveInput(container, 'general', 'participant-name');
     }));
 
 
