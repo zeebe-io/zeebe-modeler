@@ -36,6 +36,19 @@ import errorProps from './parts/ErrorProps';
 
 import callActivityProps from './parts/CallActivityProps';
 
+import { is } from 'bpmn-js/lib/util/ModelUtil';
+
+function getIdOptions(element) {
+  if (is(element, 'bpmn:Participant')) {
+    return { id: 'participant-id', label: 'Participant Id' };
+  }
+}
+
+function getNameOptions(element) {
+  if (is(element, 'bpmn:Participant')) {
+    return { id: 'participant-name', label: 'Participant Name' };
+  }
+}
 
 function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
   const generalGroup = {
@@ -43,8 +56,9 @@ function createGeneralTabGroups(element, bpmnFactory, canvas, translate) {
     label: translate('General'),
     entries: []
   };
-  idProps(generalGroup, element, translate);
-  nameProps(generalGroup, element, bpmnFactory, canvas, translate);
+
+  idProps(generalGroup, element, translate, getIdOptions(element));
+  nameProps(generalGroup, element, bpmnFactory, canvas, translate, getNameOptions(element));
   processProps(generalGroup, element, translate);
   executableProps(generalGroup, element, translate);
 
