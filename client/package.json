@@ -12,7 +12,7 @@
     "bpmn-js": "^7.5.0",
     "bpmn-js-disable-collapsed-subprocess": "^0.1.2",
     "bpmn-js-executable-fix": "^0.1.2",
-    "bpmn-js-properties-panel": "^0.37.6",
+    "bpmn-js-properties-panel": "0.39.0",
     "bpmn-js-signavio-compat": "^1.2.2",
     "canvg-browser": "^1.0.0",
     "classnames": "^2.2.6",
