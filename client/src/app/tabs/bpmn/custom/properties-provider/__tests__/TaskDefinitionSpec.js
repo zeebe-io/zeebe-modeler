@@ -93,7 +93,7 @@ describe('customs - task definition properties', function() {
         bo = getBusinessObject(shape);
 
         // assume
-        expect(getTaskDefinitions(bo)).to.be.undefined;
+        expect(getTaskDefinitions(bo)).to.be.empty;
 
         const input = getInputField(container, 'camunda-taskDefinitionType', 'type');
 
@@ -115,7 +115,7 @@ describe('customs - task definition properties', function() {
         commandStack.undo();
 
         // then
-        expect(getTaskDefinitions(bo)).to.be.undefined;
+        expect(getTaskDefinitions(bo)).to.be.empty;
 
       }));
 
@@ -294,7 +294,7 @@ describe('customs - task definition properties', function() {
         bo = getBusinessObject(shape);
 
         // assume
-        expect(getTaskDefinitions(bo)).to.be.undefined;
+        expect(getTaskDefinitions(bo)).to.be.empty;
 
         const input = getInputField(container, 'camunda-taskDefinitionRetries', 'retries');
 
@@ -316,7 +316,7 @@ describe('customs - task definition properties', function() {
         commandStack.undo();
 
         // then
-        expect(getTaskDefinitions(bo)).to.be.undefined;
+        expect(getTaskDefinitions(bo)).to.be.empty;
 
       }));
 

@@ -170,7 +170,7 @@ export default function(element, bpmnFactory, translate) {
 // helper /////////
 
 function getExtensionElements(bo, type, prop) {
-  const elements = extensionElementsHelper.getExtensionElements(bo, type) || [];
+  const elements = extensionElementsHelper.getExtensionElements(bo, type);
   return !prop ? elements : (elements[0] || {})[prop] || [];
 }
 

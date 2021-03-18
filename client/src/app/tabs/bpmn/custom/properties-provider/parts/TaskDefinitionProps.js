@@ -28,7 +28,7 @@ export default function(group, element, bpmnFactory, translate) {
   }
 
   function getElements(bo, type, prop) {
-    const elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
+    const elems = extensionElementsHelper.getExtensionElements(bo, type);
     return !prop ? elems : (elems[0] || {})[prop] || [];
   }
 

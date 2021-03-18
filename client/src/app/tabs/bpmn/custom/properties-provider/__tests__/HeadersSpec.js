@@ -90,7 +90,7 @@ describe('customs - headers property tab', function() {
       bo = getBusinessObject(shape);
 
       // assume
-      expect(getTaskHeaders(bo)).to.be.undefined;
+      expect(getTaskHeaders(bo)).to.be.empty;
 
       // when
       clickAddHeaderButton(container);
@@ -111,7 +111,7 @@ describe('customs - headers property tab', function() {
       commandStack.undo();
 
       // then
-      expect(getTaskHeaders(bo)).to.be.undefined;
+      expect(getTaskHeaders(bo)).to.be.empty;
 
     }));
 
@@ -246,7 +246,7 @@ describe('customs - headers property tab', function() {
     it('should execute', function() {
 
       // then
-      expect(getTaskHeaders(bo)).to.be.undefined;
+      expect(getTaskHeaders(bo)).to.be.empty;
 
     });
 
@@ -270,7 +270,7 @@ describe('customs - headers property tab', function() {
       commandStack.redo();
 
       // then
-      expect(getTaskHeaders(bo)).to.be.undefined;
+      expect(getTaskHeaders(bo)).to.be.empty;
 
     }));
 
@@ -282,7 +282,7 @@ describe('customs - headers property tab', function() {
 // helper /////////
 
 const getTaskHeader = (headers) => {
-  if (headers.length <= 0) {
+  if (!headers.length) {
     return;
   }
 

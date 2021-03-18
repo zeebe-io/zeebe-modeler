@@ -103,7 +103,7 @@ describe('customs - call activity', function() {
         bo = getBusinessObject(shape);
 
         // assume
-        expect(getCalledElement(bo)).to.be.undefined;
+        expect(getCalledElement(bo)).to.be.empty;
       }));
 
       it('should fail', function() {
@@ -274,7 +274,7 @@ const getCalledElement = (bo) => {
     bo,
     'zeebe:CalledElement'
   );
-  return (extensions || [])[0];
+  return extensions[0];
 };
 
 const getGeneralTab = (container) => {

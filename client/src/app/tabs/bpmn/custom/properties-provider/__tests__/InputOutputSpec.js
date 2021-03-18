@@ -837,7 +837,7 @@ describe('customs - input output property tab', function() {
       bo = getBusinessObject(shape);
 
       // assume
-      expect(getIOMapping(bo)).to.exist;
+      expect(getIOMapping(bo)).not.to.be.empty;
 
       // when
       clickRemoveInputParameterButton(container, 0);
@@ -850,7 +850,7 @@ describe('customs - input output property tab', function() {
       it('should execute', function() {
 
         // then
-        expect(getIOMapping(bo)).not.to.exist;
+        expect(getIOMapping(bo)).to.be.empty;
       });
 
 
@@ -860,7 +860,7 @@ describe('customs - input output property tab', function() {
         commandStack.undo();
 
         // then
-        expect(getIOMapping(bo)).to.exist;
+        expect(getIOMapping(bo)).not.to.be.empty;
       }));
 
 
@@ -871,7 +871,7 @@ describe('customs - input output property tab', function() {
         commandStack.redo();
 
         // then
-        expect(getIOMapping(bo)).not.to.exist;
+        expect(getIOMapping(bo)).to.be.empty;
       }));
 
     });
@@ -1391,7 +1391,7 @@ const getOutputParameters = (bo) => {
 };
 
 const getElements = (bo, type, prop) => {
-  const elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
+  const elems = extensionElementsHelper.getExtensionElements(bo, type);
   return !prop ? elems : (elems[0] || {})[prop] || [];
 };
 

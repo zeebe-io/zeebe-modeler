@@ -505,7 +505,7 @@ describe('customs - message properties', function() {
         it('subscription definitions should not exist', function() {
 
           // then
-          expect(subscriptionDefinitions).to.be.undefined;
+          expect(subscriptionDefinitions).to.be.empty;
         });
       });
     });

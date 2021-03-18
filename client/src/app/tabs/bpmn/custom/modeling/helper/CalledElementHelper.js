@@ -45,8 +45,8 @@ export function getCalledElement(element) {
 
 export function getCalledElements(element) {
   const bo = getBusinessObject(element);
-  const extElement = getExtensionElements(bo, 'zeebe:CalledElement');
-  return extElement;
+  const extElements = getExtensionElements(bo, 'zeebe:CalledElement');
+  return extElements;
 }
 
 /**

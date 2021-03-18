@@ -49,7 +49,7 @@ export default function(element, definition, bpmnFactory, translate, options) {
 
 
   function getElements(bo, type, prop) {
-    const elems = extensionElementsHelper.getExtensionElements(bo, type) || [];
+    const elems = extensionElementsHelper.getExtensionElements(bo, type);
     return !prop ? elems : (elems[0] || {})[prop] || [];
   }
 

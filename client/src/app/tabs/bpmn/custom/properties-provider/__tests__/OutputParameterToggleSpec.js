@@ -525,6 +525,6 @@ const clickPropagateAllChildVariablesToggle = (container) => {
 
 const getCalledElement = (element) => {
   const bo = getBusinessObject(element);
-  const elements = getExtensionElements(bo, 'zeebe:CalledElement') || [];
+  const elements = getExtensionElements(bo, 'zeebe:CalledElement');
   return elements[0];
 };

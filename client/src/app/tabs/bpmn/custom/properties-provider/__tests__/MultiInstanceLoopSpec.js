@@ -767,7 +767,7 @@ const getZeebeLoopCharacteristics = (bo) => {
     bo.loopCharacteristics,
     'zeebe:LoopCharacteristics'
   );
-  return (extensions || [])[0];
+  return extensions[0];
 };
 
 const getGeneralTab = (container) => {
