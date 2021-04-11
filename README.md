@@ -18,7 +18,7 @@ The visual workflow editor for [Zeebe](https://zeebe.io/) based on [bpmn.io](htt
 Requires [homebrew](https://brew.sh/index_de.html) and [cask](https://caskroom.github.io):
 
 ```sh
-brew cask install zeebe-modeler
+brew install --cask zeebe-modeler
 ```
 
 #### Windows (using Scoop)
