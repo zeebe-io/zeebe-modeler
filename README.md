@@ -1,3 +1,5 @@
+⚠️ 📣 This repository is no longer maintained, please visit https://github.com/camunda/camunda-modeler
+--- 
 # Zeebe Modeler
 
 [![Build Status](https://travis-ci.com/zeebe-io/zeebe-modeler.svg?branch=develop)](https://travis-ci.com/zeebe-io/zeebe-modeler)
